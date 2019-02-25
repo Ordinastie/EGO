@@ -1,0 +1,2 @@
+ego.commands.usage=Utilisez /ego demo pour afficher un GUI de démonstration. Utiliser /ego version pour voir la version actualle du mod.
+ego.commands.modversion=Version actuelle : %s.

@@ -1,0 +1,2 @@
+ego.commands.usage=使用 /malisis <config|version> [modid] 显示当前版本或模组的配置GUI.
+ego.commands.modversion=当前版本 : %s.

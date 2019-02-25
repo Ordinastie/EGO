@@ -1,0 +1,2 @@
+ego.commands.usage=Используйте /malisis <config|version> [id мода] для отображения текущей версии или интерфейса конфигурации модификации.
+ego.commands.modversion=Текущая версия : %s.
