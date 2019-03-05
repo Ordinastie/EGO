@@ -24,17 +24,10 @@
 
 package net.malisis.ego.gui.component;
 
-import static net.malisis.ego.gui.element.size.Sizes.*;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
+import static net.malisis.ego.gui.element.size.Sizes.heightOfContent;
+import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
-
 import net.malisis.ego.cacheddata.PredicatedData;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.MalisisGui;
@@ -53,9 +46,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
 /**
  * @author Ordinastie
- *
  */
 public class DebugComponent extends UIComponent implements IPadded, IContentHolder
 {
@@ -63,26 +62,26 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	private GuiText text;
 	private FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 	private Padding padding = Padding.of(5, 5);
-	private GuiShape borderShape = GuiShape	.builder()
-											.icon(GuiIcon.BORDER)
-											.color(this::hierarchyColor)
-											.zIndex(this::hierarchyZIndex)
-											.border(2)
-											.build();
+	private GuiShape borderShape = GuiShape.builder()
+										   .icon(GuiIcon.BORDER)
+										   .color(this::hierarchyColor)
+										   .zIndex(this::hierarchyZIndex)
+										   .border(2)
+										   .build();
 
 	private GuiText cachedText = GuiText.builder()
 										.parent(this)
 										.text("FPS: {FPS}\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size")
 										.bind("FPS", Minecraft::getDebugFPS)
-										.bind(	"POS",
-												new PredicatedData<>(	() -> Position.CACHED,
-																		ChatFormatting.DARK_GREEN,
-																		ChatFormatting.DARK_RED))
-										.bind(	"SIZE",
-												new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
+										.bind("POS",
+											  new PredicatedData<>(() -> Position.CACHED,
+																   ChatFormatting.DARK_GREEN,
+																   ChatFormatting.DARK_RED))
+										.bind("SIZE",
+											  new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
 										.translated(false)
 										.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().rightAligned().build())
-										.position(s -> Position.topRight(s))
+										.position(Position::topRight)
 										.build();
 
 	private int hierarchyColor;
@@ -110,10 +109,10 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private void setDefaultDebug()
 	{
-		debugMap.put(	"Mouse",
-						() -> MalisisGui.MOUSE_POSITION
-								+ (MalisisGui.getHoveredComponent() != null	? " (" + MalisisGui.getHoveredComponent().mousePosition() + ")"
-																			: ""));
+		debugMap.put("Mouse",
+					 () -> MalisisGui.MOUSE_POSITION + (MalisisGui.getHoveredComponent() != null ?
+														" (" + MalisisGui.getHoveredComponent().mousePosition() + ")" :
+														""));
 		debugMap.put("Focus", () -> String.valueOf(MalisisGui.getFocusedComponent()));
 		debugMap.put("Hover", () -> String.valueOf(MalisisGui.getHoveredComponent()));
 		debugMap.put("Dragged", () -> String.valueOf(MalisisGui.getDraggedComponent()));
@@ -126,11 +125,11 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	{
 		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions);
 
-		String str = debugMap	.entrySet()
-								.stream()
-								.peek(e -> tb.bind(e.getKey(), e.getValue()))
-								.map(e -> e.getKey() + " : {" + e.getKey() + "}")
-								.collect(Collectors.joining("\n"));
+		String str = debugMap.entrySet()
+							 .stream()
+							 .peek(e -> tb.bind(e.getKey(), e.getValue()))
+							 .map(e -> e.getKey() + " : {" + e.getKey() + "}")
+							 .collect(Collectors.joining("\n"));
 		text = tb.text(str).build();
 	}
 

@@ -51,7 +51,7 @@ import java.util.Set;
  * Mouse events received are passed to the child concerned (getComponentAt()).<br>
  * Keyboard event are passed to all the children.
  *
- * @author Ordinastie, PaleoCrafter
+ * @author Ordinastie
  */
 public class UIContainer extends UIComponent implements IClipable, IScrollable, ICloseable, IPadded
 {

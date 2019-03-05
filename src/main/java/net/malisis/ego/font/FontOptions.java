@@ -24,24 +24,21 @@
 
 package net.malisis.ego.font;
 
+import com.google.common.collect.Lists;
+import net.malisis.ego.gui.IPredicatedSupplier;
+import net.malisis.ego.gui.IPredicatedSupplier.PredicatedSupplier;
+import net.malisis.ego.gui.text.PredicatedFontOptions;
+import net.minecraft.util.text.TextFormatting;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Lists;
-
-import net.malisis.ego.gui.IPredicatedSupplier;
-import net.malisis.ego.gui.IPredicatedSupplier.PredicatedSupplier;
-import net.malisis.ego.gui.text.PredicatedFontOptions;
-import net.minecraft.util.text.TextFormatting;
-
 /**
  * @author Ordinastie
- *
  */
 public class FontOptions
 {
@@ -51,11 +48,14 @@ public class FontOptions
 	protected static Map<Character, TextFormatting> charFormats = new HashMap<>();
 	/** List of ECF colors **/
 	protected static int[] colors = new int[32];
+
 	static
 	{
 		//could reflect to get TextFormatting.formattingCodeMapping instead
 		for (TextFormatting ecf : TextFormatting.values())
+		{
 			charFormats.put(ecf.toString().charAt(1), ecf);
+		}
 
 		//build colors for ECF
 		for (int i = 0; i < 16; ++i)
@@ -94,7 +94,8 @@ public class FontOptions
 	/** Right aligned. */
 	protected final boolean rightAligned;
 
-	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned)
+	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline,
+			boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned)
 	{
 		this.font = font;
 		this.fontScale = fontScale;
@@ -111,7 +112,7 @@ public class FontOptions
 
 	public MalisisFont getFont()
 	{
-		MalisisFont font = this.font.isLoaded() ? this.font : MalisisFont.minecraftFont;
+		MalisisFont font = this.font != null && this.font.isLoaded() ? this.font : MalisisFont.minecraftFont;
 		return font;
 	}
 
@@ -313,7 +314,9 @@ public class FontOptions
 	{
 		int offset = 0;
 		while (getFormatting(text, offset) != null)
+		{
 			offset += 2;
+		}
 
 		return Pair.of(text.substring(0, offset), text.substring(offset, text.length()));
 	}
@@ -372,11 +375,12 @@ public class FontOptions
 		protected boolean rightAligned = false;
 
 		public FontOptionsBuilder()
-		{}
+		{
+		}
 
 		public FontOptionsBuilder scale(float scale)
 		{
-			this.fontScale = scale;
+			fontScale = scale;
 			return this;
 		}
 
@@ -454,26 +458,28 @@ public class FontOptions
 
 		public FontOptionsBuilder lineSpacing(int spacing)
 		{
-			this.lineSpacing = spacing;
+			lineSpacing = spacing;
 			return this;
 		}
 
 		public FontOptionsBuilder rightAligned()
 		{
-			this.rightAligned = true;
+			rightAligned = true;
 			return this;
 		}
 
 		public FontOptionsBuilder leftAligned()
 		{
-			this.rightAligned = false;
+			rightAligned = false;
 			return this;
 		}
 
 		public FontOptionsBuilder styles(String styles)
 		{
-			for (TextFormatting format : getFormattings(styles, 0))
+			for (TextFormatting format : FontOptions.getFormattings(styles, 0))
+			{
 				styles(format);
+			}
 			return this;
 		}
 
@@ -482,7 +488,7 @@ public class FontOptions
 			for (TextFormatting f : formats)
 			{
 				if (f.isColor())
-					color(colors[f.ordinal()]);
+					color(FontOptions.colors[f.ordinal()]);
 				else
 					switch (f)
 					{
@@ -509,17 +515,17 @@ public class FontOptions
 
 		public FontOptionsBuilder from(FontOptions options)
 		{
-			font = options.font;
-			fontScale = options.fontScale;
-			color = options.color;
-			shadow = options.shadow;
-			bold = options.bold;
-			italic = options.italic;
-			underline = options.underline;
-			strikethrough = options.strikethrough;
-			obfuscated = options.obfuscated;
-			lineSpacing = options.lineSpacing;
-			rightAligned = options.rightAligned;
+			font = options.getFont();
+			fontScale = options.getFontScale();
+			color = options.getColor();
+			shadow = options.hasShadow();
+			bold = options.isBold();
+			italic = options.isItalic();
+			underline = options.isUnderline();
+			strikethrough = options.isStrikethrough();
+			obfuscated = options.isObfuscated();
+			lineSpacing = options.lineSpacing();
+			rightAligned = options.isRightAligned();
 
 			return this;
 		}
@@ -536,17 +542,17 @@ public class FontOptions
 
 		private FontOptions buildBase()
 		{
-			return new FontOptions(	font,
-									fontScale,
-									color,
-									shadow,
-									bold,
-									italic,
-									underline,
-									strikethrough,
-									obfuscated,
-									lineSpacing,
-									rightAligned);
+			return new FontOptions(font,
+								   fontScale,
+								   color,
+								   shadow,
+								   bold,
+								   italic,
+								   underline,
+								   strikethrough,
+								   obfuscated,
+								   lineSpacing,
+								   rightAligned);
 		}
 
 		private IPredicatedSupplier<FontOptions> buildSupplier()

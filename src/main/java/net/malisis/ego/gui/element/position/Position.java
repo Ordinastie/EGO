@@ -24,9 +24,14 @@
 
 package net.malisis.ego.gui.element.position;
 
-import static net.malisis.ego.gui.element.position.Positions.*;
-
-import java.util.function.IntSupplier;
+import static net.malisis.ego.gui.element.position.Positions.bottomAligned;
+import static net.malisis.ego.gui.element.position.Positions.centered;
+import static net.malisis.ego.gui.element.position.Positions.leftAligned;
+import static net.malisis.ego.gui.element.position.Positions.leftAlignedTo;
+import static net.malisis.ego.gui.element.position.Positions.middleAligned;
+import static net.malisis.ego.gui.element.position.Positions.middleAlignedTo;
+import static net.malisis.ego.gui.element.position.Positions.rightAligned;
+import static net.malisis.ego.gui.element.position.Positions.topAligned;
 
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
@@ -35,9 +40,10 @@ import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.size.Size.ISized;
 
+import java.util.function.IntSupplier;
+
 /**
  * @author Ordinastie
- *
  */
 
 public class Position
@@ -66,9 +72,9 @@ public class Position
 
 		public default IPosition plus(IPosition other)
 		{
-			if (other == null || other == ZERO)
+			if (other == null || other == Position.ZERO)
 				return this;
-			if (this == ZERO)
+			if (this == Position.ZERO)
 				return other;
 
 			return new DynamicPosition(0, 0, () -> x() + other.x(), () -> y() + other.y());
@@ -76,9 +82,9 @@ public class Position
 
 		public default IPosition minus(IPosition other)
 		{
-			if (other == null || other == ZERO)
+			if (other == null || other == Position.ZERO)
 				return this;
-			if (this == ZERO)
+			if (this == Position.ZERO)
 				return other;
 
 			return new DynamicPosition(0, 0, () -> x() - other.x(), () -> y() - other.y());
@@ -108,7 +114,7 @@ public class Position
 
 		private void updateX()
 		{
-			if (lastFrameX == MalisisGui.counter && CACHED)
+			if (lastFrameX == MalisisGui.counter && Position.CACHED)
 				return;
 			cachedX = xFunction.getAsInt();
 			lastFrameX = MalisisGui.counter;
@@ -116,7 +122,7 @@ public class Position
 
 		private void updateY()
 		{
-			if (lastFrameY == MalisisGui.counter && CACHED)
+			if (lastFrameY == MalisisGui.counter && Position.CACHED)
 				return;
 			cachedY = yFunction.getAsInt();
 			lastFrameY = MalisisGui.counter;
@@ -150,6 +156,7 @@ public class Position
 	public static class ScreenPosition implements IPosition
 	{
 		private final IPositioned owner;
+		/* Determines whether the position with be relative to the offset ot the owner (if owner is IOffset). */
 		private final boolean fixed;
 
 		private int cachedX;
@@ -172,7 +179,7 @@ public class Position
 		@Override
 		public int x()
 		{
-			if (lastFrameX != MalisisGui.counter || !CACHED)
+			if (lastFrameX != MalisisGui.counter || !Position.CACHED)
 				updateX();
 			return cachedX;
 		}
@@ -180,7 +187,7 @@ public class Position
 		@Override
 		public int y()
 		{
-			if (lastFrameY != MalisisGui.counter || !CACHED)
+			if (lastFrameY != MalisisGui.counter || !Position.CACHED)
 				updateY();
 			return cachedY;
 		}
@@ -239,6 +246,17 @@ public class Position
 		return new DynamicPosition(0, 0, x, y);
 	}
 
+	/**
+	 * Creates a fixed {@link IPosition} based on the current values of <code>other</code>.
+	 *
+	 * @param other
+	 * @return
+	 */
+	public static IPosition fixed(IPosition other)
+	{
+		return new DynamicPosition(other.x(), other.y(), null, null);
+	}
+
 	//position relative to parent
 	public static IPosition inParent(IChild<?> owner, int x, int y)
 	{
@@ -254,12 +272,12 @@ public class Position
 	 */
 	public static IPosition topLeft(IChild<?> owner)
 	{
-		return of(topAligned(owner, 0), leftAligned(owner, 0));
+		return of(leftAligned(owner, 0), topAligned(owner, 0));
 	}
 
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topCenter(T owner)
 	{
-		return of(topAligned(owner, 0), centered(owner, 0));
+		return of(centered(owner, 0), topAligned(owner, 0));
 	}
 
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topRight(T owner)

@@ -166,7 +166,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder
 
 	//#end Getters/Setters
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		slideTo();
 		return true;

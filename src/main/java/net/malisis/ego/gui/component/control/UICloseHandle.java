@@ -51,7 +51,7 @@ public class UICloseHandle extends UIComponent implements IControlComponent
 	}
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		((ICloseable) getParent()).onClose();
 		return true;

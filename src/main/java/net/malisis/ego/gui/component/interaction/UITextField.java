@@ -549,10 +549,10 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	//#region Input
 
 	@Override
-	public boolean onButtonPress(MouseButton button)
+	public boolean mouseDown(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return super.onButtonRelease(button);
+			return super.mouseUp(button);
 		if (GuiScreen.isShiftKeyDown())
 		{
 			if (!selectingText)
@@ -570,10 +570,10 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	}
 
 	@Override
-	public boolean onButtonRelease(MouseButton button)
+	public boolean mouseUp(MouseButton button)
 	{
 		if (!autoSelectOnFocus || !selectAllOnRelease || button != MouseButton.LEFT)
-			return super.onButtonRelease(button);
+			return super.mouseUp(button);
 
 		selectingText = true;
 		selectionCursor.jumpTo(0);

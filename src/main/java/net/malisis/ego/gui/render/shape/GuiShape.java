@@ -26,15 +26,10 @@ package net.malisis.ego.gui.render.shape;
 
 import static com.google.common.base.Preconditions.*;
 
-import java.util.function.Function;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-import java.util.function.ToIntBiFunction;
-
-import org.apache.commons.lang3.ObjectUtils;
-
+import com.google.common.collect.Maps;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.IChild;
+import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
@@ -47,17 +42,23 @@ import net.malisis.ego.gui.element.size.Size.ISized;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
+import org.apache.commons.lang3.ObjectUtils;
+
+import java.util.EnumMap;
+import java.util.function.Function;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 /**
  * @author Ordinastie
- *
  */
 public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UIComponent>
 {
 	public static final int CORNER_SIZE = 5;
 
 	private final UIComponent parent;
-	private final IPosition position;;
+	private final IPosition position;
 	private final ScreenPosition screenPosition;
 	private final IntSupplier zIndex;
 	private final ISize size;
@@ -66,11 +67,13 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 	private final Supplier<GuiIcon> icon;
 	private final int border;
 
-	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
+	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size,
+			ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha,
+			Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
 		this.position = position.apply(this);
-		this.screenPosition = new ScreenPosition(this, fixed);
+		screenPosition = new ScreenPosition(this, fixed);
 		this.zIndex = zIndex;
 		this.size = size.apply(this);
 		this.color = color;
@@ -185,12 +188,12 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		int b = (color) & 0xFF;
 		color = (b << 16) + (g << 8) + r + (getAlpha(fp, vp) << 24);
 
-		GuiRenderer.BUFFER.addVertexData(new int[] {	Float.floatToRawIntBits(position.x() + x),
-														Float.floatToRawIntBits(position.y() + y),
-														Float.floatToRawIntBits(getZIndex()),
-														Float.floatToRawIntBits(u),
-														Float.floatToRawIntBits(v),
-														color });
+		GuiRenderer.BUFFER.addVertexData(new int[] { Float.floatToRawIntBits(position.x() + x),
+													 Float.floatToRawIntBits(position.y() + y),
+													 Float.floatToRawIntBits(getZIndex()),
+													 Float.floatToRawIntBits(u),
+													 Float.floatToRawIntBits(v),
+													 color });
 	}
 
 	private float interpolatedU(FacePosition fp, VertexPosition vp, GuiIcon icon)
@@ -236,11 +239,13 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		private UIComponent component;
 		private boolean fixed = true;
 		private Function<GuiShape, IPosition> position = s -> Position.ZERO;
-		private Function<GuiShape, ISize> size = s -> Size.relativeTo(s);
+		private Function<GuiShape, ISize> size = Size::relativeTo;
 		private IntSupplier zIndex;
-		private ToIntBiFunction<FacePosition, VertexPosition> color;
-		private ToIntBiFunction<FacePosition, VertexPosition> alpha;
-		private Supplier<GuiIcon> icon = () -> GuiIcon.NONE;;
+		private ToIntBiFunction<FacePosition, VertexPosition> color = (fp, vp) -> 0xFFFFFF;
+		private ToIntBiFunction<FacePosition, VertexPosition> alpha = (fp, vp) -> 255;
+		private EnumMap<VertexPosition, Integer> colors = Maps.newEnumMap(VertexPosition.class);
+		private EnumMap<VertexPosition, Integer> alphas = Maps.newEnumMap(VertexPosition.class);
+		private Supplier<GuiIcon> icon = () -> GuiIcon.NONE;
 		private int borderColor;
 		private int borderAlpha;
 		private int borderSize;
@@ -248,9 +253,9 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		private Builder forComponent(UIComponent component)
 		{
 			this.component = component;
-			this.size = s -> Size.relativeTo(component);
-			this.color = (fp, vp) -> component.getColor();
-			this.zIndex = component::getZIndex;
+			size = s -> Size.relativeTo(component);
+			color = (fp, vp) -> component.getColor();
+			zIndex = component::getZIndex;
 			return this;
 		}
 
@@ -261,6 +266,13 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
+		/**
+		 * Whether the {@link GuiShape} position will be relative to the component {@link IOffset}. If set to true (default), the
+		 * GuiShape position will match the component regardless of the scrolling offset.
+		 *
+		 * @param fixed
+		 * @return
+		 */
 		public Builder fixed(boolean fixed)
 		{
 			this.fixed = fixed;
@@ -286,6 +298,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
+		//COLOR
 		public Builder color(int c)
 		{
 			return color((fp, vp) -> c);
@@ -304,9 +317,51 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
+		//per vertex colors
+		private void putColor(VertexPosition position, int color)
+		{
+			colors.put(position, color);
+			color((f, v) -> colors.getOrDefault(v, 0xFFFFFF));
+		}
+
+		public Builder color(VertexPosition position, int color)
+		{
+			putColor(position, color);
+			return this;
+		}
+
+		public Builder topColor(int color)
+		{
+			putColor(VertexPosition.TOPLEFT, color);
+			putColor(VertexPosition.TOPRIGHT, color);
+			return this;
+		}
+
+		public Builder bottomColor(int color)
+		{
+			putColor(VertexPosition.BOTTOMLEFT, color);
+			putColor(VertexPosition.BOTTOMRIGHT, color);
+			return this;
+		}
+
+		public Builder leftColor(int color)
+		{
+			putColor(VertexPosition.TOPLEFT, color);
+			putColor(VertexPosition.BOTTOMLEFT, color);
+			return this;
+		}
+
+		public Builder rightColor(int color)
+		{
+			putColor(VertexPosition.TOPRIGHT, color);
+			putColor(VertexPosition.BOTTOMRIGHT, color);
+			return this;
+		}
+
+		//ALPHA
 		public Builder alpha(int a)
 		{
-			this.alpha = (fp, vp) -> a;
+			alpha = (fp, vp) -> a;
 			return this;
 		}
 
@@ -324,6 +379,48 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
+		//per vertex alpha
+		private void putAlpha(VertexPosition position, int alpha)
+		{
+			alphas.put(position, alpha);
+			alpha((f, v) -> alphas.getOrDefault(v, 0xFFFFFF));
+		}
+
+		public Builder alphaFor(VertexPosition position, int alpha)
+		{
+			putAlpha(position, alpha);
+			return this;
+		}
+
+		public Builder topAlpha(int alpha)
+		{
+			putAlpha(VertexPosition.TOPLEFT, alpha);
+			putAlpha(VertexPosition.TOPRIGHT, alpha);
+			return this;
+		}
+
+		public Builder bottomAlpha(int alpha)
+		{
+			putAlpha(VertexPosition.BOTTOMLEFT, alpha);
+			putAlpha(VertexPosition.BOTTOMRIGHT, alpha);
+			return this;
+		}
+
+		public Builder leftAlpha(int alpha)
+		{
+			putAlpha(VertexPosition.TOPLEFT, alpha);
+			putAlpha(VertexPosition.BOTTOMLEFT, alpha);
+			return this;
+		}
+
+		public Builder rightAlpha(int alpha)
+		{
+			putAlpha(VertexPosition.TOPRIGHT, alpha);
+			putAlpha(VertexPosition.BOTTOMRIGHT, alpha);
+			return this;
+		}
+
+		//BORDER
 		public Builder border(int size)
 		{
 			borderSize = size;
@@ -339,7 +436,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 				icon(GuiIcon.NONE);
 
 			this.color = colorFunction(this.color);
-			this.alpha = colorFunction(this.alpha);
+			this.alpha = alphaFunction(this.alpha);
 
 			return this;
 		}

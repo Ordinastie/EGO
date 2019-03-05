@@ -24,7 +24,7 @@
 
 package net.malisis.ego.gui.component;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.container.UIContainer;
@@ -46,7 +46,21 @@ import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.EventHandler;
 import net.malisis.ego.gui.event.GuiEvent;
-import net.malisis.ego.gui.event.StateChange;
+import net.malisis.ego.gui.event.MouseEvent.MouseClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseDoubleClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseDown;
+import net.malisis.ego.gui.event.MouseEvent.MouseDrag;
+import net.malisis.ego.gui.event.MouseEvent.MouseMove;
+import net.malisis.ego.gui.event.MouseEvent.MouseOut;
+import net.malisis.ego.gui.event.MouseEvent.MouseOver;
+import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseUp;
+import net.malisis.ego.gui.event.StateChangeEvent.DisableEvent;
+import net.malisis.ego.gui.event.StateChangeEvent.EnableEvent;
+import net.malisis.ego.gui.event.StateChangeEvent.FocusEvent;
+import net.malisis.ego.gui.event.StateChangeEvent.HiddenEvent;
+import net.malisis.ego.gui.event.StateChangeEvent.UnfocusEvent;
+import net.malisis.ego.gui.event.StateChangeEvent.VisibleEvent;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 
@@ -220,13 +234,13 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public void setHovered(boolean hovered)
 	{
-		boolean flag = this.hovered != hovered;
+		boolean flag = isHovered() != hovered;
 		flag |= MalisisGui.setHoveredComponent(this, hovered);
 		if (!flag)
 			return;
 
 		this.hovered = hovered;
-		fireEvent(new StateChange.HoveredStateChange<>(this, hovered));
+		fireEvent(isHovered() ? new MouseOver<>(this) : new MouseOut<>(this));
 
 		if (tooltip != null && hovered)
 			tooltip.animate();
@@ -252,13 +266,13 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		if (!isEnabled())
 			return;
 
-		boolean flag = this.focused != focused;
+		boolean flag = isFocused() != focused;
 		flag |= MalisisGui.setFocusedComponent(this, focused);
 		if (!flag)
 			return;
 
 		this.focused = focused;
-		fireEvent(new StateChange.FocusStateChange<>(this, focused));
+		fireEvent(isFocused() ? new FocusEvent<>(this) : new UnfocusEvent<>(this));
 	}
 
 	/**
@@ -314,11 +328,10 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		if (isVisible() == visible)
 			return;
 
-		if (!fireEvent(new StateChange.VisibleStateChange<>(this, visible)))
-			return;
-
 		this.visible = visible;
-		if (!visible)
+		fireEvent(isVisible() ? new VisibleEvent<>(this) : new HiddenEvent<>(this));
+
+		if (!isVisible())
 		{
 			setHovered(false);
 			setFocused(false);
@@ -355,11 +368,10 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		if (isEnabled() == enabled)
 			return;
 
-		if (!fireEvent(new StateChange.EnabledStateChange<>(this, enabled)))
-			return;
-
 		this.enabled = enabled;
-		if (enabled)
+		fireEvent(isEnabled() ? new EnableEvent<>(this) : new DisableEvent<>(this));
+
+		if (isEnabled())
 		{
 			setHovered(false);
 			setFocused(false);
@@ -504,91 +516,106 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	// #end getters/setters
 
 	/**
-	 * Fires a {@link GuiEvent}.
+	 * Fires a {@link GuiEvent}.<br>
 	 *
-	 * @param event the event
-	 * @return true, if the even can propagate, false if cancelled
+	 * @param event event to fire
+	 * @return if true, stop the propagation of the event to the source's parent
 	 */
-	public boolean fireEvent(GuiEvent event)
+	public boolean fireEvent(GuiEvent<?> event)
 	{
-		eventHandler.fireEvent(event);
-		return !event.isCancelled();
+		return eventHandler.fireEvent(event);
 	}
 
 	//#region Inputs
 
 	/**
-	 * On mouse move.
-	 *
-	 * @return true, if successful
+	 * Called from the GUI when mouse is moved and over this component.
 	 */
-	public boolean onMouseMove()
+	public void mouseMove()
 	{
-		return isEnabled() && parent != null && parent.onMouseMove();
+		if (!isEnabled())
+			return;
+		if (fireEvent(new MouseMove<>(this)))
+			return;
+		if (parent != null)
+			parent.mouseMove();
 	}
 
 	/**
-	 * On button press.
+	 * Called from the GUI when a mouse button is pressed
 	 *
 	 * @param button the button
-	 * @return true, if successful
 	 */
-	public boolean onButtonPress(MouseButton button)
+	public void mouseDown(MouseButton button)
 	{
-		return isEnabled() && parent != null && parent.onButtonPress(button);
+		if (!isEnabled())
+			return;
+		if (fireEvent(new MouseDown<>(this, button)))
+			return;
+		if (parent != null)
+			parent.mouseDown(button);
 	}
 
 	/**
-	 * On button release.
+	 * Called from teh GUI when a mouse button is released
 	 *
 	 * @param button the button
-	 * @return true, if successful
 	 */
-	public boolean onButtonRelease(MouseButton button)
+	public void mouseUp(MouseButton button)
 	{
-		return isEnabled() && parent != null && parent.onButtonRelease(button);
+		if (!isEnabled())
+			return;
+		if (fireEvent(new MouseUp<>(this, button)))
+			return;
+		if (parent != null)
+			parent.mouseUp(button);
 	}
 
 	/**
-	 * On click.
+	 * Called from the GUI when the left mouse button is clicked
 	 *
-	 * @return true, if successful
+	 * @param button button being clicked
 	 */
-	public boolean onClick()
+	public void click(MouseButton button)
 	{
-		return isEnabled() && parent != null && parent.onClick();
+		if (!isEnabled())
+			return;
+		if (fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this)))
+			return;
+		if (parent != null)
+			parent.click();
 	}
 
 	/**
-	 * On right click.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean onRightClick()
-	{
-		return isEnabled() && parent != null && parent.onRightClick();
-	}
-
-	/**
-	 * On double click.
+	 * Called from the GUI when a mouse button is double clicked.<br>
+	 * Only fires the event if the button is {@link MouseButton#LEFT}.
 	 *
 	 * @param button the button
-	 * @return true, if successful
 	 */
-	public boolean onDoubleClick(MouseButton button)
+	public void doubleClick(MouseButton button)
 	{
-		return isEnabled() && parent != null && parent.onDoubleClick(button);
+		if (!isEnabled())
+			return;
+		if (button != MouseButton.LEFT)
+			return;
+		if (!fireEvent(new MouseDoubleClick<>(this)))
+			return;
+		if (parent != null)
+			parent.doubleClick(button);
 	}
 
 	/**
 	 * On drag.
 	 *
 	 * @param button the button
-	 * @return true, if successful
 	 */
-	public boolean onDrag(MouseButton button)
+	public void onDrag(MouseButton button)
 	{
-		return isEnabled() && parent != null && parent.onDrag(button);
+		if(!isEnabled())
+			return;
+		if(!fireEvent(new MouseDrag<>(this, button)))
+		if( parent != null )
+			parent.onDrag(button);
 	}
 
 	/**

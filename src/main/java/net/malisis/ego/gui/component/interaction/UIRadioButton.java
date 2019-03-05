@@ -158,7 +158,7 @@ public class UIRadioButton extends UIComponent implements IContentHolder
 
 	//#end Getters/Setters
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		if (fireEvent(new UIRadioButton.SelectEvent(this)))
 			setSelected();

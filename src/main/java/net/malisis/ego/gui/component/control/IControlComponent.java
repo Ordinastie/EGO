@@ -25,15 +25,15 @@
 package net.malisis.ego.gui.component.control;
 
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.render.IGuiRenderer;
 
 /**
  * IControlledComponent are special components designed to affect other {@link UIComponent}.
  *
  * @author Ordinastie
- *
  */
-public interface IControlComponent extends IGuiRenderer
+public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 {
 	/**
 	 * Sets the {@link UIComponent} controlled by this {@link IControlComponent}.
@@ -47,6 +47,7 @@ public interface IControlComponent extends IGuiRenderer
 	 *
 	 * @return the parent
 	 */
+	@Override
 	public UIComponent getParent();
 
 	/**

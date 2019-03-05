@@ -30,7 +30,6 @@ import net.malisis.ego.gui.IPredicatedSupplier;
 
 /**
  * @author Ordinastie
- *
  */
 public class PredicatedFontOptions extends FontOptions
 {

@@ -280,13 +280,13 @@ public class UITab extends UIComponent implements IContentHolder
 	//#end Getters/Setters
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		if (!(parent instanceof UITabGroup))
-			return super.onClick();
+			return super.click();
 
 		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
-			return super.onClick();
+			return super.click();
 
 		tabGroup().setActiveTab(this);
 		return true;

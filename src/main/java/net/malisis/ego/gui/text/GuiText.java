@@ -25,20 +25,8 @@ package net.malisis.ego.gui.text;
 
 import static com.google.common.base.Preconditions.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import net.malisis.ego.cacheddata.CachedData;
 import net.malisis.ego.cacheddata.FixedData;
 import net.malisis.ego.cacheddata.ICachedData;
@@ -60,6 +48,16 @@ import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The Class GuiString represents a String to be used and displayed in a GUI.<br>
@@ -86,7 +84,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private final Map<String, ICachedData<?>> parameters;
 
 	/** The base font options to use to render. */
-	private FontOptions fontOptions = FontOptions.EMPTY;
+	private FontOptions fontOptions = null;
 	/** Translated text with resolved parameters. */
 	private String cache = null;
 
@@ -110,9 +108,10 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private UIComponent parent;
 
-	private GuiText(String text, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(String text, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex,
+			UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
 	{
-		this.base = text;
+		base = text;
 		this.parameters = parameters;
 		this.position = position.apply(this);
 		this.zIndex = zIndex != null ? zIndex : () -> 0;
@@ -191,7 +190,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public void setText(String text)
 	{
-		this.base = text != null ? text : "";
+		base = text != null ? text : "";
 		buildCache = true;
 	}
 
@@ -328,7 +327,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		{
 			data.update();
 			if (data.hasChanged())
-				changed |= true; //can't return early, we need to call update on each data
+				changed = true; //can't return early, we need to call update on each data
 		}
 		return changed;
 	}
@@ -366,7 +365,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		size = Size.of(w, h);
 
 		for (LineInfo info : lines)
+		{
 			info.spaceWidth = w;
+		}
 	}
 
 	/**
@@ -398,7 +399,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		Matcher matcher = pattern.matcher(str);
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find())
+		{
 			matcher.appendReplacement(sb, resolveParameter(matcher.group("key")));
+		}
 		matcher.appendTail(sb);
 		str = sb.toString();
 		return translated ? I18n.format(str) : str;
@@ -406,8 +409,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	/**
 	 * Splits the cache in multiple lines to fit in the {@link #wrapSize}.
-	 *
-	 * @param str the str
 	 */
 	private void buildLines()
 	{
@@ -492,7 +493,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		int y = screenPosition.y();
 		int z = zIndex.getAsInt();
 		ClipArea area = null;
-		if (parent instanceof UIComponent)
+		if (parent != null)
 			z += parent.getZIndex();
 		if (parent instanceof IClipable)
 			area = ((IClipable) parent).getClipArea();
@@ -530,7 +531,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	@Override
 	public String toString()
 	{
-		String str = position + "@" + size;
+		String str = lines.size() > 0 ? lines.get(0).text().replace("\n", "") : "";
+		str += position + "@" + size;
 		if (isMultiLine())
 			str += " (wrap: " + getWrapSize() + ")";
 		return str;
@@ -580,7 +582,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public Builder text(Supplier<String> supplier)
 		{
-			this.text = "{text}";
+			text = "{text}";
 			return bind("text", supplier);
 		}
 
@@ -606,7 +608,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		{
 			this.parent = parent;
 			//Assume default position to be top left in parent
-			position(s -> Position.topLeft(s));
+			position(Position::topLeft);
 			return this;
 		}
 

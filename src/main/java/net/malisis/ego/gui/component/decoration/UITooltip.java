@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2019 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,8 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import static net.malisis.ego.gui.element.position.Positions.*;
+import static net.malisis.ego.gui.element.position.Positions.centered;
+import static net.malisis.ego.gui.element.position.Positions.middleAligned;
 
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.MalisisGui;
@@ -41,7 +42,7 @@ import net.malisis.ego.gui.text.GuiText;
 /**
  * UITooltip
  *
- * @author PaleoCrafter
+ * @author Ordinastie
  */
 public class UITooltip extends UIComponent implements IContentHolder
 {

@@ -51,9 +51,9 @@ public class EcfSelect extends UISelect<TextFormatting>
 	}
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
-		super.onClick();
+		super.click();
 		if (!expanded)
 			editor.getTextfield().setFocused(true);
 		return true;

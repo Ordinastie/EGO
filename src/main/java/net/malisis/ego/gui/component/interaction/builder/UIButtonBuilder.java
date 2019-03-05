@@ -7,7 +7,10 @@ import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.decoration.UIImage;
 import net.malisis.ego.gui.component.decoration.UITooltip;
 import net.malisis.ego.gui.component.interaction.UIButton;
+import net.malisis.ego.gui.element.position.IPositionBuilder;
+import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
+import net.malisis.ego.gui.element.size.ISizeBuilder;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
@@ -15,27 +18,19 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
+import java.util.function.Function;
 
 @SideOnly(Side.CLIENT)
-public final class UIButtonBuilder
+public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, UIButton>, ISizeBuilder<UIButtonBuilder, UIButton>
 {
-	@Nullable
 	private String name;
-	private IPosition position;
-	private ISize size;
+	private Function<UIButton, IPosition> position = b -> Position.ZERO;
+	private Function<UIButton, ISize> size = null;
 	private int zIndex;
-
-	@Nullable
 	private IContent content;
-	@Nullable
 	private String text;
-	@Nullable
 	private UIContainer parent;
-	@Nullable
 	private UITooltip tooltip;
-	@Nullable
 	private Consumer<UIButton> onClickRunnable;
 
 	private boolean enabled = true;
@@ -43,6 +38,11 @@ public final class UIButtonBuilder
 
 	public UIButtonBuilder()
 	{
+	}
+
+	public UIButtonBuilder(String name)
+	{
+		this.name = name;
 	}
 
 	public UIButtonBuilder text(String text)
@@ -53,7 +53,7 @@ public final class UIButtonBuilder
 
 	public UIButtonBuilder image(UIImage image)
 	{
-		this.content = image;
+		content = image;
 		return this;
 	}
 
@@ -67,15 +67,17 @@ public final class UIButtonBuilder
 		return image(new UIImage(new GuiIcon(texture)));
 	}
 
-	public UIButtonBuilder position(IPosition position)
+	@Override
+	public UIButtonBuilder position(Function<UIButton, IPosition> func)
 	{
-		this.position = checkNotNull(position);
+		position = checkNotNull(func);
 		return this;
 	}
 
-	public UIButtonBuilder size(ISize size)
+	@Override
+	public UIButtonBuilder size(Function<UIButton, ISize> func)
 	{
-		this.size = checkNotNull(size);
+		size = checkNotNull(func);
 		return this;
 	}
 
@@ -120,36 +122,24 @@ public final class UIButtonBuilder
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	public UIButton build()
 	{
 		UIButton button = new UIButton();
-		button.setPosition(position);
-		button.setSize(size);
-
+		button.setPosition(position.apply(button));
+		if (size != null)
+			button.setSize(size.apply(button));
 		if (name != null)
 			button.setName(name);
-
 		if (text != null)
-		{
 			button.setText(text);
-		}
 		if (content != null)
-		{
 			button.setContent(content);
-		}
 		if (tooltip != null)
-		{
 			button.setTooltip(tooltip);
-		}
 		if (parent != null)
-		{
 			parent.add(button);
-		}
 		if (onClickRunnable != null)
-		{
 			button.onClick(onClickRunnable);
-		}
 		button.setEnabled(enabled);
 		button.setVisible(visible);
 		button.setZIndex(zIndex);

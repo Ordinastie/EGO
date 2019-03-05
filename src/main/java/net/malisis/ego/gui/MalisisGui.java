@@ -32,8 +32,11 @@ import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.element.IKeyListener;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
+import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.GuiTexture;
+import net.malisis.ego.gui.render.IGuiRenderer;
+import net.malisis.ego.gui.render.shape.GuiShape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
@@ -56,7 +59,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -65,18 +70,27 @@ import java.util.function.Supplier;
  *
  * @author Ordinastie
  */
-public abstract class MalisisGui extends GuiScreen
+public abstract class MalisisGui extends GuiScreen implements Size.ISized
 {
 	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(new ResourceLocation("ego", "textures/gui/gui.png"), 300, 100);
 
 	public static final MousePosition MOUSE_POSITION = new MousePosition();
 
+	public static IGuiRenderer GRADIENT_BG = GuiShape.builder()
+													 .size(() -> current().width, () -> current().height)
+													 .color(0x101010)
+													 .topAlpha(0xC0)
+													 .bottomAlpha(0xD0)
+													 .build();
+
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;
 
 	/** Renderer drawing the components. */
 	protected GuiRenderer renderer;
+	/** Size of the gui (with scale factor). */
+	protected ISize size = Size.of(() -> width, () -> height);
 	/** Width of the window. */
 	protected int displayWidth;
 	/** Height of the window. */
@@ -88,7 +102,7 @@ public abstract class MalisisGui extends GuiScreen
 	/** Top level parent which hold the user components. Spans across the whole screen. */
 	private UIContainer screen;
 	/** Determines if the screen should be darkened when the GUI is opened. */
-	protected boolean guiscreenBackground = true;
+	protected IGuiRenderer background = null;
 	/** Last clicked button */
 	protected long lastClickButton = -1;
 	/** How long since last click. */
@@ -127,6 +141,7 @@ public abstract class MalisisGui extends GuiScreen
 		renderer = new GuiRenderer();
 		screen = new UIContainer();
 		screen.setName("Screen");
+		screen.setSize(size);
 		screen.setClipContent(false);
 		Keyboard.enableRepeatEvents(true);
 
@@ -172,6 +187,16 @@ public abstract class MalisisGui extends GuiScreen
 	public GuiRenderer getRenderer()
 	{
 		return renderer;
+	}
+
+	public UIComponent getScreen()
+	{
+		return screen;
+	}
+
+	public ISize getSize()
+	{
+		return size;
 	}
 
 	//	/**
@@ -233,6 +258,11 @@ public abstract class MalisisGui extends GuiScreen
 		screen.setSize(Size.of(width, height));
 	}
 
+	public void setBackground(IGuiRenderer background)
+	{
+		screen.setBackground(background);
+	}
+
 	/**
 	 * Checks whether this {@link MalisisGui} is used as an overlay.
 	 *
@@ -244,14 +274,16 @@ public abstract class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Adds the {@link UIComponent} to the screen.
+	 * Adds the {@link UIComponent}s to the screen.
 	 *
-	 * @param component the component
+	 * @param components the components
 	 */
-	public void addToScreen(UIComponent component)
+	public void addToScreen(UIComponent... components)
 	{
-		screen.add(component);
-		component.onAddedToScreen(this);
+		Arrays.stream(components).filter(Objects::nonNull).forEach(c -> {
+			screen.add(c);
+			c.onAddedToScreen(this);
+		});
 	}
 
 	/**
@@ -347,7 +379,7 @@ public abstract class MalisisGui extends GuiScreen
 					tooltip = component.getTooltip();
 					if (component.isEnabled())
 					{
-						component.onMouseMove();
+						component.mouseMove();
 						component.setHovered(true);
 					}
 				}
@@ -392,14 +424,14 @@ public abstract class MalisisGui extends GuiScreen
 				//double click
 				if (button == lastClickButton && time - lastClickTime < 250 && component == focusedComponent)
 				{
-					regularClick = !component.onDoubleClick(MouseButton.getButton(button));
+					regularClick = !component.doubleClick(MouseButton.getButton(button));
 					lastClickTime = 0;
 				}
 
-				//do not trigger onButtonPress when double clicked (fixed shift-double click issue in inventory)
+				//do not trigger mouseDown when double clicked (fixed shift-double click issue in inventory)
 				if (regularClick)
 				{
-					component.onButtonPress(MouseButton.getButton(button));
+					component.mouseDown(MouseButton.getButton(button));
 					if (draggedComponent == null)
 						draggedComponent = component;
 				}
@@ -470,11 +502,11 @@ public abstract class MalisisGui extends GuiScreen
 			{
 				MouseButton mb = MouseButton.getButton(button);
 				if (draggedComponent != null)
-					draggedComponent.onButtonRelease(mb);
+					draggedComponent.mouseUp(mb);
 				if (component == focusedComponent)
 				{
 					if (mb == MouseButton.LEFT)
-						component.onClick();
+						component.click();
 					else if (mb == MouseButton.RIGHT)
 						component.onRightClick();
 				}
@@ -513,7 +545,7 @@ public abstract class MalisisGui extends GuiScreen
 			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)
 				close();
 
-			if (!EGO.isObfEnv && isCtrlKeyDown() && (current() != null || isOverlay))
+			if (!EGO.isObfEnv && GuiScreen.isCtrlKeyDown() && (current() != null || isOverlay))
 			{
 				if (keyCode == Keyboard.KEY_R)
 				{
@@ -563,8 +595,8 @@ public abstract class MalisisGui extends GuiScreen
 		{
 			update();
 
-			if (guiscreenBackground)
-				drawWorldBackground(1);
+			//			if (background != null)
+			//				background.render(renderer);
 
 			screen.render(renderer);
 
@@ -575,6 +607,7 @@ public abstract class MalisisGui extends GuiScreen
 
 			if (renderTooltip)
 				tooltip.render(renderer);
+
 		}
 		catch (Exception e)
 		{

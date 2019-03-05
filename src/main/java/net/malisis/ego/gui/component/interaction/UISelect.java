@@ -24,7 +24,7 @@
 
 package net.malisis.ego.gui.component.interaction;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static net.malisis.ego.gui.element.position.Positions.middleAligned;
 import static net.malisis.ego.gui.element.position.Positions.rightAligned;
 import static net.malisis.ego.gui.element.size.Sizes.heightOfContent;
@@ -160,7 +160,7 @@ public class UISelect<T> extends UIComponent
 	@SuppressWarnings("unchecked")
 	public <U extends UIComponent & IOptionComponent> void setComponentFactory(Function<T, U> factory)
 	{
-		optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
+		//optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
 	}
 
 	//#end Getters/Setters
@@ -272,7 +272,7 @@ public class UISelect<T> extends UIComponent
 	}
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		if (!expanded)
 			optionsContainer.display();
@@ -379,7 +379,7 @@ public class UISelect<T> extends UIComponent
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public boolean onClick()
+		public boolean click()
 		{
 			UIComponent comp = getComponentAt(MalisisGui.MOUSE_POSITION.x(), MalisisGui.MOUSE_POSITION.y());
 			if (comp == null)

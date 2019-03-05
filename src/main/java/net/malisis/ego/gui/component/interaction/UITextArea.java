@@ -29,7 +29,6 @@ import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
-import net.malisis.ego.gui.render.shape.GuiShape.Builder;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.input.Keyboard;
@@ -177,11 +176,11 @@ public class UITextArea extends UITextField implements IScrollable
 		Cursor first = cursor.index < selectionCursor.index ? cursor : selectionCursor;
 		Cursor last = cursor == first ? selectionCursor : cursor;
 
-		Builder builder = GuiShape.builder(this)
-								  .position(first)
-								  .fixed(false)
-								  .size(innerSize().width() - first.x(), cursor.height())
-								  .color(selectColor);
+		GuiShape.Builder builder = GuiShape.builder(this)
+										   .position(first)
+										   .fixed(false)
+										   .size(innerSize().width() - first.x(), cursor.height())
+										   .color(selectColor);
 		//drawFirst line :
 		GuiShape s = builder.build();
 		s.render(renderer);

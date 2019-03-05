@@ -24,55 +24,46 @@
 
 package net.malisis.ego.gui.component.container;
 
-import static net.malisis.core.client.gui.element.position.Positions.*;
-
-import net.malisis.core.inventory.MalisisInventory;
-import net.malisis.core.inventory.MalisisSlot;
-import net.malisis.ego.gui.component.UISlot;
-import net.malisis.ego.gui.element.position.Position;
-import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.element.size.Size.ISize;
-
 public class UIPlayerInventory extends UIInventory
 {
-	/** Size required for player inventory */
-	public static final ISize INVENTORY_SIZE = Size.of(162, 87);
-
-	/** {@link MalisisInventory} used for this {@link UIPlayerInventory} **/
-	protected MalisisInventory inventory;
-
-	public UIPlayerInventory(MalisisInventory inventory)
-	{
-		super("parent.inventory", inventory, 9);
-
-		setSize(INVENTORY_SIZE);
-		for (int i = 0; i < inventory.getSize(); i++)
-			addSlot(inventory.getSlot(i), i);
-
-		setPosition(Position.of(centered(this, 0), bottomAligned(this, 0)));
-	}
-
-	/**
-	 * Creates and adds <code>UISlot</code> into this <code>UIPlayerInventory</code>.
-	 *
-	 * @param slot the slot
-	 * @param number the number
-	 */
-	@Override
-	protected void addSlot(MalisisSlot slot, int number)
-	{
-		UISlot uislot = new UISlot(slot);
-		if (number < 9)
-			uislot.setPosition(Position.of(number * 18, 69));
-		else if (number < 36)
-		{
-			int row = (number - 9) / 9;
-			int col = number % 9;
-			uislot.setPosition(Position.of(col * 18, 11 + row * 18));
-		}
-		else
-			return;
-
-		add(uislot);
-	}
+	//	/** Size required for player inventory */
+	//	public static final ISize INVENTORY_SIZE = Size.of(162, 87);
+	//
+	//	/** {@link MalisisInventory} used for this {@link UIPlayerInventory} **/
+	//	protected MalisisInventory inventory;
+	//
+	//	public UIPlayerInventory(MalisisInventory inventory)
+	//	{
+	//		super("parent.inventory", inventory, 9);
+	//
+	//		setSize(INVENTORY_SIZE);
+	//		for (int i = 0; i < inventory.getSize(); i++)
+	//			addSlot(inventory.getSlot(i), i);
+	//
+	//		setPosition(Position.of(centered(this, 0), bottomAligned(this, 0)));
+	//	}
+	//
+	//	/**
+	//	 * Creates and adds <code>UISlot</code> into this <code>UIPlayerInventory</code>.
+	//	 *
+	//	 * @param slot the slot
+	//	 * @param number the number
+	//	 */
+	//	@Override
+	//	protected void addSlot(MalisisSlot slot, int number)
+	//	{
+	//		UISlot uislot = new UISlot(slot);
+	//		if (number < 9)
+	//			uislot.setPosition(Position.of(number * 18, 69));
+	//		else if (number < 36)
+	//		{
+	//			int row = (number - 9) / 9;
+	//			int col = number % 9;
+	//			uislot.setPosition(Position.of(col * 18, 11 + row * 18));
+	//		}
+	//		else
+	//			return;
+	//
+	//		add(uislot);
+	//	}
 }

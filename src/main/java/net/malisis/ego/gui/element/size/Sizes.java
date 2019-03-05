@@ -26,18 +26,18 @@ package net.malisis.ego.gui.element.size;
 
 import static com.google.common.base.Preconditions.*;
 
-import java.util.function.IntSupplier;
-
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.Padding;
+import net.malisis.ego.gui.element.position.Position.IPositioned;
 import net.malisis.ego.gui.element.size.Size.ISized;
+
+import java.util.function.IntSupplier;
 
 /**
  * @author Ordinastie
- *
  */
 public class Sizes
 {
@@ -57,7 +57,7 @@ public class Sizes
 		};
 	}
 
-	public static <T extends ISized & IChild<UIComponent>> IntSupplier parentWidth(T owner, float width, int offset)
+	public static <T extends IChild<UIComponent>> IntSupplier parentWidth(T owner, float width, int offset)
 	{
 		checkNotNull(owner);
 		return () -> {
@@ -68,7 +68,7 @@ public class Sizes
 		};
 	}
 
-	public static <T extends ISized & IChild<UIComponent>> IntSupplier parentHeight(T owner, float height, int offset)
+	public static <T extends IChild<UIComponent>> IntSupplier parentHeight(T owner, float height, int offset)
 	{
 		checkNotNull(owner);
 		return () -> {
@@ -76,6 +76,28 @@ public class Sizes
 			if (parent == null)
 				return 0;
 			return (int) (parent.innerSize().height() * height) + offset;
+		};
+	}
+
+	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillWidth(T owner, int offset)
+	{
+		checkNotNull(owner);
+		return () -> {
+			UIComponent parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return parent.innerSize().width() + offset - owner.position().x();
+		};
+	}
+
+	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillHeight(T owner, int offset)
+	{
+		checkNotNull(owner);
+		return () -> {
+			UIComponent parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return parent.innerSize().height() + offset - owner.position().y();
 		};
 	}
 

@@ -24,8 +24,6 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import javax.annotation.Nonnull;
-
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.control.IScrollable;
@@ -36,6 +34,8 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.util.text.TextFormatting;
+
+import javax.annotation.Nonnull;
 
 /**
  * UILabel.
@@ -48,6 +48,14 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 	protected boolean autoSize = false;
 	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
 
+	public UILabel(GuiText text)
+	{
+		this.text = text;
+		text.setParent(this);
+		setAutoSize();
+		setForeground(this.text);
+	}
+
 	/**
 	 * Instantiates a new {@link UILabel}.
 	 *
@@ -56,18 +64,19 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 	 */
 	public UILabel(String text, boolean multiLine)
 	{
-		this.text = GuiText	.builder()
-							.parent(this)
-							.multiLine(multiLine)
-							.literal(false)
-							.translated(true)
-							.text(text)
-							.fontOptions(FontOptions.builder().color(0x444444).build())
-							.wrapSize(() -> autoSize ? 0 : innerSize().width())
-							.build();
-		setAutoSize();
+		this.text = GuiText.builder()
+						   .parent(this)
+						   .multiLine(multiLine)
+						   .literal(false)
+						   .translated(true)
+						   .text(text)
+						   .fontOptions(FontOptions.builder().color(0x444444).build())
+						   .wrapSize(() -> autoSize ? 0 : innerSize().width())
+						   .build();
 
+		setAutoSize();
 		setForeground(this.text);
+
 	}
 
 	/**

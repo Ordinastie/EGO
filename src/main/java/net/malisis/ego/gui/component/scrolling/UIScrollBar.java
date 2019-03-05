@@ -268,17 +268,17 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	//	}
 
 	@Override
-	public boolean onButtonPress(MouseButton button)
+	public boolean mouseDown(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return super.onButtonPress(button);
+			return super.mouseDown(button);
 
 		scrollToMouse();
 		return true;
 	}
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		return true;
 	}

@@ -26,14 +26,13 @@ package net.malisis.ego.gui.element.size;
 
 import static com.google.common.base.Preconditions.*;
 
+import net.malisis.ego.gui.element.size.Size.ISize;
+
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 
-import net.malisis.ego.gui.element.size.Size.ISize;
-
 /**
  * @author Ordinastie
- *
  */
 public interface ISizeBuilder<BUILDER, OWNER>
 {
@@ -53,7 +52,6 @@ public interface ISizeBuilder<BUILDER, OWNER>
 
 	public default BUILDER size(int width, Function<OWNER, IntSupplier> height)
 	{
-		checkNotNull(width);
 		checkNotNull(height);
 		return size(o -> Size.of(width, height.apply(o)));
 	}
@@ -61,7 +59,6 @@ public interface ISizeBuilder<BUILDER, OWNER>
 	public default BUILDER size(Function<OWNER, IntSupplier> width, int height)
 	{
 		checkNotNull(width);
-		checkNotNull(height);
 		return size(o -> Size.of(width.apply(o), height));
 	}
 

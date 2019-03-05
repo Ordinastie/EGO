@@ -40,8 +40,8 @@ import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
-import net.malisis.ego.gui.render.ColoredBackground;
 import net.malisis.ego.gui.render.GuiIcon;
+import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Blocks;
@@ -76,7 +76,7 @@ public class GuiDemo extends MalisisGui
 	public GuiDemo(/*MalisisInventoryContainer inventoryContainer*/)
 	{
 		//setInventoryContainer(inventoryContainer);
-		guiscreenBackground = false;
+		//guiscreenBackground = false;
 	}
 
 	private UIComponent debug()
@@ -164,7 +164,7 @@ public class GuiDemo extends MalisisGui
 
 		//add the window to the screen
 		addToScreen(window);
-		addDebug("Counter", () -> counter + " (" + xCounter + " / " + xTotal + ")");
+		addDebug("Counter", () -> MalisisGui.counter + " (" + MalisisGui.xCounter + " / " + MalisisGui.xTotal + ")");
 
 	}
 
@@ -472,7 +472,7 @@ public class GuiDemo extends MalisisGui
 					ItemStack is = new ItemStack(item);
 					setName(is.getDisplayName());
 					setSize(Size.of(parentWidth(this, 1.0F, 0), 20));
-					setBackground(ColoredBackground.of(this).color(0xFFFFFF).border(1, 0x6666DD).build());
+					setBackground(GuiShape.builder(this).color(0xFFFFFF).border(1, 0x6666DD).build());
 
 					UIImage img = new UIImage(is);
 					img.setPosition(Position.middleCenter(this));

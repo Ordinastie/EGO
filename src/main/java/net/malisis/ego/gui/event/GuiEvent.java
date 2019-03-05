@@ -30,42 +30,17 @@ import net.malisis.ego.gui.component.UIComponent;
 /**
  * Base for all events happening while a {@link MalisisGui} is opened.
  */
-public class GuiEvent<T extends UIComponent>
+public abstract class GuiEvent<T extends UIComponent>
 {
-	/** {@link T} firing this {@link ComponentEvent} */
-	public final T component;
+	protected final T source;
 
-	/** Whether this event is cancelled. */
-	private boolean cancelled = false;
-
-	public GuiEvent(T component)
+	public GuiEvent(T source)
 	{
-		this.component = component;
+		this.source = source;
 	}
 
-	/**
-	 * Gets the {@link UIComponent} that fired this {@link ComponentEvent}.
-	 *
-	 * @return the component
-	 */
-	public T getComponent()
+	public T component()
 	{
-		return component;
-	}
-
-	/**
-	 * Marks this {@link GuiEvent} as cancelled.
-	 */
-	public void cancel()
-	{
-		cancelled = true;
-	}
-
-	/**
-	 * @return whether this {@link GuiEvent} is cancelled.
-	 */
-	public boolean isCancelled()
-	{
-		return cancelled;
+		return source;
 	}
 }

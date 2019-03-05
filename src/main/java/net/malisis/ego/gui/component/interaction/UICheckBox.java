@@ -146,7 +146,7 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	}
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		if (fireEvent(new CheckEvent(this, !checked)))
 			checked = !checked;

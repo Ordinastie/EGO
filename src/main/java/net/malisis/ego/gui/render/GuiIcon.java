@@ -226,6 +226,11 @@ public class GuiIcon
 		return str;
 	}
 
+	public static GuiIcon full(GuiTexture texture)
+	{
+		return new GuiIcon(texture, 0F, 0F, 1F, 1F);
+	}
+
 	public static GuiIcon from(ItemStack itemStack)
 	{
 		if (Minecraft.getMinecraft().getRenderItem() == null)

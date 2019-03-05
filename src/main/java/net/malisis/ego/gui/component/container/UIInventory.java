@@ -24,18 +24,9 @@
 
 package net.malisis.ego.gui.component.container;
 
-import org.apache.commons.lang3.StringUtils;
-
-import net.malisis.core.inventory.MalisisInventory;
-import net.malisis.core.inventory.MalisisSlot;
-import net.malisis.ego.gui.component.UISlot;
-import net.malisis.ego.gui.component.decoration.UILabel;
-import net.malisis.ego.gui.element.position.Position;
-import net.malisis.ego.gui.element.size.Size;
-
 public class UIInventory extends UIContainer
 {
-	protected UILabel label;
+/*	protected UILabel label;
 	protected MalisisInventory inventory;
 	protected int numCols;
 	protected boolean hasTitle;
@@ -90,4 +81,4 @@ public class UIInventory extends UIContainer
 
 		add(uislot);
 	}
-}
+*/}

@@ -89,10 +89,9 @@ public class UIListContainer<S> extends UIContainer
 		return componentElements.get(element);
 	}
 
-	public UIListContainer<S> setComponentFactory(Function<S, UIComponent> factory)
+	public void setComponentFactory(Function<S, UIComponent> factory)
 	{
 		this.elementComponentFactory = factory;
-		return this;
 	}
 
 	public void setElementSpacing(int elementSpacing)

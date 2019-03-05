@@ -26,35 +26,54 @@ package net.malisis.ego.gui.event;
 
 import static com.google.common.base.Preconditions.*;
 
-import java.util.function.Predicate;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import net.malisis.ego.gui.component.UIComponent;
+
+import java.util.function.Predicate;
 
 /**
  * @author Ordinastie
- *
  */
 public class EventHandler
 {
+	//Todo: InheritanceMap/Multimap ?
 	private Multimap<Class<?>, Predicate<?>> handlers = HashMultimap.create();
 
-	public <T extends GuiEvent> void registerHandler(Class<T> clazz, Predicate<T> handler)
+	/**
+	 * Registers a {@link Predicate} handler for the type of {@link GuiEvent}.
+	 *
+	 * @param clazz type of event
+	 * @param handler handler
+	 */
+	public void register(Class<? extends GuiEvent> clazz, Predicate<UIComponent> handler)
 	{
 		handlers.put(checkNotNull(clazz), checkNotNull(handler));
 	}
 
-	public <T extends GuiEvent> void unregisterHandler(Class<T> clazz, Predicate<T> handler)
+	/**
+	 * Unregisters a handle for the {@link GuiEvent}.
+	 *
+	 * @param clazz type of event
+	 * @param handler handler to be removed
+	 */
+	public void unregister(Class<? extends GuiEvent> clazz, Predicate<UIComponent> handler)
 	{
 		handlers.remove(checkNotNull(clazz), handler);
 	}
 
+	/**
+	 * Fires the {@link GuiEvent}. Triggers all predicates registered for that event type.<br>
+	 *
+	 * @param event event to fire
+	 * @return true, to cancel event propagation to the source's parent.
+	 */
 	@SuppressWarnings("unchecked")
-	public <T extends GuiEvent> boolean fireEvent(T event)
+	public boolean fireEvent(GuiEvent<?> event)
 	{
-		boolean r = true;
+		boolean r = false;
 		for (Predicate<?> p : handlers.get(event.getClass()))
-			r &= ((Predicate<T>) p).test(event);
+			r |= ((Predicate<GuiEvent<?>>) p).test(event);
 		return r;
 	}
 }

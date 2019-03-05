@@ -26,14 +26,19 @@ package net.malisis.ego.gui.element.position;
 
 import static com.google.common.base.Preconditions.*;
 
+import net.malisis.ego.gui.element.position.Position.IPosition;
+import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.text.GuiText;
+
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 
-import net.malisis.ego.gui.element.position.Position.IPosition;
-
 /**
- * @author Ordinastie
+ * This interface is a helper for Builders that build objects implementing the {@link Position.IPositioned} interface.
  *
+ * @author Ordinastie
+ * @see GuiText.Builder
+ * @see GuiShape.ColoredBackgroundBuilder
  */
 public interface IPositionBuilder<BUILDER, OWNER>
 {
@@ -53,7 +58,6 @@ public interface IPositionBuilder<BUILDER, OWNER>
 
 	public default BUILDER position(int x, Function<OWNER, IntSupplier> y)
 	{
-		checkNotNull(x);
 		checkNotNull(y);
 		return position(o -> Position.of(x, y.apply(o)));
 	}
@@ -61,7 +65,6 @@ public interface IPositionBuilder<BUILDER, OWNER>
 	public default BUILDER position(Function<OWNER, IntSupplier> x, int y)
 	{
 		checkNotNull(x);
-		checkNotNull(y);
 		return position(o -> Position.of(x.apply(o), y));
 	}
 

@@ -24,10 +24,9 @@
 
 package net.malisis.ego.gui.component.mceditor;
 
-import static net.malisis.ego.gui.element.position.Positions.*;
+import static net.malisis.ego.gui.element.position.Positions.bottomAligned;
 
 import com.google.common.eventbus.Subscribe;
-
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.MalisisFont;
 import net.malisis.ego.gui.MalisisGui;
@@ -43,7 +42,6 @@ import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
- *
  */
 public class MCEditor extends UIContainer
 {
@@ -65,7 +63,7 @@ public class MCEditor extends UIContainer
 
 		cb = new UICheckBox("Use litteral formatting");
 		cb.setPosition(Position.of(85, 0));
-		cb.register(this);
+		//cb.register(this);
 
 		add(tf, sel, cb);
 	}
@@ -105,7 +103,7 @@ public class MCEditor extends UIContainer
 
 	public MCEditor setFontOptions(FontOptions fro)
 	{
-		this.fontOptions = fro;
+		fontOptions = fro;
 		return this;
 	}
 

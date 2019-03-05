@@ -5,10 +5,7 @@ import java.util.Set;
 
 public enum VertexPosition
 {
-	TOPLEFT(0, 0, 0xd9746a),
-	BOTTOMLEFT(0, 1, 0x6abbd9),
-	BOTTOMRIGHT(1, 1, 0x91d96a),
-	TOPRIGHT(1, 0, 0xf588ec);
+	TOPLEFT(0, 0, 0xd9746a), BOTTOMLEFT(0, 1, 0x6abbd9), BOTTOMRIGHT(1, 1, 0x91d96a), TOPRIGHT(1, 0, 0xf588ec);
 
 	public static final Set<VertexPosition> VALUES = EnumSet.allOf(VertexPosition.class);
 	private int x, y;
@@ -39,4 +36,23 @@ public enum VertexPosition
 		return y * height;
 	}
 
+	public boolean isTop()
+	{
+		return this == TOPLEFT || this == TOPRIGHT;
+	}
+
+	public boolean isBottom()
+	{
+		return !isTop();
+	}
+
+	public boolean isLeft()
+	{
+		return this == TOPLEFT || this == BOTTOMLEFT;
+	}
+
+	public boolean isRight()
+	{
+		return !isLeft();
+	}
 }

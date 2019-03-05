@@ -24,11 +24,6 @@
 
 package net.malisis.ego.gui.component.interaction;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import org.lwjgl.input.Keyboard;
-
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
@@ -43,6 +38,9 @@ import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.input.Keyboard;
+
+import java.util.function.Consumer;
 
 /**
  * UIButton
@@ -52,14 +50,14 @@ import net.minecraft.util.text.TextFormatting;
 public class UIButton extends UIComponent implements IContentHolder
 {
 	/** The {@link FontOptions} to use by default for the {@link UIButton} content. */
-	protected final FontOptions fontOptions = FontOptions	.builder()
-															.color(0xFFFFFF)
-															.shadow()
-															.when(this::isHovered)
-															.color(0xFFFFA0)
-															.when(this::isDisabled)
-															.color(0xCCCCCC)
-															.build();
+	protected final FontOptions fontOptions = FontOptions.builder()
+														 .color(0xFFFFFF)
+														 .shadow()
+														 .when(this::isHovered)
+														 .color(0xFFFFA0)
+														 .when(this::isDisabled)
+														 .color(0xCCCCCC)
+														 .build();
 
 	protected IPosition offsetPosition = Position.of(() -> isPressed() ? 1 : 0, () -> isPressed() ? 1 : 0);
 	protected IPosition contentPosition = null;
@@ -78,7 +76,7 @@ public class UIButton extends UIComponent implements IContentHolder
 	public UIButton()
 	{
 		setAutoSize();
-		setBackground(GuiShape.builder(this).border(5).icon((Supplier<GuiIcon>) () -> {
+		setBackground(GuiShape.builder(this).border(5).icon(() -> {
 			if (isDisabled())
 				return GuiIcon.BUTTON_DISABLED;
 			if (isHovered())
@@ -111,6 +109,7 @@ public class UIButton extends UIComponent implements IContentHolder
 	}
 
 	//#region Getters/Setters
+
 	/**
 	 * Sets the content for this {@link UIButton}.
 	 *
@@ -181,26 +180,26 @@ public class UIButton extends UIComponent implements IContentHolder
 	}
 
 	@Override
-	public boolean onClick()
+	public boolean click()
 	{
 		executeAction();
 		return true;
 	}
 
 	@Override
-	public boolean onButtonPress(MouseButton button)
+	public boolean mouseDown(MouseButton button)
 	{
 		if (button == MouseButton.LEFT)
 			isPressed = true;
-		return super.onButtonPress(button);
+		return super.mouseDown(button);
 	}
 
 	@Override
-	public boolean onButtonRelease(MouseButton button)
+	public boolean mouseUp(MouseButton button)
 	{
 		if (button == MouseButton.LEFT)
 			isPressed = false;
-		return super.onButtonRelease(button);
+		return super.mouseUp(button);
 	}
 
 	@Override
