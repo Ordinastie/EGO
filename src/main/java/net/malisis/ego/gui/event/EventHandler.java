@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import net.malisis.ego.gui.component.UIComponent;
 
 import java.util.function.Predicate;
 
@@ -46,7 +45,7 @@ public class EventHandler
 	 * @param clazz type of event
 	 * @param handler handler
 	 */
-	public void register(Class<? extends GuiEvent> clazz, Predicate<UIComponent> handler)
+	public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler)
 	{
 		handlers.put(checkNotNull(clazz), checkNotNull(handler));
 	}
@@ -57,7 +56,7 @@ public class EventHandler
 	 * @param clazz type of event
 	 * @param handler handler to be removed
 	 */
-	public void unregister(Class<? extends GuiEvent> clazz, Predicate<UIComponent> handler)
+	public <T extends GuiEvent<?>> void unregister(Class<T> clazz, Predicate<T> handler)
 	{
 		handlers.remove(checkNotNull(clazz), handler);
 	}

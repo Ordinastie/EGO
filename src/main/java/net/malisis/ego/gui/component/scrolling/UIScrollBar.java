@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2019 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,8 @@
 
 package net.malisis.ego.gui.component.scrolling;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
-import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
@@ -38,6 +37,8 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Size.ISized;
+import net.malisis.ego.gui.event.KeyTypedEvent;
+import net.malisis.ego.gui.event.MouseEvent.ScrollWheel;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Keyboard;
@@ -74,11 +75,16 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	public <T extends UIComponent & IScrollable> UIScrollBar(T parent, Type type)
 	{
 		this.type = type;
+		zIndex = 5;
 
 		parent.addControlComponent(this);
+		parent.onScrollWheel(this::scrollWheel);
+		parent.onKeyTyped(this::keyTyped);
 
 		if (type == Type.VERTICAL)
 			verticalScrollbars.put(parent, this);
+		else
+			horizontalScrollbars.put(parent, this);
 
 		setPosition(new ScrollbarPosition());
 		setSize(new ScrollbarSize());
@@ -143,22 +149,19 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 
 	/**
 	 * Sets whether this {@link UIScrollBar} should automatically hide when scrolling is not possible (content size is inferior to
-	 * component
-	 * size).
+	 * component size).
 	 *
 	 * @param autoHide the auto hide
-	 * @return this {@link UIScrollBar}
 	 */
-	public UIScrollBar setAutoHide(boolean autoHide)
+	public void setAutoHide(boolean autoHide)
 	{
 		this.autoHide = autoHide;
-		return this;
 	}
 
 	@Override
 	public int getZIndex()
 	{
-		return getParent() != null ? getParent().getZIndex() + 5 : 0;
+		return getParent() != null ? getParent().getZIndex() + zIndex : 0;
 	}
 
 	protected int sizeDiff()
@@ -258,40 +261,24 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 			setVisible(!hide);
 	}
 
-	//	@Subscribe
-	//	public void onContentUpdate(ContentUpdateEvent<UIScrollBar> event)
-	//	{
-	//		if (getParent() != event.getComponent())
-	//			return;
-	//
-	//		updateScrollbar();
-	//	}
-
 	@Override
-	public boolean mouseDown(MouseButton button)
+	public void mouseDown(MouseButton button)
 	{
-		if (button != MouseButton.LEFT)
-			return super.mouseDown(button);
-
-		scrollToMouse();
-		return true;
-	}
-
-	@Override
-	public boolean click()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean onDrag(MouseButton button)
-	{
-		if (button != MouseButton.LEFT)
-			return super.onDrag(button);
-
-		if (isFocused())
+		if (button == MouseButton.LEFT)
 			scrollToMouse();
-		return true;
+	}
+
+	@Override
+	public void click(MouseButton button)
+	{
+		//do not propagate to parent
+	}
+
+	@Override
+	public void mouseDrag(MouseButton button)
+	{
+		if (button == MouseButton.LEFT)
+			scrollToMouse();
 	}
 
 	private void scrollToMouse()
@@ -302,37 +289,38 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		scrollTo((float) pos / l);
 	}
 
-	@Override
-	public boolean onScrollWheel(int delta)
+	/**
+	 * Event fired by the parent
+	 *
+	 * @param event ScrollWheel event
+	 * @return true if the event should propagate to parent
+	 */
+	protected boolean scrollWheel(ScrollWheel<UIScrollBar> event)
 	{
+		//we want to propagate to (grand) parents so they can scroll too if needed
 		if ((isHorizontal() != GuiScreen.isShiftKeyDown()) && !isHovered())
-			return super.onScrollWheel(delta);
+			return false;
 
-		scrollBy(-delta * getScrollable().getScrollStep());
-		//true = stop
+		scrollBy(-event.delta() * getScrollable().getScrollStep());
 		float o = offset();
-		return !(delta > 0 && o == 0 || delta < 0 && o == 1);
+		//if we can't scroll anymore, propagate to parent
+		return (event.delta() <= 0 || o != 0) && (event.delta() >= 0 || o != 1);
 	}
 
-	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	protected boolean keyTyped(KeyTypedEvent<UIScrollBar> event)
 	{
-		if (MalisisGui.isGuiCloseKey(keyCode))
-			return super.onKeyTyped(keyChar, keyCode);
-
-		if (!isHovered() && !getParent().isHovered())
-			return super.onKeyTyped(keyChar, keyCode);
-		if (isHorizontal() != GuiScreen.isShiftKeyDown())
-			return super.onKeyTyped(keyChar, keyCode);
-
-		if (keyCode == Keyboard.KEY_HOME)
+		if (event.isKey(Keyboard.KEY_HOME))
+		{
 			scrollTo(0);
-		else if (keyCode == Keyboard.KEY_END)
+			return true;
+		}
+		if (event.isKey(Keyboard.KEY_END))
+		{
 			scrollTo(1);
-		else
-			return super.onKeyTyped(keyChar, keyCode);
+			return true;
+		}
 
-		return true;
+		return false;
 	}
 
 	@Override
@@ -344,22 +332,26 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 
 	public static UIScrollBar verticalScrollbar(Object component)
 	{
+		//noinspection SuspiciousMethodCalls
 		return verticalScrollbars.get(component);
 	}
 
 	public static UIScrollBar horizontalScrollbar(Object component)
 	{
+		//noinspection SuspiciousMethodCalls
 		return horizontalScrollbars.get(component);
 	}
 
 	public static int scrollbarWidth(Object component)
 	{
+		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = verticalScrollbars.get(component);
 		return scrollbar != null && scrollbar.isVisible() ? scrollbar.size().width() : 0;
 	}
 
 	public static int scrollbarHeight(Object component)
 	{
+		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = horizontalScrollbars.get(component);
 		return scrollbar != null && scrollbar.isVisible() ? scrollbar.size().height() : 0;
 	}

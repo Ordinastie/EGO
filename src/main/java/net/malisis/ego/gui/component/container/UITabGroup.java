@@ -167,12 +167,10 @@ public class UITabGroup extends UIContainer
 	 * Sets the spacing for this {@link UITabGroup}.
 	 *
 	 * @param spacing the spacing
-	 * @return this {@link UITabGroup}
 	 */
-	public UITabGroup setSpacing(int spacing)
+	public void setSpacing(int spacing)
 	{
 		this.spacing = spacing;
-		return this;
 	}
 
 	/**
@@ -181,15 +179,14 @@ public class UITabGroup extends UIContainer
 	 *
 	 * @param tab tab to add to the UITabGroup
 	 * @param container {@link UIContainer} linked to the {@link UITab}
-	 * @return this {@link UITab}
 	 */
-	public UITab addTab(UITab tab, UIContainer container)
+	public void addTab(UITab tab, UIContainer container)
 	{
 		if (tab.isActive())
 			activeTab = tab;
 
 		add(tab);
-		tab.setContainer(container);
+		tab.linkContainer(container);
 		tab.setActive(false);
 		listTabs.put(tab, container);
 		updateSize();
@@ -199,7 +196,6 @@ public class UITabGroup extends UIContainer
 			setupTabContainer(container);
 			calculateTabPosition();
 		}
-		return tab;
 	}
 
 	private void setupTabContainer(UIContainer container)
@@ -287,14 +283,18 @@ public class UITabGroup extends UIContainer
 		tab.setActive(true);
 	}
 
+	public UITab activeTab()
+	{
+		return activeTab;
+	}
+
 	/**
 	 * Attach this {@link UITabGroup} to a {@link UIContainer}.
 	 *
 	 * @param container the parent to attach to.
 	 * @param displace if true, moves and resize the UIContainer to make place for the UITabGroup
-	 * @return this {@link UITab}
 	 */
-	public UITabGroup attachTo(UIContainer container, boolean displace)
+	public void attachTo(UIContainer container, boolean displace)
 	{
 		attachedContainer = container;
 		if (activeTab != null)
@@ -336,7 +336,6 @@ public class UITabGroup extends UIContainer
 			attachedContainer.setSize(new AttachedContainerSize(attachedContainer.size()));
 		}
 
-		return this;
 	}
 
 	private class AttachedContainerPosition implements IPosition
@@ -407,30 +406,27 @@ public class UITabGroup extends UIContainer
 	 *
 	 * @author Ordinastie
 	 */
-	public static class TabChangeEvent extends GuiEvent<UITabGroup>
+	public static class TabChangeEvent extends GuiEvent<UITab>
 	{
-		private UITab newTab;
+		private final UITab oldTab;
 
-		public TabChangeEvent(UITabGroup component, UITab newTab)
+		public TabChangeEvent(UITab source, UITab oldTab)
 		{
-			super(component);
-			this.newTab = newTab;
+			super(source);
+			this.oldTab = oldTab;
+		}
+
+		public UITabGroup tabGroup()
+		{
+			return source.tabGroup();
 		}
 
 		/**
 		 * @return the {@link UITab} deactivated
 		 */
-		public UITab getOldTab()
+		public UITab oldTab()
 		{
-			return component.activeTab;
-		}
-
-		/**
-		 * @return the {@link UITab} activated
-		 */
-		public UITab getNewTab()
-		{
-			return newTab;
+			return oldTab;
 		}
 
 	}

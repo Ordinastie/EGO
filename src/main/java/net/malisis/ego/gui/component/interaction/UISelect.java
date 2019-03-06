@@ -32,13 +32,14 @@ import static net.malisis.ego.gui.element.size.Sizes.heightRelativeTo;
 import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
 import static net.malisis.ego.gui.element.size.Sizes.widthRelativeTo;
 
-import com.google.common.base.Predicates;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIListContainer;
 import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
+import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position;
@@ -81,7 +82,7 @@ public class UISelect<T> extends UIComponent
 	/** The string supplier to use for the default UILabel option. */
 	protected Function<T, String> stringFunction = Objects::toString;
 	/** Predicate for option disability */
-	protected Predicate<T> disablePredicate = Predicates.alwaysFalse();
+	protected Predicate<T> disablePredicate = t -> false;
 
 	/**
 	 * Instantiates a new {@link UISelect}.
@@ -94,12 +95,12 @@ public class UISelect<T> extends UIComponent
 		setSize(Size.of(width, 12));
 		setOptions(values);
 
-		/** Shape used for the background of the select. */
+		/* Shape used for the background of the select. */
 		GuiShape background = GuiShape.builder(this)
 									  .icon(GuiIcon.forComponent(this, GuiIcon.SELECT, null, GuiIcon.SELECT_DISABLED))
 									  .border(1)
 									  .build();
-		/** Shape used to draw the arrow. */
+		/* Shape used to draw the arrow. */
 		GuiShape arrowShape = GuiShape.builder(this)
 									  .position(o -> rightAligned(o, 2), o -> middleAligned(o, 0))
 									  .size(7, 4)
@@ -113,7 +114,7 @@ public class UISelect<T> extends UIComponent
 			if (c != null)
 			{
 				IPosition old = c.position();
-				IPosition pos = Position.of(Positions.leftAligned(c, 1), Positions.middleAligned(c, 1));
+				IPosition pos = Position.of(Positions.leftAligned(c, 1), middleAligned(c, 1));
 				c.setParent(this);
 				c.setPosition(pos);
 				((IOptionComponent) c).renderSelected(r);
@@ -271,19 +272,19 @@ public class UISelect<T> extends UIComponent
 		return select(selectedIndex + 1);
 	}
 
-	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
+		if(isDisabled())
+			return;
+
 		if (!expanded)
 			optionsContainer.display();
 		else
 			optionsContainer.hide();
-
-		return true;
 	}
 
 	@Override
-	public boolean onScrollWheel(int delta)
+	public boolean scrollWheel(int delta)
 	{
 		if (!isFocused())
 			return true;
@@ -296,10 +297,10 @@ public class UISelect<T> extends UIComponent
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public void keyTyped(char keyChar, int keyCode)
 	{
 		if (!isFocused() && !optionsContainer.isFocused())
-			return super.onKeyTyped(keyChar, keyCode);
+			return super.keyTyped(keyChar, keyCode);
 
 		switch (keyCode)
 		{
@@ -316,7 +317,7 @@ public class UISelect<T> extends UIComponent
 				selectLast();
 				break;
 			default:
-				return super.onKeyTyped(keyChar, keyCode);
+				return super.keyTyped(keyChar, keyCode);
 		}
 		return true;
 	}
@@ -340,7 +341,7 @@ public class UISelect<T> extends UIComponent
 
 			setComponentFactory(Option::new);
 
-			scrollbar = new UISlimScrollbar(this, UIScrollBar.Type.VERTICAL);
+			scrollbar = new UISlimScrollbar(this, Type.VERTICAL);
 			scrollbar.setFade(false);
 			scrollbar.setAutoHide(true);
 		}
@@ -392,9 +393,9 @@ public class UISelect<T> extends UIComponent
 		}
 
 		@Override
-		public boolean onKeyTyped(char keyChar, int keyCode)
+		public void keyTyped(char keyChar, int keyCode)
 		{
-			return UISelect.this.onKeyTyped(keyChar, keyCode);
+			return UISelect.this.keyTyped(keyChar, keyCode);
 		}
 
 		@Override

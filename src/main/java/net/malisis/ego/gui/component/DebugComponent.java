@@ -181,13 +181,13 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public void keyTyped(char keyChar, int keyCode)
 	{
-		return super.onKeyTyped(keyChar, keyCode);
+		return super.keyTyped(keyChar, keyCode);
 	}
 
 	@Override
-	public boolean onScrollWheel(int delta)
+	public boolean scrollWheel(int delta)
 	{
 		if (!isHovered())
 			return false;

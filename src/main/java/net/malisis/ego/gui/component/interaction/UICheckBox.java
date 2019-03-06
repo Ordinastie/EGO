@@ -25,6 +25,7 @@
 package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
@@ -36,6 +37,8 @@ import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
+
+import java.util.function.Predicate;
 
 /**
  * UICheckBox
@@ -146,26 +149,29 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	}
 
 	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
+		if (isDisabled() || button != MouseButton.LEFT)
+			return;
 		if (fireEvent(new CheckEvent(this, !checked)))
 			checked = !checked;
-		return true;
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public boolean keyTyped(char keyChar, int keyCode)
 	{
-		if (!isFocused())
-			return super.onKeyTyped(keyChar, keyCode);
+		if (keyCode != Keyboard.KEY_SPACE)
+			return false;
 
-		if (keyCode == Keyboard.KEY_SPACE)
-		{
-			if (fireEvent(new CheckEvent(this, !checked)))
-				checked = !checked;
-		}
+		if (fireEvent(new CheckEvent(this, !checked)))
+			checked = !checked;
 
-		return false;
+		return true;
+	}
+
+	public void onCheck(Predicate<CheckEvent> onCheck)
+	{
+		register(CheckEvent.class, onCheck);
 	}
 
 	@Override
@@ -177,7 +183,7 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	/**
 	 * Event fired when a {@link UICheckBox} is checked or unchecked.<br>
 	 * When catching the event, the state is not applied to the {@code UICheckbox} yet.<br>
-	 * Canceling the event will prevent the state to be set for the {@code UICheckbox} .
+	 * Canceling the event will prevent the state to be set for the {@code UICheckbox}.
 	 */
 	public static class CheckEvent extends ValueChange<UICheckBox, Boolean>
 	{

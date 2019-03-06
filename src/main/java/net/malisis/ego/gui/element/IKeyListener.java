@@ -41,5 +41,5 @@ public interface IKeyListener
 	 * @param keyCode the key code
 	 * @return true, to prevent parents and gui to handle the key typed
 	 */
-	public boolean onKeyTyped(char keyChar, int keyCode);
+	public boolean keyTyped(char keyChar, int keyCode);
 }

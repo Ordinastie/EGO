@@ -25,6 +25,7 @@
 package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
@@ -144,25 +145,23 @@ public class UIRadioButton extends UIComponent implements IContentHolder
 	 * Sets state of this {@link UIRadioButton} to selected.<br>
 	 * If a radio button with the same name is currently selected, unselects it.<br>
 	 * Does not fire {@link SelectEvent}.
-	 *
-	 * @return the UI radio button
 	 */
-	public UIRadioButton setSelected()
+	public void setSelected()
 	{
 		UIRadioButton rb = getSelected(name);
 		if (rb != null)
 			rb.selected = false;
 		selected = true;
-		return this;
 	}
 
 	//#end Getters/Setters
-	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
+		if(isDisabled() || button != MouseButton.LEFT)
+			return;
+
 		if (fireEvent(new UIRadioButton.SelectEvent(this)))
 			setSelected();
-		return true;
 	}
 
 	public static void addRadioButton(UIRadioButton rb)

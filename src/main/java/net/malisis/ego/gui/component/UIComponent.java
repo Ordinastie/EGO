@@ -46,6 +46,8 @@ import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.EventHandler;
 import net.malisis.ego.gui.event.GuiEvent;
+import net.malisis.ego.gui.event.KeyTypedEvent;
+import net.malisis.ego.gui.event.MouseEvent.IMouseEventRegister;
 import net.malisis.ego.gui.event.MouseEvent.MouseClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseDoubleClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseDown;
@@ -55,6 +57,7 @@ import net.malisis.ego.gui.event.MouseEvent.MouseOut;
 import net.malisis.ego.gui.event.MouseEvent.MouseOver;
 import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseUp;
+import net.malisis.ego.gui.event.MouseEvent.ScrollWheel;
 import net.malisis.ego.gui.event.StateChangeEvent.DisableEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.EnableEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.FocusEvent;
@@ -66,6 +69,7 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
@@ -77,7 +81,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>
+public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister
 {
 	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
 	protected MalisisGui gui;
@@ -526,6 +530,17 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		return eventHandler.fireEvent(event);
 	}
 
+	@Override
+	public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler)
+	{
+		eventHandler.register(clazz, handler);
+	}
+
+	public void onKeyTyped(Predicate<KeyTypedEvent> handler)
+	{
+		register(KeyTypedEvent.class, handler);
+	}
+
 	//#region Inputs
 
 	/**
@@ -583,7 +598,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		if (fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this)))
 			return;
 		if (parent != null)
-			parent.click();
+			parent.click(button);
 	}
 
 	/**
@@ -598,59 +613,74 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 			return;
 		if (button != MouseButton.LEFT)
 			return;
-		if (!fireEvent(new MouseDoubleClick<>(this)))
+		if (fireEvent(new MouseDoubleClick<>(this)))
 			return;
 		if (parent != null)
 			parent.doubleClick(button);
 	}
 
 	/**
-	 * On drag.
+	 * Called from the GUI when the mouse is dragged with a button pressed.
 	 *
 	 * @param button the button
 	 */
-	public void onDrag(MouseButton button)
+	public void mouseDrag(MouseButton button)
 	{
-		if(!isEnabled())
+		if (!isEnabled())
 			return;
-		if(!fireEvent(new MouseDrag<>(this, button)))
-		if( parent != null )
-			parent.onDrag(button);
+		if (fireEvent(new MouseDrag<>(this, button)))
+			return;
+		if (parent != null)
+			parent.mouseDrag(button);
 	}
 
 	/**
-	 * On scroll wheel.
+	 * Called from the GUI when the mouse scroll wheel is used.
 	 *
 	 * @param delta the delta
-	 * @return true, if successful
 	 */
-	public boolean onScrollWheel(int delta)
+	public void scrollWheel(int delta)
 	{
 		if (!isEnabled())
-			return false;
+			return;
 
-		for (IControlComponent c : controlComponents)
-		{
-			if (c.onScrollWheel(delta))
-				return true;
-		}
+		//IControlComponents should just register their event
+		//		for (IControlComponent c : controlComponents)
+		//		{
+		//			if (c.onScrollWheel(delta))
+		//				return;
+		//		}
+		//
+		//		if(this instanceof IControlComponent)
+		//			return;
 
-		return parent != null && !(this instanceof IControlComponent) && parent.onScrollWheel(delta);
+		if (fireEvent(new ScrollWheel<>(this, delta)))
+			return;
+
+		if (parent != null)
+			parent.scrollWheel(delta);
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public boolean keyTyped(char keyChar, int keyCode)
 	{
 		if (!isEnabled())
 			return false;
 
-		for (IControlComponent c : controlComponents)
-		{
-			if (c.onKeyTyped(keyChar, keyCode))
-				return true;
-		}
+		//IControlComponents should just register their event
+		//		for (IControlComponent c : controlComponents)
+		//		{
+		//			if (c.keyTyped(keyChar, keyCode))
+		//				return;
+		//		}
+		//
+		//		if(this instanceof IControlComponent)
+		//			return;
 
-		return parent != null && !(this instanceof IControlComponent) && parent.onKeyTyped(keyChar, keyCode);
+		if (fireEvent(new KeyTypedEvent<>(this, keyChar, keyCode)))
+			return true;
+
+		return parent != null && parent.keyTyped(keyChar, keyCode);
 	}
 
 	//#end Inputs

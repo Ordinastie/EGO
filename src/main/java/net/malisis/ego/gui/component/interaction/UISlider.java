@@ -173,14 +173,14 @@ public class UISlider<T> extends UIComponent implements IContentHolder
 	}
 
 	@Override
-	public boolean onScrollWheel(int delta)
+	public boolean scrollWheel(int delta)
 	{
 		slideTo(offset + delta * scrollStep);
 		return true;
 	}
 
 	@Override
-	public boolean onDrag(MouseButton button)
+	public boolean mouseDrag(MouseButton button)
 	{
 		slideTo();
 		return true;

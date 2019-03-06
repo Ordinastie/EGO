@@ -27,6 +27,7 @@ package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.ComponentPosition;
+import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.container.UITabGroup;
@@ -36,7 +37,8 @@ import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
-import net.malisis.ego.gui.event.StateChange.ActiveStateChange;
+import net.malisis.ego.gui.event.MouseEvent.MouseClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
@@ -63,7 +65,7 @@ public class UITab extends UIComponent implements IContentHolder
 	protected IContent content;
 	/** Size calculated based on content. */
 	protected ISize contentSize = Size.ZERO;
-	/** The parent this {@link UITab} is linked to. */
+	/** The container this {@link UITab} is linked to. */
 	protected UIContainer container;
 	/** Whether this {@link UITab} is currently active. */
 	protected boolean active = false;
@@ -165,15 +167,13 @@ public class UITab extends UIComponent implements IContentHolder
 	}
 
 	/**
-	 * Set the {@link UIContainer} linked with this {@link UITab}.
+	 * Links the {@link UIContainer} to this {@link UITab}.
 	 *
 	 * @param container the parent
-	 * @return this {@link UITab}
 	 */
-	public UITab setContainer(UIContainer container)
+	public void linkContainer(UIContainer container)
 	{
 		this.container = container;
-		return this;
 	}
 
 	/**
@@ -183,7 +183,7 @@ public class UITab extends UIComponent implements IContentHolder
 	 */
 	public ComponentPosition getTabPosition()
 	{
-		return tabGroup().getTabPosition();
+		return tabGroup() != null ? tabGroup().getTabPosition() : null;
 	}
 
 	public UIContainer attachedContainer()
@@ -261,7 +261,7 @@ public class UITab extends UIComponent implements IContentHolder
 		//applies current color to attached parent
 		setColor(color);
 
-		fireEvent(new ActiveStateChange<>(this, active));
+		//fireEvent(new ActiveStateChange<>(this, active));
 		return this;
 	}
 
@@ -274,22 +274,21 @@ public class UITab extends UIComponent implements IContentHolder
 	{
 		if (parent == null)
 			return true;
-		ComponentPosition pos = ((UITabGroup) parent).getTabPosition();
+		ComponentPosition pos = getTabPosition();
 		return pos == ComponentPosition.TOP || pos == ComponentPosition.BOTTOM;
 	}
 	//#end Getters/Setters
 
 	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
-		if (!(parent instanceof UITabGroup))
-			return super.click();
+		if (parent == null || parent.isDisabled() || isDisabled())
+			return;
 
-		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
-			return super.click();
-
+		UITab old = tabGroup().activeTab();
 		tabGroup().setActiveTab(this);
-		return true;
+		fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this));
+		fireEvent(new TabChangeEvent(this, old));
 	}
 
 	@Override

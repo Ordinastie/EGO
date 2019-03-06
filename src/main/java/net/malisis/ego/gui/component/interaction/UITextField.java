@@ -37,7 +37,6 @@ import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
@@ -283,17 +282,6 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	}
 
 	/**
-	 * Sets the size of this {@link UITextField}.<br>
-	 *
-	 * @param size the new size
-	 */
-	@Override
-	public void setSize(ISize size)
-	{
-		super.setSize(size);
-	}
-
-	/**
 	 * Sets the focused.
 	 *
 	 * @param focused the new focused
@@ -334,12 +322,10 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	 * Sets whether this {@link UITextField} should automatically select its {@link #text} when focused.
 	 *
 	 * @param auto the auto
-	 * @return this {@link UITextField}
 	 */
-	public UITextField setAutoSelectOnFocus(boolean auto)
+	public void setAutoSelectOnFocus(boolean auto)
 	{
 		autoSelectOnFocus = auto;
-		return this;
 	}
 
 	/**
@@ -549,10 +535,11 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	//#region Input
 
 	@Override
-	public boolean mouseDown(MouseButton button)
+	public void mouseDown(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return super.mouseUp(button);
+			return;
+
 		if (GuiScreen.isShiftKeyDown())
 		{
 			if (!selectingText)
@@ -565,29 +552,26 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 			selectingText = false;
 
 		cursor.fromMouse();
-
-		return true;
 	}
 
 	@Override
-	public boolean mouseUp(MouseButton button)
+	public void mouseUp(MouseButton button)
 	{
 		if (!autoSelectOnFocus || !selectAllOnRelease || button != MouseButton.LEFT)
-			return super.mouseUp(button);
+			return;
 
 		selectingText = true;
 		selectionCursor.jumpTo(0);
 		cursor.jumpTo(text.length());
 
 		selectAllOnRelease = false;
-		return true;
 	}
 
 	@Override
-	public boolean onDrag(MouseButton button)
+	public void mouseDrag(MouseButton button)
 	{
-		if (!isFocused() || button != MouseButton.LEFT)
-			return super.onDrag(button);
+		if (button != MouseButton.LEFT)
+			return;
 
 		if (!selectingText)
 		{
@@ -596,64 +580,54 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		}
 
 		cursor.fromMouse();
-
 		selectAllOnRelease = false;
-		return true;
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public void keyTyped(char keyChar, int keyCode)
 	{
-		if (!isFocused())
-			return false;
-
 		if (keyCode == Keyboard.KEY_ESCAPE)
 		{
 			setFocused(false);
-			return true; //we don't want to close the GUI
+			return; //we don't want to close the GUI
 		}
 
 		if (handleCtrlKeyDown(keyCode))
-			return true;
+			return;
 
 		switch (keyCode)
 		{
 			case Keyboard.KEY_LEFT:
 				startSelecting();
 				cursor.shiftLeft();
-				return true;
+				return;
 			case Keyboard.KEY_RIGHT:
 				startSelecting();
 				cursor.shiftRight();
-				return true;
+				return;
 			case Keyboard.KEY_HOME:
 				startSelecting();
 				cursor.jumpToLineStart();
-				return true;
+				return;
 			case Keyboard.KEY_END:
 				startSelecting();
 				cursor.jumpToLineEnd();
-				return true;
+				return;
 			case Keyboard.KEY_BACK:
 				if (isEditable())
 					deleteFromCursor(-1);
-				return true;
+				return;
 			case Keyboard.KEY_DELETE:
 				if (isEditable())
 					deleteFromCursor(1);
-				return true;
+				return;
 			case Keyboard.KEY_TAB:
 				if (isEditable())
 					addText("\t");
-				return true;
+				return;
 			default:
 				if ((ChatAllowedCharacters.isAllowedCharacter(keyChar) || keyChar == '\u00a7') && isEditable())
-				{
 					addText(Character.toString(keyChar));
-					return true;
-				}
-				else
-					return super.onKeyTyped(keyChar, keyCode);
 		}
 	}
 

@@ -88,9 +88,9 @@ public class UITextArea extends UITextField implements IScrollable
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public void keyTyped(char keyChar, int keyCode)
 	{
-		if (super.onKeyTyped(keyChar, keyCode))
+		if (super.keyTyped(keyChar, keyCode))
 			return true;
 
 		switch (keyCode)
@@ -114,7 +114,7 @@ public class UITextArea extends UITextField implements IScrollable
 					break;
 				}
 				else
-					return super.onKeyTyped(keyChar, keyCode);
+					return super.keyTyped(keyChar, keyCode);
 
 		}
 		return true;

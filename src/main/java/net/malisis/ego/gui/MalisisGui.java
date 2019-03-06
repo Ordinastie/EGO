@@ -400,7 +400,7 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 
 			if (component != null && component.isEnabled())
 			{
-				component.onScrollWheel(delta);
+				component.scrollWheel(delta);
 			}
 		}
 		catch (Exception e)
@@ -417,36 +417,25 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	{
 		try
 		{
-			long time = System.currentTimeMillis();
-			if (component != null && component.isEnabled())
-			{
-				boolean regularClick = true;
-				//double click
-				if (button == lastClickButton && time - lastClickTime < 250 && component == focusedComponent)
-				{
-					regularClick = !component.doubleClick(MouseButton.getButton(button));
-					lastClickTime = 0;
-				}
-
-				//do not trigger mouseDown when double clicked (fixed shift-double click issue in inventory)
-				if (regularClick)
-				{
-					component.mouseDown(MouseButton.getButton(button));
-					if (draggedComponent == null)
-						draggedComponent = component;
-				}
-
-				component.setFocused(true);
-			}
-			else
+			if (component == null)
 			{
 				setFocusedComponent(null, true);
-				//				if (inventoryContainer != null && !inventoryContainer.getPickedItemStack().isEmpty())
-				//				{
-				//					ActionType action = button == 1 ? ActionType.DROP_ONE : ActionType.DROP_STACK;
-				//					MalisisGui.sendAction(action, null, button);
-				//				}
+				return;
 			}
+
+			long time = System.currentTimeMillis();
+			//double click
+			if (button == lastClickButton && time - lastClickTime < 250 && component == focusedComponent)
+			{
+				component.doubleClick(MouseButton.getButton(button));
+				lastClickTime = 0;
+				return;
+			}
+
+			component.mouseDown(MouseButton.getButton(button));
+			component.setFocused(true);
+			if (draggedComponent == null)
+				draggedComponent = component;
 
 			lastClickTime = time;
 			lastClickButton = button;
@@ -466,7 +455,7 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		try
 		{
 			if (draggedComponent != null)
-				draggedComponent.onDrag(MouseButton.getButton(button));
+				draggedComponent.mouseDrag(MouseButton.getButton(button));
 		}
 		catch (Exception e)
 		{
@@ -483,34 +472,14 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	{
 		try
 		{
-			//			if (inventoryContainer != null)
-			//			{
-			//				if (inventoryContainer.shouldResetDrag(button))
-			//				{
-			//					MalisisGui.sendAction(ActionType.DRAG_RESET, null, 0);
-			//					UISlot.buttonRelased = false;
-			//					return;
-			//				}
-			//				if (inventoryContainer.shouldEndDrag(button))
-			//				{
-			//					MalisisGui.sendAction(ActionType.DRAG_END, null, 0);
-			//					return;
-			//				}
-			//			}
+			if (component == null)
+				return;
 
-			if (component != null && component.isEnabled())
-			{
-				MouseButton mb = MouseButton.getButton(button);
-				if (draggedComponent != null)
-					draggedComponent.mouseUp(mb);
-				if (component == focusedComponent)
-				{
-					if (mb == MouseButton.LEFT)
-						component.click();
-					else if (mb == MouseButton.RIGHT)
-						component.onRightClick();
-				}
-			}
+			MouseButton mb = MouseButton.getButton(button);
+			if (draggedComponent != null)
+				draggedComponent.mouseUp(mb);
+			if (component == focusedComponent)
+				component.click(mb);
 		}
 		catch (Exception e)
 		{
@@ -527,19 +496,13 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	{
 		try
 		{
+			if (focusedComponent != null && focusedComponent.keyTyped(keyChar, keyCode))
+				return;
+
 			boolean ret = false;
 			for (IKeyListener listener : keyListeners)
-			{
-				ret |= listener.onKeyTyped(keyChar, keyCode);
-			}
-
+				ret |= listener.keyTyped(keyChar, keyCode);
 			if (ret)
-				return;
-
-			if (focusedComponent != null && !keyListeners.contains(focusedComponent) && focusedComponent.onKeyTyped(keyChar, keyCode))
-				return;
-
-			if (hoveredComponent != null && !keyListeners.contains(hoveredComponent) && hoveredComponent.onKeyTyped(keyChar, keyCode))
 				return;
 
 			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)

@@ -10,6 +10,8 @@ import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 
+import java.util.function.Predicate;
+
 public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 {
 	protected final MouseButton button;
@@ -43,10 +45,92 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 	public static class MouseDoubleClick<T extends UIComponent> extends MouseEvent<T> { public MouseDoubleClick(T source) 	{ super(source, LEFT); }}
 	public static class MouseOver		<T extends UIComponent> extends MouseEvent<T> { public MouseOver(T source) 			{ super(source, UNKNOWN); }}
 	public static class MouseOut		<T extends UIComponent> extends MouseEvent<T> { public MouseOut(T source) 			{ super(source, UNKNOWN); }}
-	public static class ScrollUp		<T extends UIComponent> extends MouseEvent<T> { public ScrollUp(T source) 			{ super(source, UNKNOWN); }}
-	public static class ScrollDown		<T extends UIComponent> extends MouseEvent<T> { public ScrollDown(T source) 		{ super(source, UNKNOWN); }}
 	public static class MouseDown		<T extends UIComponent> extends MouseEvent<T> { public MouseDown(T source, MouseButton button) 	{ super(source, button); }}
 	public static class MouseUp			<T extends UIComponent> extends MouseEvent<T> { public MouseUp(T source, MouseButton button) 	{ super(source, button); }}
 	public static class MouseDrag		<T extends UIComponent> extends MouseEvent<T> { public MouseDrag(T source, MouseButton button)  { super(source, button); }}
 	//@formatter:on
+
+	public static class ScrollWheel<T extends UIComponent> extends MouseEvent<T>
+	{
+		protected final int delta;
+
+		public ScrollWheel(T source, int delta)
+		{
+			super(source, UNKNOWN);
+			this.delta = delta;
+		}
+
+		public int delta()
+		{
+			return delta;
+		}
+
+		public boolean isUp()
+		{
+			return delta < 0;
+		}
+
+		public boolean isDown()
+		{
+			return delta > 0;
+		}
+	}
+
+	/**
+	 * Interface helper for classes that need to register mouse events
+	 */
+	public interface IMouseEventRegister
+	{
+		public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler);
+
+		public default void onMouseMove(Predicate<MouseMove> onMouseMove)
+		{
+			register(MouseMove.class, onMouseMove);
+		}
+
+		public default void onClick(Predicate<MouseClick> onClick)
+		{
+			register(MouseClick.class, onClick);
+		}
+
+		public default void onRightClick(Predicate<MouseRightClick> onRightClick)
+		{
+			register(MouseRightClick.class, onRightClick);
+		}
+
+		public default void onDoubleClick(Predicate<MouseDoubleClick> onDoubleClick)
+		{
+			register(MouseDoubleClick.class, onDoubleClick);
+		}
+
+		public default void onMouseOver(Predicate<MouseOver> onMouseOver)
+		{
+			register(MouseOver.class, onMouseOver);
+		}
+
+		public default void onMouseOut(Predicate<MouseOut> onMouseOut)
+		{
+			register(MouseOut.class, onMouseOut);
+		}
+
+		public default void onMouseDown(Predicate<MouseDown> onMouseDown)
+		{
+			register(MouseDown.class, onMouseDown);
+		}
+
+		public default void onMouseUp(Predicate<MouseUp> onMouseUp)
+		{
+			register(MouseUp.class, onMouseUp);
+		}
+
+		public default void onMouseDrag(Predicate<MouseDrag> onMouseDrag)
+		{
+			register(MouseDrag.class, onMouseDrag);
+		}
+
+		public default void onScrollWheel(Predicate<ScrollWheel> onScrollWheel)
+		{
+			register(ScrollWheel.class, onScrollWheel);
+		}
+	}
 }

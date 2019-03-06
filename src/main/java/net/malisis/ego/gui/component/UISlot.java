@@ -162,7 +162,7 @@ public class UISlot extends UIComponent
 	//	}
 	//
 	//	@Override
-	//	public boolean onDrag(MouseButton button)
+	//	public boolean mouseDrag(MouseButton button)
 	//	{
 	//		MalisisGui.current();
 	//		MalisisInventoryContainer container = MalisisGui.getInventoryContainer();
@@ -194,10 +194,10 @@ public class UISlot extends UIComponent
 	//	}
 	//
 	//	@Override
-	//	public boolean onKeyTyped(char keyChar, int keyCode)
+	//	public boolean keyTyped(char keyChar, int keyCode)
 	//	{
 	//		if (!isHovered() || MalisisGui.isGuiCloseKey(keyCode))
-	//			return super.onKeyTyped(keyChar, keyCode);
+	//			return super.keyTyped(keyChar, keyCode);
 	//
 	//		ActionType action = null;
 	//		int code = keyCode;

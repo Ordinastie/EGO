@@ -33,14 +33,16 @@ import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
+import net.malisis.ego.gui.event.MouseEvent.MouseClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseDown;
+import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseUp;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
-
-import java.util.function.Consumer;
 
 /**
  * UIButton
@@ -66,9 +68,6 @@ public class UIButton extends UIComponent implements IContentHolder
 	protected IContent content;
 	/** Whether this {@link UIButton} is currently being pressed. */
 	protected boolean isPressed = false;
-
-	/** Action to execute when the button is clicked. */
-	protected Consumer<UIButton> action;
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -151,19 +150,10 @@ public class UIButton extends UIComponent implements IContentHolder
 
 	/**
 	 * Sets whether the size of this {@link UIButton} should be calculated automatically.
-	 *
-	 * @return the UI button
 	 */
-	public UIButton setAutoSize()
+	public void setAutoSize()
 	{
 		setSize(Size.sizeOfContent(this, 6, 6));
-		return this;
-	}
-
-	public UIButton onClick(Consumer<UIButton> action)
-	{
-		this.action = action;
-		return this;
 	}
 
 	public FontOptions defaultFontOptions()
@@ -172,46 +162,48 @@ public class UIButton extends UIComponent implements IContentHolder
 	}
 
 	//#end Getters/Setters
-	protected void executeAction()
+	@Override
+	public void click(MouseButton button)
 	{
-		MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
-		if (action != null)
-			action.accept(this);
+		if (!isEnabled())
+			return;
+
+		fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this));
+		if (button == MouseButton.LEFT)
+			MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
 	}
 
 	@Override
-	public boolean click()
+	public void mouseDown(MouseButton button)
 	{
-		executeAction();
-		return true;
-	}
-
-	@Override
-	public boolean mouseDown(MouseButton button)
-	{
+		if (!isEnabled())
+			return;
+		if (fireEvent(new MouseDown<>(this, button)))
+			return;
 		if (button == MouseButton.LEFT)
 			isPressed = true;
-		return super.mouseDown(button);
 	}
 
 	@Override
-	public boolean mouseUp(MouseButton button)
+	public void mouseUp(MouseButton button)
 	{
+		if (!isEnabled())
+			return;
+		if (fireEvent(new MouseUp<>(this, button)))
+			return;
 		if (button == MouseButton.LEFT)
 			isPressed = false;
-		return super.mouseUp(button);
 	}
 
 	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
+	public boolean keyTyped(char keyChar, int keyCode)
 	{
-		if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER)
-		{
-			executeAction();
-			return true;
-		}
+		if (keyCode != Keyboard.KEY_RETURN && keyCode != Keyboard.KEY_NUMPADENTER && keyCode != Keyboard.KEY_SPACE)
+			return false;
 
-		return false;
+		fireEvent(new MouseClick<>(this));
+		MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
+		return true;
 	}
 
 	@Override

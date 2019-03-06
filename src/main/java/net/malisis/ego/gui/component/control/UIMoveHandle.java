@@ -72,14 +72,14 @@ public class UIMoveHandle extends UIComponent implements IControlComponent
 	}
 
 	@Override
-	public boolean onDrag(MouseButton button)
+	public boolean mouseDrag(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return super.onDrag(button);
+			return super.mouseDrag(button);
 
 		UIComponent parentCont = getParent().getParent();
 		if (parentCont == null)
-			return super.onDrag(button);
+			return super.mouseDrag(button);
 
 		int px = parent.position().x();
 		if (type == Type.BOTH || type == Type.HORIZONTAL)

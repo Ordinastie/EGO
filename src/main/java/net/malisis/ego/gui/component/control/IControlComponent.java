@@ -61,7 +61,7 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 
 	/**
 	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>
-	 * See {@link UIComponent#onKeyTyped(char, int)}.
+	 * See {@link UIComponent#keyTyped(char, int)}.
 	 *
 	 * @param keyChar the key char
 	 * @param keyCode the key code
@@ -71,7 +71,7 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 
 	/**
 	 * Called when the scrollwheel is used when this {@link IControlComponent} or its parent is focused or hovered.<br>
-	 * See {@link UIComponent#onScrollWheel(int)}
+	 * See {@link UIComponent#scrollWheel(int)}
 	 *
 	 * @param delta the delta
 	 * @return true, if successful
