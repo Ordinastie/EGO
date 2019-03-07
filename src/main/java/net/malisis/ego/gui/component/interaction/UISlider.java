@@ -24,7 +24,7 @@
 
 package net.malisis.ego.gui.component.interaction;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static net.malisis.ego.gui.element.position.Positions.middleAligned;
 
 import com.google.common.base.Converter;
@@ -34,6 +34,7 @@ import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
@@ -43,7 +44,7 @@ import net.minecraft.util.text.TextFormatting;
 /**
  * @author Ordinastie
  */
-public class UISlider<T> extends UIComponent implements IContentHolder
+public class UISlider<T> extends UIComponent implements IContentHolder, IValueChangeEventRegister<UISlider<T>, T>
 {
 	private static int SLIDER_WIDTH = 8;
 
@@ -104,11 +105,14 @@ public class UISlider<T> extends UIComponent implements IContentHolder
 	{
 		if (this.value == value)
 			return this;
-		if (!fireEvent(new ValueChange<>(this, this.value, value)))
+		T old = this.value;
+		if (!fireEvent(new ValueChange.Pre<>(this, old, value)))
 			return this;
 
 		this.value = value;
 		offset = MathHelper.clamp(converter.reverse().convert(value), 0, 1);
+
+		fireEvent(new ValueChange.Post<>(this, old, value));
 		return this;
 	}
 
@@ -156,34 +160,29 @@ public class UISlider<T> extends UIComponent implements IContentHolder
 	 * Sets the amount of offset to scroll with the wheel.
 	 *
 	 * @param scrollStep the scroll step
-	 * @return the UI slider
 	 */
-	public UISlider<T> setScrollStep(float scrollStep)
+	public void setScrollStep(float scrollStep)
 	{
 		this.scrollStep = scrollStep;
-		return this;
 	}
 
 	//#end Getters/Setters
 	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
 		slideTo();
-		return true;
 	}
 
 	@Override
-	public boolean scrollWheel(int delta)
+	public void scrollWheel(int delta)
 	{
 		slideTo(offset + delta * scrollStep);
-		return true;
 	}
 
 	@Override
-	public boolean mouseDrag(MouseButton button)
+	public void mouseDrag(MouseButton button)
 	{
 		slideTo();
-		return true;
 	}
 
 	/**

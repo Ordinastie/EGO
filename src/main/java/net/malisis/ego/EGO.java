@@ -64,7 +64,7 @@ public class EGO
 	public static boolean isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
 	/**
-	 * Pre-initialization event
+	 * Post-initialization event
 	 *
 	 * @param event the event
 	 */

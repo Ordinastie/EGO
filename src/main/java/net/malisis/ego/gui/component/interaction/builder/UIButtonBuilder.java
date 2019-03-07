@@ -12,13 +12,14 @@ import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.ISizeBuilder;
 import net.malisis.ego.gui.element.size.Size.ISize;
+import net.malisis.ego.gui.event.MouseEvent.MouseClick;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @SideOnly(Side.CLIENT)
 public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, UIButton>, ISizeBuilder<UIButtonBuilder, UIButton>
@@ -31,7 +32,7 @@ public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, 
 	private String text;
 	private UIContainer parent;
 	private UITooltip tooltip;
-	private Consumer<UIButton> onClickRunnable;
+	private Predicate<MouseClick> onClick;
 
 	private boolean enabled = true;
 	private boolean visible = true;
@@ -116,9 +117,9 @@ public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, 
 		return this;
 	}
 
-	public UIButtonBuilder onClick(Consumer<UIButton> onClickRunnable)
+	public UIButtonBuilder onClick(Predicate<MouseClick> onClick)
 	{
-		this.onClickRunnable = onClickRunnable;
+		this.onClick = onClick;
 		return this;
 	}
 
@@ -138,8 +139,8 @@ public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, 
 			button.setTooltip(tooltip);
 		if (parent != null)
 			parent.add(button);
-		if (onClickRunnable != null)
-			button.onClick(onClickRunnable);
+		if (onClick != null)
+			button.onClick(onClick);
 		button.setEnabled(enabled);
 		button.setVisible(visible);
 		button.setZIndex(zIndex);

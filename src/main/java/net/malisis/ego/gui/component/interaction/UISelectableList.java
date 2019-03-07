@@ -32,7 +32,7 @@ public class UISelectableList<T> extends UIListContainer<T>
 
 	private void applyEventToElements()
 	{
-		componentElements.forEach(c -> click());
+		//componentElements.forEach(c -> click());
 	}
 
 	public static class SelectEvent<U, T extends UIComponent> extends GuiEvent<T>

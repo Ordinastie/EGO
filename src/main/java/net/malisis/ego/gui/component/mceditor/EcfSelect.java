@@ -24,14 +24,14 @@
 
 package net.malisis.ego.gui.component.mceditor;
 
-import java.util.Arrays;
-
+import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.interaction.UISelect;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.Arrays;
+
 /**
  * @author Ordinastie
- *
  */
 public class EcfSelect extends UISelect<TextFormatting>
 {
@@ -51,11 +51,10 @@ public class EcfSelect extends UISelect<TextFormatting>
 	}
 
 	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
-		super.click();
+		super.click(button);
 		if (!expanded)
 			editor.getTextfield().setFocused(true);
-		return true;
 	}
 }

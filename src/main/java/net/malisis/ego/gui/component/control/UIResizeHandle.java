@@ -68,24 +68,24 @@ public class UIResizeHandle extends UIComponent implements IControlComponent
 	}
 
 	@Override
-	public boolean mouseDrag(MouseButton button)
+	public void mouseDrag(MouseButton button)
 	{
-		if (button != MouseButton.LEFT)
-			return super.mouseDrag(button);
-
-		int w = getParent().size().width();
-		int h = getParent().size().height();
-		if (type == Type.BOTH || type == Type.HORIZONTAL)
-			w += MalisisGui.MOUSE_POSITION.dragged().x();
-		if (type == Type.BOTH || type == Type.VERTICAL)
-			h += MalisisGui.MOUSE_POSITION.dragged().y();
-		if (w < 10)
-			w = 10;
-		if (h < 10)
-			h = 10;
-
-		getParent().setSize(Size.of(w, h));
-
-		return true;
+//		if (button != MouseButton.LEFT)
+//			return super.mouseDrag(button);
+//
+//		int w = getParent().size().width();
+//		int h = getParent().size().height();
+//		if (type == Type.BOTH || type == Type.HORIZONTAL)
+//			w += MalisisGui.MOUSE_POSITION.dragged().x();
+//		if (type == Type.BOTH || type == Type.VERTICAL)
+//			h += MalisisGui.MOUSE_POSITION.dragged().y();
+//		if (w < 10)
+//			w = 10;
+//		if (h < 10)
+//			h = 10;
+//
+//		getParent().setSize(Size.of(w, h));
+//
+//		return true;
 	}
 }

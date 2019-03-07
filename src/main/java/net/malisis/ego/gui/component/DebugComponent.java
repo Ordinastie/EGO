@@ -181,16 +181,10 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	}
 
 	@Override
-	public void keyTyped(char keyChar, int keyCode)
-	{
-		return super.keyTyped(keyChar, keyCode);
-	}
-
-	@Override
-	public boolean scrollWheel(int delta)
+	public void scrollWheel(int delta)
 	{
 		if (!isHovered())
-			return false;
+			return;
 
 		FontOptions fontOptions = text.getFontOptions();
 		if (GuiScreen.isCtrlKeyDown())
@@ -207,8 +201,6 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 			alpha += 25 * delta;
 			alpha = MathHelper.clamp(alpha, 0, 255);
 		}
-
-		return true;
 	}
 
 	private int hierarchyColor()

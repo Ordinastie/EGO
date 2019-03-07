@@ -161,6 +161,19 @@ public class UIButton extends UIComponent implements IContentHolder
 		return fontOptions;
 	}
 
+	/**
+	 * Convenience methods to register onClick callback.
+	 *
+	 * @param onClick callback when this {@link UIButton} is clicked.
+	 */
+	public void onClick(Runnable onClick)
+	{
+		register(MouseClick.class, e -> {
+			onClick.run();
+			return true;
+		});
+	}
+
 	//#end Getters/Setters
 	@Override
 	public void click(MouseButton button)

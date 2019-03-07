@@ -47,6 +47,7 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
@@ -64,7 +65,7 @@ import java.util.function.Predicate;
  *
  * @author Ordinastie
  */
-public class UISelect<T> extends UIComponent
+public class UISelect<T> extends UIComponent implements IValueChangeEventRegister<UISelect<T>, T>
 {
 
 	/** Make the options width match the longest option available. */
@@ -161,7 +162,7 @@ public class UISelect<T> extends UIComponent
 	@SuppressWarnings("unchecked")
 	public <U extends UIComponent & IOptionComponent> void setComponentFactory(Function<T, U> factory)
 	{
-		//optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
+		optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
 	}
 
 	//#end Getters/Setters
@@ -214,9 +215,10 @@ public class UISelect<T> extends UIComponent
 		if (index == -1 || index == selectedIndex)
 			return selected();
 
-		if (fireEvent(new SelectEvent<>(this, option)))
+		T old = selected();
+		if (fireEvent(new ValueChange.Pre<>(this, old, option)))
 			setSelected(option);
-
+		fireEvent(new ValueChange.Post<>(this, old, option));
 		return selected();
 	}
 
@@ -272,9 +274,10 @@ public class UISelect<T> extends UIComponent
 		return select(selectedIndex + 1);
 	}
 
+	@Override
 	public void click(MouseButton button)
 	{
-		if(isDisabled())
+		if (isDisabled())
 			return;
 
 		if (!expanded)
@@ -284,20 +287,22 @@ public class UISelect<T> extends UIComponent
 	}
 
 	@Override
-	public boolean scrollWheel(int delta)
+	public void scrollWheel(int delta)
 	{
 		if (!isFocused())
-			return true;
+		{
+			super.scrollWheel(delta);
+			return;
+		}
 
 		if (delta < 0)
 			selectNext();
 		else
 			selectPrevious();
-		return true;
 	}
 
 	@Override
-	public void keyTyped(char keyChar, int keyCode)
+	public boolean keyTyped(char keyChar, int keyCode)
 	{
 		if (!isFocused() && !optionsContainer.isFocused())
 			return super.keyTyped(keyChar, keyCode);
@@ -370,30 +375,21 @@ public class UISelect<T> extends UIComponent
 		}
 
 		//#end IScrollable
-		@Override
-		public void setFocused(boolean focused)
-		{
-			//			if (!focused && (MalisisGui.getFocusedComponent() == null || MalisisGui.getFocusedComponent().getParent() != this))
-			//				hide();
-			super.setFocused(focused);
-		}
 
 		@SuppressWarnings("unchecked")
-		@Override
-		public boolean click()
+		public void click()
 		{
 			UIComponent comp = getComponentAt(MalisisGui.MOUSE_POSITION.x(), MalisisGui.MOUSE_POSITION.y());
 			if (comp == null)
-				return true;
+				return;
 
 			select((T) comp.getData());
 			hide();
 			UISelect.this.setFocused(true);
-			return true;
 		}
 
 		@Override
-		public void keyTyped(char keyChar, int keyCode)
+		public boolean keyTyped(char keyChar, int keyCode)
 		{
 			return UISelect.this.keyTyped(keyChar, keyCode);
 		}
@@ -515,19 +511,6 @@ public class UISelect<T> extends UIComponent
 		public default void renderSelected(GuiRenderer renderer)
 		{
 			((UIComponent) this).render(renderer);
-		}
-	}
-
-	/**
-	 * Event fired when a {@link UISelect} changes its selected option.<br>
-	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
-	 * Canceling the event will prevent the {@code Option} to be set for the {@code UISelect} .
-	 */
-	public static class SelectEvent<T> extends ValueChange<UISelect<T>, T>
-	{
-		public SelectEvent(UISelect<T> component, T newValue)
-		{
-			super(component, component.selected(), newValue);
 		}
 	}
 }

@@ -93,12 +93,14 @@ public class UIPasswordField extends UITextField
 		if (filterFunction != null)
 			newValue = filterFunction.apply(newValue);
 
-		if (!fireEvent(new ValueChange<>(this, oldValue, newValue)))
+		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
 			return;
 
 		password = new StringBuilder(newValue);
 		updateText();
 		cursor.jumpBy(text.length());
+
+		fireEvent(new ValueChange.Post<>(this, oldValue, newValue));
 	}
 
 	/**

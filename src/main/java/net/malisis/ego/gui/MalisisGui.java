@@ -500,8 +500,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 				return;
 
 			boolean ret = false;
-			for (IKeyListener listener : keyListeners)
-				ret |= listener.keyTyped(keyChar, keyCode);
+			for (IKeyListener listener : keyListeners) //if a component registered itself as IKeyListener, don't call keyTyped() twice
+				ret |= (!(listener instanceof UIComponent) || ((UIComponent) listener).isFocused()) && listener.keyTyped(keyChar, keyCode);
 			if (ret)
 				return;
 
@@ -557,9 +557,6 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		try
 		{
 			update();
-
-			//			if (background != null)
-			//				background.render(renderer);
 
 			screen.render(renderer);
 

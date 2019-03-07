@@ -67,14 +67,13 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	 * @param keyCode the key code
 	 * @return true, if successful
 	 */
-	public boolean onKeyTyped(char keyChar, int keyCode);
+	public boolean keyTyped(char keyChar, int keyCode);
 
 	/**
 	 * Called when the scrollwheel is used when this {@link IControlComponent} or its parent is focused or hovered.<br>
 	 * See {@link UIComponent#scrollWheel(int)}
 	 *
 	 * @param delta the delta
-	 * @return true, if successful
 	 */
-	public boolean onScrollWheel(int delta);
+	public void scrollWheel(int delta);
 }

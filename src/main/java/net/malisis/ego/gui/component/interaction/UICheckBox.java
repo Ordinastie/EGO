@@ -32,20 +32,19 @@ import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
-import java.util.function.Predicate;
-
 /**
  * UICheckBox
  *
  * @author Ordinastie
  */
-public class UICheckBox extends UIComponent implements IContentHolder
+public class UICheckBox extends UIComponent implements IContentHolder, IValueChangeEventRegister<UICheckBox, Boolean>
 {
 	protected final FontOptions fontOptions = FontOptions.builder()
 														 .color(0x444444)
@@ -137,7 +136,7 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	}
 
 	/**
-	 * Sets the state for this {@link UICheckBox}. Does not fire {@link CheckEvent}.
+	 * Sets the state for this {@link UICheckBox}. Does not fire {@link ValueChange} event.
 	 *
 	 * @param checked true if checked
 	 * @return this {@link UIComponent}
@@ -153,8 +152,9 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	{
 		if (isDisabled() || button != MouseButton.LEFT)
 			return;
-		if (fireEvent(new CheckEvent(this, !checked)))
+		if (fireEvent(new ValueChange.Pre<>(this, !checked, checked)))
 			checked = !checked;
+		fireEvent(new ValueChange.Post<>(this, checked, !checked));
 	}
 
 	@Override
@@ -163,15 +163,10 @@ public class UICheckBox extends UIComponent implements IContentHolder
 		if (keyCode != Keyboard.KEY_SPACE)
 			return false;
 
-		if (fireEvent(new CheckEvent(this, !checked)))
+		if (fireEvent(new ValueChange.Pre<>(this, !checked, checked)))
 			checked = !checked;
-
+		fireEvent(new ValueChange.Post<>(this, checked, !checked));
 		return true;
-	}
-
-	public void onCheck(Predicate<CheckEvent> onCheck)
-	{
-		register(CheckEvent.class, onCheck);
 	}
 
 	@Override
@@ -179,26 +174,4 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	{
 		return (checked ? "checked " : "") + "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
-
-	/**
-	 * Event fired when a {@link UICheckBox} is checked or unchecked.<br>
-	 * When catching the event, the state is not applied to the {@code UICheckbox} yet.<br>
-	 * Canceling the event will prevent the state to be set for the {@code UICheckbox}.
-	 */
-	public static class CheckEvent extends ValueChange<UICheckBox, Boolean>
-	{
-		public CheckEvent(UICheckBox component, boolean checked)
-		{
-			super(component, component.isChecked(), checked);
-		}
-
-		/**
-		 * @return the new state for the checkbox
-		 */
-		public boolean isChecked()
-		{
-			return newValue;
-		}
-	}
-
 }

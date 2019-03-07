@@ -1,10 +1,8 @@
 package net.malisis.ego.gui.component.scrolling;
 
-import com.google.common.eventbus.Subscribe;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.event.StateChange.HoveredStateChange;
 import net.malisis.ego.gui.render.shape.GuiShape;
 
 /**
@@ -27,6 +25,17 @@ public final class UISlimScrollbar extends UIScrollBar
 
 		setBackground(GuiShape.builder(this).color(this::getBackgroundColor).build());
 		setForeground(GuiShape.builder(this).position(scrollPosition).size(scrollSize).color(this::scrollColor).build());
+
+		parent.onMouseOver(e -> {
+			if (fade)
+				setVisible(true);
+			return false;
+		});
+		parent.onMouseOut(e -> {
+			if (fade)
+				setVisible(false);
+			return false;
+		});
 
 	}
 
@@ -71,22 +80,5 @@ public final class UISlimScrollbar extends UIScrollBar
 	public int getBackgroundColor()
 	{
 		return backgroundColor;
-	}
-
-	@Subscribe
-	public void onMouseOver(HoveredStateChange<?> event)
-	{
-		if (!fade)
-			return;
-
-		if (isFocused() && !event.getState())
-			return;
-
-		//int from = event.getState() ? 0 : 255;
-		//int to = event.getState() ? 255 : 0;
-
-		//Animation<ITransformable.Alpha> anim = new Animation<>(this, new AlphaTransform(from, to).forTicks(5));
-
-		//MalisisGui.currentGui().animate(anim);
 	}
 }

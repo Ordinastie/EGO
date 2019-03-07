@@ -27,6 +27,7 @@ package net.malisis.ego.gui.component.interaction;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.minecraft.client.gui.GuiScreen;
@@ -88,7 +89,7 @@ public class UITextArea extends UITextField implements IScrollable
 	}
 
 	@Override
-	public void keyTyped(char keyChar, int keyCode)
+	public boolean keyTyped(char keyChar, int keyCode)
 	{
 		if (super.keyTyped(keyChar, keyCode))
 			return true;

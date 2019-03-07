@@ -27,6 +27,8 @@ package net.malisis.ego.gui.event;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 
+import java.util.function.Predicate;
+
 /**
  * Base for all events happening while a {@link MalisisGui} is opened.
  */
@@ -42,5 +44,10 @@ public abstract class GuiEvent<T extends UIComponent>
 	public T component()
 	{
 		return source;
+	}
+
+	public interface IEventRegister
+	{
+		public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler);
 	}
 }

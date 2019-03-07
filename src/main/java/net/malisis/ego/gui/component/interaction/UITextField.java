@@ -38,6 +38,8 @@ import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
+import net.malisis.ego.gui.event.ValueChange.Pre;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
@@ -50,13 +52,15 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * UITextField.
  *
  * @author Ordinastie
  */
-public class UITextField extends UIComponent implements IContentHolder, IClipable, IOffset, IPadded
+public class UITextField extends UIComponent implements IContentHolder, IClipable, IOffset, IPadded,
+		IValueChangeEventRegister<UITextField, String>
 {
 	protected final GuiText guiText;
 	/** Current text of this {@link UITextField}. */
@@ -401,13 +405,15 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		if (filterFunction != null)
 			newValue = filterFunction.apply(newValue);
 
-		if (!fireEvent(new ValueChange<>(this, oldValue, newValue)))
+		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
 			return;
 
 		text = new StringBuilder(newValue);
 		guiText.setText(newValue);
 
 		cursor.jumpBy(str.length());
+
+		fireEvent(new ValueChange.Post<>(this, oldValue, newValue));
 	}
 
 	/**
@@ -424,13 +430,15 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		String oldValue = text.toString();
 		String newValue = new StringBuilder(oldValue).delete(start, end).toString();
 
-		if (!fireEvent(new ValueChange<>(this, oldValue, newValue)))
+		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
 			return;
 
 		text = new StringBuilder(newValue);
 		guiText.setText(newValue);
 		selectingText = false;
 		cursor.jumpTo(start);
+
+		fireEvent(new ValueChange.Post<>(this, oldValue, newValue));
 	}
 
 	/**
@@ -584,51 +592,52 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	}
 
 	@Override
-	public void keyTyped(char keyChar, int keyCode)
+	public boolean keyTyped(char keyChar, int keyCode)
 	{
 		if (keyCode == Keyboard.KEY_ESCAPE)
 		{
 			setFocused(false);
-			return; //we don't want to close the GUI
+			return true; //we don't want to close the GUI
 		}
 
 		if (handleCtrlKeyDown(keyCode))
-			return;
+			return true;
 
 		switch (keyCode)
 		{
 			case Keyboard.KEY_LEFT:
 				startSelecting();
 				cursor.shiftLeft();
-				return;
+				return true;
 			case Keyboard.KEY_RIGHT:
 				startSelecting();
 				cursor.shiftRight();
-				return;
+				return true;
 			case Keyboard.KEY_HOME:
 				startSelecting();
 				cursor.jumpToLineStart();
-				return;
+				return true;
 			case Keyboard.KEY_END:
 				startSelecting();
 				cursor.jumpToLineEnd();
-				return;
+				return true;
 			case Keyboard.KEY_BACK:
 				if (isEditable())
 					deleteFromCursor(-1);
-				return;
+				return true;
 			case Keyboard.KEY_DELETE:
 				if (isEditable())
 					deleteFromCursor(1);
-				return;
+				return true;
 			case Keyboard.KEY_TAB:
 				if (isEditable())
 					addText("\t");
-				return;
+				return true;
 			default:
 				if ((ChatAllowedCharacters.isAllowedCharacter(keyChar) || keyChar == '\u00a7') && isEditable())
 					addText(Character.toString(keyChar));
 		}
+		return true;
 	}
 
 	/**

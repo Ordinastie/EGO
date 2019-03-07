@@ -2,7 +2,9 @@ package net.malisis.ego.gui.event;
 
 import net.malisis.ego.gui.component.UIComponent;
 
-public class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
+import java.util.function.Predicate;
+
+public abstract class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
 {
 	/** The old value. */
 	protected S oldValue;
@@ -41,5 +43,58 @@ public class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
 	public S getNewValue()
 	{
 		return newValue;
+	}
+
+	public static class Pre<T extends UIComponent, S> extends ValueChange<T, S>
+	{
+		/**
+		 * Instantiates a new {@link ValueChange}
+		 *
+		 * @param component the component
+		 * @param oldValue the old value
+		 * @param newValue the new value
+		 */
+		public Pre(T component, S oldValue, S newValue)
+		{
+			super(component, oldValue, newValue);
+		}
+	}
+
+	public static class Post<T extends UIComponent, S> extends ValueChange<T, S>
+	{
+		/**
+		 * Instantiates a new {@link ValueChange}
+		 *
+		 * @param component the component
+		 * @param oldValue the old value
+		 * @param newValue the new value
+		 */
+		public Post(T component, S oldValue, S newValue)
+		{
+			super(component, oldValue, newValue);
+		}
+	}
+
+	public interface IValueChangeEventRegister<T extends UIComponent, S> extends IEventRegister
+	{
+		@SuppressWarnings("unchecked")
+		public default void onPreChange(Predicate<ValueChange.Pre<T, S>> onChange)
+		{
+			register(ValueChange.Pre.class, (Predicate) onChange);
+		}
+
+		@SuppressWarnings("unchecked")
+		public default void onChange(Predicate<ValueChange.Post<T, S>> onChange)
+		{
+			register(ValueChange.Post.class, (Predicate) onChange);
+		}
+
+		public default void onChange(Runnable onChange)
+		{
+			register(ValueChange.Post.class, e -> {
+				onChange.run();
+				return true;
+			});
+		}
 	}
 }

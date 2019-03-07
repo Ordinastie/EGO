@@ -13,7 +13,6 @@ import static net.malisis.ego.gui.element.size.Sizes.widthRelativeTo;
 
 import com.google.common.base.Converter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.eventbus.Subscribe;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.ComponentPosition;
 import net.malisis.ego.gui.MalisisGui;
@@ -39,7 +38,6 @@ import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
@@ -87,7 +85,7 @@ public class GuiDemo extends MalisisGui
 		//RadioButton with custom fonts
 		UIButton button = new UIButton();
 		GuiText.builder().bind("zindex", button::getZIndex);
-		button.onClick(b -> panel.setZIndex(panel.getZIndex() + (GuiScreen.isCtrlKeyDown() ? -25 : 25)));
+		button.onClick(() -> panel.setZIndex(panel.getZIndex() + (GuiScreen.isCtrlKeyDown() ? -25 : 25)));
 
 		cb = new UICheckBox("CheckBox with label");
 		cb.setPosition(Position.of(centered(cb, 0), middleAligned(cb, -10)));
@@ -222,7 +220,7 @@ public class GuiDemo extends MalisisGui
 		UIButton selectSizeButton = new UIButton("<-");
 		selectSizeButton.setPosition(Position.rightOf(selectSizeButton, select, 5));
 		selectSizeButton.setSize(Size.of(12, 12));
-		selectSizeButton.onClick(b -> {
+		selectSizeButton.onClick(() -> {
 			currentSize += 20;
 			if (currentSize > 190)
 				currentSize = selectSize;
@@ -407,6 +405,7 @@ public class GuiDemo extends MalisisGui
 		sliderRed.setSize(Size.of(150, 12));
 		sliderRed.setValue(255);
 		sliderRed.setScrollStep(1 / 255F);
+		sliderRed.onChange(this::calculateColor);
 		sliderGreen = new UISlider<>(150, colorConv, "{slider.green} {value}");
 		sliderGreen.setPosition(Position.below(sliderGreen, sliderRed, 2));
 		sliderGreen.setSize(Size.of(150, 12));
@@ -418,13 +417,13 @@ public class GuiDemo extends MalisisGui
 		sliderBlue.setValue(255);
 		sliderBlue.setScrollStep(1 / 255F);
 
-		sliderColorLabel = new UILabel("Color : 0xFFFFFF");
+		sliderColorLabel = new UILabel(GuiText.builder().text("Color : {COLOR}").bind("COLOR", tabSlider::getColor).build());
 		sliderColorLabel.setPosition(Position.rightOf(sliderColorLabel, sliderRed, 2));
 
 		UIButton invertButton = new UIButton("Invert");
 		invertButton.setPosition(Position.rightOf(invertButton, sliderGreen, 2));
 		invertButton.setSize(Size.of(widthRelativeTo(sliderColorLabel, 1.0F, 0), heightRelativeTo(sliderBlue, 1.0F, 0)));
-		invertButton.onClick(b -> {
+		invertButton.onClick(() -> {
 			sliderRed.setValue(255 - sliderRed.getValue());
 			sliderGreen.setValue(255 - sliderGreen.getValue());
 			sliderBlue.setValue(255 - sliderBlue.getValue());
@@ -508,34 +507,13 @@ public class GuiDemo extends MalisisGui
 		return itemList;
 	}
 
-	@Subscribe
-	public void onSliderChanged(ValueChange<UISlider<Integer>, Integer> event)
+	public void calculateColor()
 	{
-		if (!(event.getComponent() instanceof UISlider))
-			return;
-
 		//get the different values
 		int r = sliderRed.getValue();
 		int g = sliderGreen.getValue();
 		int b = sliderBlue.getValue();
-		//use the updated value
-		if (event.getComponent() == sliderRed)
-			r = event.getNewValue();
-		if (event.getComponent() == sliderGreen)
-			g = event.getNewValue();
-		if (event.getComponent() == sliderBlue)
-			b = event.getNewValue();
-
 		int color = r << 16 | g << 8 | b;
-
-		//no black color
-		if (color == 0)
-		{
-			event.cancel();
-			return;
-		}
-
-		sliderColorLabel.setText(String.format("Color : 0x%06X", color));
 		if (tabSlider != null)
 			tabSlider.setColor(color);
 	}

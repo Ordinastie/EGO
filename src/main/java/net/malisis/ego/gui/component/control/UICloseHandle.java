@@ -24,8 +24,10 @@
 
 package net.malisis.ego.gui.component.control;
 
-import static net.malisis.ego.gui.element.position.Positions.*;
+import static net.malisis.ego.gui.element.position.Positions.rightAligned;
+import static net.malisis.ego.gui.element.position.Positions.topAligned;
 
+import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position;
@@ -35,7 +37,6 @@ import net.malisis.ego.gui.render.shape.GuiShape;
 
 /**
  * @author Ordinastie
- *
  */
 public class UICloseHandle extends UIComponent implements IControlComponent
 {
@@ -51,9 +52,8 @@ public class UICloseHandle extends UIComponent implements IControlComponent
 	}
 
 	@Override
-	public boolean click()
+	public void click(MouseButton button)
 	{
 		((ICloseable) getParent()).onClose();
-		return true;
 	}
 }

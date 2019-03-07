@@ -79,10 +79,8 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 	/**
 	 * Interface helper for classes that need to register mouse events
 	 */
-	public interface IMouseEventRegister
+	public interface IMouseEventRegister extends IEventRegister
 	{
-		public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler);
-
 		public default void onMouseMove(Predicate<MouseMove> onMouseMove)
 		{
 			register(MouseMove.class, onMouseMove);

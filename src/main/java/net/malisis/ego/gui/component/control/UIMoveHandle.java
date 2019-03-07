@@ -34,15 +34,12 @@ import net.malisis.ego.gui.render.shape.GuiShape;
 
 /**
  * @author Ordinastie
- *
  */
 public class UIMoveHandle extends UIComponent implements IControlComponent
 {
 	public enum Type
 	{
-		BOTH,
-		HORIZONTAL,
-		VERTICAL
+		BOTH, HORIZONTAL, VERTICAL
 	}
 
 	private Type type;
@@ -72,28 +69,28 @@ public class UIMoveHandle extends UIComponent implements IControlComponent
 	}
 
 	@Override
-	public boolean mouseDrag(MouseButton button)
+	public void mouseDrag(MouseButton button)
 	{
-		if (button != MouseButton.LEFT)
-			return super.mouseDrag(button);
-
-		UIComponent parentCont = getParent().getParent();
-		if (parentCont == null)
-			return super.mouseDrag(button);
-
-		int px = parent.position().x();
-		if (type == Type.BOTH || type == Type.HORIZONTAL)
-			px = parentCont.mousePosition().x();
-		int py = parent.position().y();
-		if (type == Type.BOTH || type == Type.VERTICAL)
-			py = parentCont.mousePosition().y();
-		if (px < 0)
-			px = 0;
-		if (py < 0)
-			py = 0;
-		//TODO: check x + w against screen size
-
-		getParent().setPosition(Position.of(px, py));
-		return true;
+		//		if (button != MouseButton.LEFT)
+		//			return super.mouseDrag(button);
+		//
+		//		UIComponent parentCont = getParent().getParent();
+		//		if (parentCont == null)
+		//			return super.mouseDrag(button);
+		//
+		//		int px = parent.position().x();
+		//		if (type == Type.BOTH || type == Type.HORIZONTAL)
+		//			px = parentCont.mousePosition().x();
+		//		int py = parent.position().y();
+		//		if (type == Type.BOTH || type == Type.VERTICAL)
+		//			py = parentCont.mousePosition().y();
+		//		if (px < 0)
+		//			px = 0;
+		//		if (py < 0)
+		//			py = 0;
+		//		//TODO: check x + w against screen size
+		//
+		//		getParent().setPosition(Position.of(px, py));
+		//		return true;
 	}
 }

@@ -32,6 +32,7 @@ import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * @author Ordinastie
  */
-public class UIRadioButton extends UIComponent implements IContentHolder
+public class UIRadioButton extends UIComponent implements IContentHolder, IValueChangeEventRegister<UIRadioButton, Boolean>
 {
 	//TODO:needs to cleared at some point
 	private final static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
