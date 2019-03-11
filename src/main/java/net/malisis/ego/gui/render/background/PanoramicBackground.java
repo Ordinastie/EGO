@@ -57,6 +57,8 @@ public class PanoramicBackground implements IGuiRenderer
 
 	private void renderSkybox(GuiRenderer renderer)
 	{
+		int x = screen.position().x();
+		int y = screen.position().y();
 		int width = screen.size().width();
 		int height = screen.size().height();
 		float partialTicks = renderer.getPartialTick();
@@ -82,15 +84,17 @@ public class PanoramicBackground implements IGuiRenderer
 		float w = height * ratio / 256.0F;
 		float h = width * ratio / 256.0F;
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		buffer.pos(0, height, 0).tex((0.5F - w), (0.5F + h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
-		buffer.pos(width, height, 0).tex((0.5F - w), (0.5F - h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
-		buffer.pos(width, 0.0D, 0).tex((0.5F + w), (0.5F - h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
-		buffer.pos(0.0D, 0.0D, 0).tex((0.5F + w), (0.5F + h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+		buffer.pos(x, y + height, 0).tex((0.5F - w), (0.5F + h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+		buffer.pos(x + width, y + height, 0).tex((0.5F - w), (0.5F - h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+		buffer.pos(x + width, y, 0).tex((0.5F + w), (0.5F - h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+		buffer.pos(x, y, 0).tex((0.5F + w), (0.5F + h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
 		tessellator.draw();
 	}
 
 	private void rotateAndBlurSkybox(Tessellator tessellator, BufferBuilder buffer)
 	{
+		int x = screen.position().x();
+		int y = screen.position().y();
 		int width = screen.size().width();
 		int height = screen.size().height();
 
@@ -111,10 +115,10 @@ public class PanoramicBackground implements IGuiRenderer
 		{
 			int blurIntensity = (int) ((1.0F / (i + 1)) * 255.0F);
 			float rotation = (i - 1) / 256.0F;
-			buffer.pos(width, height, 0).tex((0.0F + rotation), 1.0D).color(255, 255, 255, blurIntensity).endVertex();
-			buffer.pos(width, 0.0D, 0).tex((1.0F + rotation), 1.0D).color(255, 255, 255, blurIntensity).endVertex();
-			buffer.pos(0.0D, 0.0D, 0).tex((1.0F + rotation), 0.0D).color(255, 255, 255, blurIntensity).endVertex();
-			buffer.pos(0.0D, height, 0).tex((0.0F + rotation), 0.0D).color(255, 255, 255, blurIntensity).endVertex();
+			buffer.pos(x + width, y + height, 0).tex((0.0F + rotation), 1.0D).color(255, 255, 255, blurIntensity).endVertex();
+			buffer.pos(x + width, y, 0).tex((1.0F + rotation), 1.0D).color(255, 255, 255, blurIntensity).endVertex();
+			buffer.pos(x, y, 0).tex((1.0F + rotation), 0.0D).color(255, 255, 255, blurIntensity).endVertex();
+			buffer.pos(x, y + height, 0).tex((0.0F + rotation), 0.0D).color(255, 255, 255, blurIntensity).endVertex();
 		}
 
 		tessellator.draw();
