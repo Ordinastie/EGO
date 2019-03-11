@@ -24,24 +24,21 @@
 
 package net.malisis.ego.gui.component.container;
 
+import com.google.common.collect.Maps;
+import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.decoration.UILabel;
+import net.malisis.ego.gui.component.layout.RowLayout;
+import net.malisis.ego.gui.element.size.Size;
+import net.malisis.ego.gui.render.GuiRenderer;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-import com.google.common.collect.Maps;
-
-import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.decoration.UILabel;
-import net.malisis.ego.gui.component.layout.RowLayout;
-import net.malisis.ego.gui.element.IClipable;
-import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.render.GuiRenderer;
-
 /**
  * @author Ordinastie
- *
  */
 public class UIListContainer<S> extends UIContainer
 {
@@ -55,6 +52,7 @@ public class UIListContainer<S> extends UIContainer
 	public UIListContainer()
 	{
 		setSize(Size.sizeOfContent(this));
+		setClipContent(true);
 	}
 
 	protected void buildElementComponents()
@@ -91,7 +89,7 @@ public class UIListContainer<S> extends UIContainer
 
 	public void setComponentFactory(Function<S, UIComponent> factory)
 	{
-		this.elementComponentFactory = factory;
+		elementComponentFactory = factory;
 	}
 
 	public void setElementSpacing(int elementSpacing)
@@ -103,7 +101,7 @@ public class UIListContainer<S> extends UIContainer
 	@Override
 	public ClipArea getClipArea()
 	{
-		return IClipable.NOCLIP;
+		return super.getClipArea();// IClipable.NOCLIP;
 	}
 
 	@Override

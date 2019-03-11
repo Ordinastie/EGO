@@ -493,8 +493,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		int y = screenPosition.y();
 		int z = zIndex.getAsInt();
 		ClipArea area = null;
-		if (parent != null)
-			z += parent.getZIndex();
 		if (parent instanceof IClipable)
 			area = ((IClipable) parent).getClipArea();
 		render(renderer, x, y, z, area);
@@ -609,6 +607,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			this.parent = parent;
 			//Assume default position to be top left in parent
 			position(Position::topLeft);
+			zIndex(parent::zIndex);
 			return this;
 		}
 

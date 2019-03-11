@@ -33,6 +33,7 @@ public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, 
 	private UIContainer parent;
 	private UITooltip tooltip;
 	private Predicate<MouseClick> onClick;
+	private Runnable onCLickR;
 
 	private boolean enabled = true;
 	private boolean visible = true;
@@ -120,6 +121,14 @@ public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, 
 	public UIButtonBuilder onClick(Predicate<MouseClick> onClick)
 	{
 		this.onClick = onClick;
+		onCLickR = null;
+		return this;
+	}
+
+	public UIButtonBuilder onClick(Runnable onClickR)
+	{
+		onClick = null;
+		onCLickR = onClickR;
 		return this;
 	}
 
@@ -141,6 +150,8 @@ public final class UIButtonBuilder implements IPositionBuilder<UIButtonBuilder, 
 			parent.add(button);
 		if (onClick != null)
 			button.onClick(onClick);
+		if (onCLickR != null)
+			button.onClick(onCLickR);
 		button.setEnabled(enabled);
 		button.setVisible(visible);
 		button.setZIndex(zIndex);

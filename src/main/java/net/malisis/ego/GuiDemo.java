@@ -84,8 +84,8 @@ public class GuiDemo extends MalisisGui
 
 		//RadioButton with custom fonts
 		UIButton button = new UIButton();
-		GuiText.builder().bind("zindex", button::getZIndex);
-		button.onClick(() -> panel.setZIndex(panel.getZIndex() + (GuiScreen.isCtrlKeyDown() ? -25 : 25)));
+		GuiText.builder().bind("zindex", button::zIndex);
+		button.onClick(() -> panel.setZIndex(panel.zIndex() + (GuiScreen.isCtrlKeyDown() ? -25 : 25)));
 
 		cb = new UICheckBox("CheckBox with label");
 		cb.setPosition(Position.of(centered(cb, 0), middleAligned(cb, -10)));
@@ -507,7 +507,7 @@ public class GuiDemo extends MalisisGui
 		return itemList;
 	}
 
-	public void calculateColor()
+	public void calculateColor(int newValue)
 	{
 		//get the different values
 		int r = sliderRed.getValue();

@@ -24,6 +24,7 @@
 
 package net.malisis.ego.gui.component.container;
 
+import com.google.common.collect.Lists;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
@@ -42,8 +43,10 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link UIContainer} are the base for components holding other components.<br>
@@ -195,25 +198,12 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		if (shouldClipContent() && !getClipArea().isInside(x, y))
 			return superComp;
 
-		Set<UIComponent> list = new LinkedHashSet<>();
-		for (UIComponent c : content.components)
-		{
-			UIComponent component = c.getComponentAt(x, y);
-			if (component != null)
-				list.add(component);
-		}
-
-		if (list.size() == 0)
-			return superComp;
-
-		UIComponent component = superComp;
-		for (UIComponent c : list)
-		{
-			if (component != null && (component.getZIndex() <= c.getZIndex()))
-				component = c;
-		}
-
-		return component != null && component.isEnabled() ? component : superComp;
+		return content.components.stream()
+								 .map(c -> c.getComponentAt(x, y))
+								 .filter(Objects::nonNull)
+								 .filter(UIComponent::isEnabled)
+								 .max(Comparator.comparingInt(UIComponent::zIndex))
+								 .orElse(superComp);
 	}
 
 	/**
@@ -261,14 +251,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public void add(UIComponent... components)
 	{
-		for (UIComponent component : components)
-		{
-			if (component != null && component != this)
-			{
-				content.components.add(component);
-				component.setParent(this);
-			}
-		}
+		Arrays.stream(components).filter(Objects::nonNull).forEach(content::add);
 		onContentUpdate();
 	}
 
@@ -369,9 +352,19 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	public class ContainerContent implements IContent, IGuiRenderer, ISize
 	{
 		/** List of {@link UIComponent} inside this {@link UIContainer}. */
-		protected final Set<UIComponent> components = new LinkedHashSet<>();
+		protected final List<UIComponent> components = Lists.newArrayList();
 		protected int width;
 		protected int height;
+
+		public void add(UIComponent component)
+		{
+			if (components.contains(component))
+				return;
+
+			components.add(component);
+			components.sort(Comparator.comparingInt(UIComponent::zIndex));
+			component.setParent(getParent());
+		}
 
 		@Override
 		public void setParent(UIComponent parent)

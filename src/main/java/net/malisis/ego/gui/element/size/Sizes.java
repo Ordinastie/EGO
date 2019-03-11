@@ -86,7 +86,8 @@ public class Sizes
 			UIComponent parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return parent.innerSize().width() + offset - owner.position().x();
+			//remove left padding as it's counted both in parent.innerSize and owner.position
+			return parent.innerSize().width() + offset - owner.position().x() + Padding.of(parent).left();
 		};
 	}
 
@@ -97,7 +98,8 @@ public class Sizes
 			UIComponent parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return parent.innerSize().height() + offset - owner.position().y();
+			//remove top padding as it's counted both in parent.innerSize and owner.position
+			return parent.innerSize().height() + offset - owner.position().y() + Padding.of(parent).top();
 		};
 	}
 

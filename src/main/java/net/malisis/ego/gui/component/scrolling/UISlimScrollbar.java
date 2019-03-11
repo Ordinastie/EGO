@@ -25,18 +25,6 @@ public final class UISlimScrollbar extends UIScrollBar
 
 		setBackground(GuiShape.builder(this).color(this::getBackgroundColor).build());
 		setForeground(GuiShape.builder(this).position(scrollPosition).size(scrollSize).color(this::scrollColor).build());
-
-		parent.onMouseOver(e -> {
-			if (fade)
-				setVisible(true);
-			return false;
-		});
-		parent.onMouseOut(e -> {
-			if (fade)
-				setVisible(false);
-			return false;
-		});
-
 	}
 
 	public void setFade(boolean fade)

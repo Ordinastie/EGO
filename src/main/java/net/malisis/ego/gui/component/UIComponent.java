@@ -219,6 +219,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	public void setZIndex(int zIndex)
 	{
 		this.zIndex = zIndex;
+		//TODO: fire event to notify parent to reorder components
 	}
 
 	/**
@@ -226,9 +227,9 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 *
 	 * @return the zIndex
 	 */
-	public int getZIndex()
+	public int zIndex()
 	{
-		return zIndex == 0 ? (parent != null ? parent.getZIndex() : 0) : zIndex;
+		return zIndex == 0 ? (parent != null ? parent.zIndex() : 0) : zIndex;
 	}
 
 	/**
@@ -812,12 +813,14 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 				gr.render(renderer);
 				if (!(this instanceof IControlComponent))
 					renderer.endClipping(area);
+
 			}
 		}
 
-		for (IControlComponent c : controlComponents)
+		if (controlComponents.size() != 0)
 		{
-			c.render(renderer);
+			controlComponents.forEach(c -> c.render(renderer));
+			renderer.next();//required to not clip foreground of IControlComponents. Still not sure why...
 		}
 
 		renderer.currentComponent = oldComponent;

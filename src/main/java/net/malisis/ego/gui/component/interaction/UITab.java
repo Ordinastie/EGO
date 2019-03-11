@@ -256,7 +256,7 @@ public class UITab extends UIComponent implements IContentHolder
 		this.active = active;
 		container.setVisible(active);
 		container.setEnabled(active);
-		zIndex = container.getZIndex() + (active ? 1 : 0);
+		zIndex = container.zIndex() + (active ? 1 : 0);
 
 		//applies current color to attached parent
 		setColor(color);

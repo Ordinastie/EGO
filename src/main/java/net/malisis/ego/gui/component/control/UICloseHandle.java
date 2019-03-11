@@ -45,7 +45,7 @@ public class UICloseHandle extends UIComponent implements IControlComponent
 		Padding padding = Padding.of(parent);
 		setPosition(Position.of(rightAligned(this, -padding.right()), topAligned(this, -padding.top())));
 		setSize(Size.of(5, 5));
-		setZIndex(parent.getZIndex() + 10);
+		setZIndex(parent.zIndex() + 10);
 		parent.addControlComponent(this);
 
 		setForeground(GuiShape.builder(this).icon(GuiIcon.CLOSE).build());

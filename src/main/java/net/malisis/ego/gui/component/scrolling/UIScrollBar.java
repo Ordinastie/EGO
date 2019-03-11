@@ -70,7 +70,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 
 	protected float offset;
 
-	public boolean autoHide = false;
+	public boolean autoHide = true;
 
 	public <T extends UIComponent & IScrollable> UIScrollBar(T parent, Type type)
 	{
@@ -102,7 +102,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	 *
 	 * @return the scrollable
 	 */
-	protected IScrollable getScrollable()
+	protected IScrollable scrollable()
 	{
 		return (IScrollable) getParent();
 	}
@@ -159,9 +159,27 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	}
 
 	@Override
-	public int getZIndex()
+	public boolean isVisible()
 	{
-		return getParent() != null ? getParent().getZIndex() + zIndex : 0;
+		if (!autoHide)
+			return super.isVisible();
+
+		if (isHorizontal())
+			return scrollable().contentSize().width() > parent().size().width();
+		else
+			return scrollable().contentSize().height() > parent().size().height();
+
+		//		if (hide == isEnabled() || offset < 0)
+		//			scrollTo(0);
+		//		if (offset > 1)
+		//			scrollTo(1);
+
+	}
+
+	@Override
+	public int zIndex()
+	{
+		return getParent() != null ? getParent().zIndex() + zIndex : 0;
 	}
 
 	protected int sizeDiff()
@@ -237,7 +255,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	public void updateScrollbar()
 	{
 		UIComponent parent = getParent();
-		IScrollable scrollable = getScrollable();
+		IScrollable scrollable = scrollable();
 		int delta = 0;// hasVisibleOtherScrollbar() ? scrollThickness() : 0;
 		boolean hide = false;
 		float offset = offset();
@@ -301,7 +319,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		if ((isHorizontal() != GuiScreen.isShiftKeyDown()) && !isHovered())
 			return false;
 
-		scrollBy(-event.delta() * getScrollable().getScrollStep());
+		scrollBy(-event.delta() * scrollable().getScrollStep());
 		float o = offset();
 		//if we can't scroll anymore, propagate to parent
 		return (event.delta() <= 0 || o != 0) && (event.delta() >= 0 || o != 1);
@@ -326,7 +344,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	@Override
 	public String getPropertyString()
 	{
-		ISize cs = getScrollable().contentSize();
+		ISize cs = scrollable().contentSize();
 		return type + " | O=" + offset() + "(" + (isHorizontal() ? cs.width() : cs.height()) + ") | " + super.getPropertyString();
 	}
 
@@ -346,14 +364,14 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	{
 		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = verticalScrollbars.get(component);
-		return scrollbar != null && scrollbar.isVisible() ? scrollbar.size().width() : 0;
+		return scrollbar != null ? scrollbar.size().width() : 0; //always count the width even if it's not visible
 	}
 
 	public static int scrollbarHeight(Object component)
 	{
 		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = horizontalScrollbars.get(component);
-		return scrollbar != null && scrollbar.isVisible() ? scrollbar.size().height() : 0;
+		return scrollbar != null ? scrollbar.size().height() : 0; //always count the height even if it's not visible
 	}
 
 	private class ScrollbarPosition implements IPosition

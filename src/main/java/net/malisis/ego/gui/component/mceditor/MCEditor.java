@@ -26,7 +26,6 @@ package net.malisis.ego.gui.component.mceditor;
 
 import static net.malisis.ego.gui.element.position.Positions.bottomAligned;
 
-import com.google.common.eventbus.Subscribe;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.MalisisFont;
 import net.malisis.ego.gui.MalisisGui;
@@ -109,10 +108,4 @@ public class MCEditor extends UIContainer
 
 	//#end IGuiText
 
-	@Subscribe
-	public void onChecked(UICheckBox.CheckEvent event)
-	{
-		//tf.getFontOptions().disableECF = event.isChecked();
-		//tf.buildLines();
-	}
 }

@@ -2,15 +2,13 @@ package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIListContainer;
-import net.malisis.ego.gui.event.GuiEvent;
+import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 
-import java.util.function.Predicate;
-
-public class UISelectableList<T> extends UIListContainer<T>
+public class UISelectableList<T> extends UIListContainer<T> implements IValueChangeEventRegister<UISelectableList<T>, T>
 {
-	protected UIComponent selected;
+	protected T selected;
 	protected boolean unselectable = false;
-	protected Predicate<SelectEvent<T, UISelectableList>> onSelect;
 
 	public void setUnselectable(boolean unselectable)
 	{
@@ -21,33 +19,48 @@ public class UISelectableList<T> extends UIListContainer<T>
 	protected void buildElementComponents()
 	{
 		super.buildElementComponents();
-		//componentElements.forEach();
-	}
-
-	public void onSelect(Predicate<SelectEvent<T, UISelectableList>> onSelect)
-	{
-		this.onSelect = onSelect;
 		applyEventToElements();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void applyEventToElements()
 	{
-		//componentElements.forEach(c -> click());
+		componentElements.values().forEach(c -> c.onClick(e -> {
+			select((T) c.getData());
+			return true;
+		}));
 	}
 
-	public static class SelectEvent<U, T extends UIComponent> extends GuiEvent<T>
+	@SuppressWarnings("unchecked")
+	public void select(UIComponent component)
 	{
-		protected final U element;
+		select((T) component.getData());
+	}
 
-		public SelectEvent(T source, U element)
-		{
-			super(source);
-			this.element = element;
-		}
+	public void select(T element)
+	{
+		UIComponent comp = componentElements.values().stream().filter(c -> c.getData() == element).findFirst().orElse(null);
+		if (comp == null)
+			return;
 
-		public U element()
-		{
-			return element;
-		}
+		T oldValue = selected;
+		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, element)))
+			selected = element;
+		fireEvent(new ValueChange.Post<>(this, oldValue, selected));
+	}
+
+	public T selected()
+	{
+		return selected;
+	}
+
+	public boolean isSelected(UIComponent component)
+	{
+		return component != null && component.getParent() == this && component.getData() == selected;
+	}
+
+	public boolean isSelected(T element)
+	{
+		return selected == element;
 	}
 }

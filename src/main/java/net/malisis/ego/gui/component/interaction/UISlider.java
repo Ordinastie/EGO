@@ -72,7 +72,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 						   .text(text)
 						   .position(this::textPosition, o -> middleAligned(o, 0))
 						   .bind("value", this::getValue)
-						   .zIndex(this::getZIndex)
+						   .zIndex(this::zIndex)
 						   .fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().when(this::isHovered).color(0xFFFFA0).build())
 						   .build();
 

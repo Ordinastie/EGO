@@ -24,9 +24,6 @@
 
 package net.malisis.ego.gui.render;
 
-import org.apache.logging.log4j.util.Strings;
-import org.lwjgl.opengl.GL11;
-
 import net.malisis.ego.EGO;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
@@ -44,12 +41,13 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
+import org.apache.logging.log4j.util.Strings;
+import org.lwjgl.opengl.GL11;
 
 /**
  * Renderer to use for {@link MalisisGui}.
  *
  * @author Ordinastie
- *
  */
 public class GuiRenderer
 {
@@ -105,7 +103,7 @@ public class GuiRenderer
 	 */
 	public void setDefaultTexture(GuiTexture texture)
 	{
-		this.defaultGuiTexture = texture;
+		defaultGuiTexture = texture;
 	}
 
 	/**
@@ -180,6 +178,7 @@ public class GuiRenderer
 	{
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableLighting();
+		GlStateManager.enableDepth();
 		enableBlending();
 	}
 
@@ -332,7 +331,7 @@ public class GuiRenderer
 		//		{
 		//			x += currentComponent.screenX();
 		//			y += currentComponent.screenY();
-		//			z += currentComponent.getZIndex();
+		//			z += currentComponent.zIndex();
 		//		}
 		//
 		//		rectangle.resetState();
@@ -422,7 +421,7 @@ public class GuiRenderer
 		{
 			x += currentComponent.screenPosition().x();
 			y += currentComponent.screenPosition().y();
-			itemRenderer.zLevel = currentComponent.getZIndex();
+			itemRenderer.zLevel = currentComponent.zIndex();
 		}
 
 		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
@@ -496,7 +495,7 @@ public class GuiRenderer
 		int x = area.x * f;
 		int y = Minecraft.getMinecraft().displayHeight - (area.y + area.height()) * f;
 		int w = area.width() * f;
-		int h = area.height() * f;;
+		int h = area.height() * f;
 		GL11.glScissor(x, y, w, h);
 	}
 
