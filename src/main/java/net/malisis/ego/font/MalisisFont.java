@@ -145,7 +145,7 @@ public class MalisisFont
 
 	public CharData getCharData(char c)
 	{
-		if (c < 0 || c > charData.length)
+		if (c > charData.length)
 			c = '?';
 		return charData[c];
 	}
@@ -168,8 +168,8 @@ public class MalisisFont
 			renderer.next();
 		else
 			renderer.draw();
-		if (renderer instanceof GuiRenderer)
-			Minecraft.getMinecraft().getTextureManager().bindTexture(renderer.getDefaultTexture().getResourceLocation());
+
+		Minecraft.getMinecraft().getTextureManager().bindTexture(renderer.getDefaultTexture().getResourceLocation());
 		GL11.glPopMatrix();
 
 		zIndex = 0;
@@ -178,21 +178,11 @@ public class MalisisFont
 	protected void prepareShadow(GuiRenderer renderer)
 	{
 		drawingShadow = true;
-		if (renderer instanceof GuiRenderer)
-			return;
-		renderer.next();
-		GL11.glPolygonOffset(3.0F, 3.0F);
-		GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
 	}
 
 	protected void cleanShadow(GuiRenderer renderer)
 	{
 		drawingShadow = false;
-		if (renderer instanceof GuiRenderer)
-			return;
-		renderer.next();
-		GL11.glPolygonOffset(0.0F, 0.0F);
-		GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
 	}
 	//#end Prepare/Clean
 
@@ -219,17 +209,12 @@ public class MalisisFont
 			StringWalker walker = new StringWalker(text, options);
 			walker.applyStyles(true);
 
-			float rx = 0;
-			float ry = 0;
-
 			while (walker.walk())
 			{
-				rx = walker.x();
-				ry = walker.y();
-				if (isCharVisible((int) (x + rx), (int) (y + ry), walker, clipArea))
+				if (isCharVisible((int) (x + walker.x()), (int) (y + walker.y()), walker, clipArea))
 				{
 					options = walker.currentStyle();
-					renderCharacter(walker.getChar(), rx, ry, options);
+					renderCharacter(walker.getChar(), walker.x(), walker.y(), options);
 				}
 				//rx += walker.width();
 
