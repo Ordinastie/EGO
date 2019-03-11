@@ -501,8 +501,11 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 
 			boolean ret = false;
 			for (IKeyListener listener : keyListeners) //if a component registered itself as IKeyListener, don't call keyTyped() twice
-				ret |= (!(listener instanceof UIComponent) || ((UIComponent) listener).isFocused()) && listener.keyTyped(keyChar, keyCode);
+				ret |= listener != focusedComponent && listener.keyTyped(keyChar, keyCode);
 			if (ret)
+				return;
+
+			if(debugComponent.keyTyped(keyChar, keyCode))
 				return;
 
 			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)
@@ -518,19 +521,6 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 					setFocusedComponent(null, true);
 					constructed = false;
 					doConstruct();
-				}
-				if (keyCode == Keyboard.KEY_D)
-				{
-					debug = !debug;
-					debugComponent.setEnabled(debug);
-				}
-				if (keyCode == Keyboard.KEY_P)
-				{
-					Position.CACHED = !Position.CACHED;
-				}
-				if (keyCode == Keyboard.KEY_S)
-				{
-					Size.CACHED = !Size.CACHED;
 				}
 			}
 		}

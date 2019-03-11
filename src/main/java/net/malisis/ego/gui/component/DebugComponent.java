@@ -45,6 +45,7 @@ import net.malisis.ego.gui.text.GuiText.Builder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.input.Keyboard;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -58,9 +59,15 @@ import javax.annotation.Nonnull;
  */
 public class DebugComponent extends UIComponent implements IPadded, IContentHolder
 {
+	//remember setting between reconstructs and different guis
+	private static boolean isDebug = false;
+	private static boolean isTop = true; //can't store the actual position because it's dependant on the instance
+	private static float scale = 1;
+	private static int alpha = 80;
+
 	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
 	private GuiText text;
-	private FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	private FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).scale(scale).shadow().build();
 	private Padding padding = Padding.of(5, 5);
 	private GuiShape borderShape = GuiShape.builder()
 										   .icon(GuiIcon.BORDER)
@@ -80,7 +87,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 										.bind("SIZE",
 											  new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
 										.translated(false)
-										.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().rightAligned().build())
+										.fontOptions(FontOptions.builder().color(0xFFFFFF).scale(scale).shadow().rightAligned().build())
 										.position(Position::topRight)
 										.build();
 
@@ -90,11 +97,12 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	public DebugComponent(MalisisGui gui)
 	{
 		this.gui = gui;
-		enabled = false;
 
-		setAlpha(80);
-		//setZIndex(-1);
+		setAlpha(alpha);
+		setZIndex(100);
 
+		if (!isTop)
+			setPosition(Position.bottomLeft(this));
 		setSize(Size.of(parentWidth(this, 1.0F, 0), heightOfContent(this, 0)));
 
 		setBackground(GuiShape.builder(this).color(0).alpha(this::getAlpha).build());
@@ -104,7 +112,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		}));
 
 		setDefaultDebug();
-		setEnabled(MalisisGui.debug);
+		setEnabled(isDebug);
 	}
 
 	private void setDefaultDebug()
@@ -149,7 +157,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	@Override
 	public boolean isEnabled()
 	{
-		return MalisisGui.debug;
+		return super.isEnabled();
 	}
 
 	@Override
@@ -160,6 +168,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		else
 			getGui().removeFromScreen(this);
 		super.setEnabled(enabled);
+		isDebug = enabled;
 	}
 
 	public void clear()
@@ -189,7 +198,6 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		FontOptions fontOptions = text.getFontOptions();
 		if (GuiScreen.isCtrlKeyDown())
 		{
-			float scale = fontOptions.getFontScale();
 			scale += 1 / 3F * delta;
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
@@ -200,7 +208,41 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		{
 			alpha += 25 * delta;
 			alpha = MathHelper.clamp(alpha, 0, 255);
+			setAlpha(alpha);
 		}
+	}
+
+	@Override
+	public boolean keyTyped(char keyChar, int keyCode)
+	{
+
+		if (!GuiScreen.isCtrlKeyDown())
+			return false;
+
+		switch (keyCode)
+		{
+			case Keyboard.KEY_D:
+				setEnabled(!isEnabled());
+				break;
+			case Keyboard.KEY_P:
+				Position.CACHED = !Position.CACHED;
+				break;
+			case Keyboard.KEY_S:
+				Size.CACHED = !Size.CACHED;
+				break;
+			case Keyboard.KEY_DOWN:
+				isTop = false;
+				setPosition(Position.bottomLeft(this));
+				break;
+			case Keyboard.KEY_UP:
+				isTop = true;
+				setPosition(Position.topLeft(this));
+				break;
+
+		}
+
+		return false;
+
 	}
 
 	private int hierarchyColor()
