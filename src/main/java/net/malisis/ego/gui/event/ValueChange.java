@@ -2,6 +2,7 @@ package net.malisis.ego.gui.event;
 
 import net.malisis.ego.gui.component.UIComponent;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public abstract class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
@@ -89,10 +90,11 @@ public abstract class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
 			register(ValueChange.Post.class, (Predicate) onChange);
 		}
 
-		public default void onChange(Runnable onChange)
+		@SuppressWarnings("unchecked")
+		public default void onChange(Consumer<S> onChange)
 		{
 			register(ValueChange.Post.class, e -> {
-				onChange.run();
+				onChange.accept((S) e.getNewValue());
 				return true;
 			});
 		}
