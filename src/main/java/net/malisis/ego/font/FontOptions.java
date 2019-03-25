@@ -24,9 +24,9 @@
 
 package net.malisis.ego.font;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.collect.Lists;
-import net.malisis.ego.gui.IPredicatedSupplier;
-import net.malisis.ego.gui.IPredicatedSupplier.PredicatedSupplier;
 import net.malisis.ego.gui.text.PredicatedFontOptions;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * @author Ordinastie
@@ -288,7 +289,7 @@ public class FontOptions
 	public static String formattingAsText(List<TextFormatting> list)
 	{
 		StringBuilder builder = new StringBuilder();
-		list.forEach(f -> builder.append(f));
+		list.forEach(builder::append);
 		return builder.toString();
 	}
 
@@ -318,7 +319,7 @@ public class FontOptions
 			offset += 2;
 		}
 
-		return Pair.of(text.substring(0, offset), text.substring(offset, text.length()));
+		return Pair.of(text.substring(0, offset), text.substring(offset));
 	}
 
 	public static Link getLink(String text, int index)
@@ -359,8 +360,8 @@ public class FontOptions
 	public static class FontOptionsBuilder
 	{
 		protected FontOptions base;
-		protected BooleanSupplier currentSupplier;
-		protected IPredicatedSupplier<FontOptions> supplier;
+		protected Predicate<Object> currentPredicate;
+		private final List<Pair<Predicate<Object>, FontOptions>> suppliers = Lists.newArrayList();
 
 		protected MalisisFont font = MalisisFont.minecraftFont;
 		protected float fontScale = 1;
@@ -378,6 +379,23 @@ public class FontOptions
 		{
 		}
 
+		/**
+		 * @return The base fontOptionBuilder before the predicated suppliers are applied.
+		 */
+		public FontOptionsBuilder base()
+		{
+			if (currentPredicate == null)
+				return this;
+			addSupplier();
+			return from(base);
+		}
+
+		public FontOptionsBuilder font(MalisisFont font)
+		{
+			this.font = checkNotNull(font);
+			return this;
+		}
+
 		public FontOptionsBuilder scale(float scale)
 		{
 			fontScale = scale;
@@ -387,6 +405,12 @@ public class FontOptions
 		public FontOptionsBuilder color(int color)
 		{
 			this.color = color;
+			return this;
+		}
+
+		public FontOptionsBuilder color(TextFormatting color)
+		{
+			styles(color);
 			return this;
 		}
 
@@ -532,11 +556,18 @@ public class FontOptions
 
 		public FontOptionsBuilder when(BooleanSupplier supplier)
 		{
-			if (currentSupplier == null)
-				base = build();
+			return when(o -> supplier.getAsBoolean());
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T> FontOptionsBuilder when(Predicate<T> predicate)
+		{
+			if (currentPredicate == null)
+				base = buildBase();
 			else
-				this.supplier = buildSupplier();
-			currentSupplier = supplier;
+				addSupplier();
+
+			currentPredicate = (Predicate<Object>) predicate;
 			return this;
 		}
 
@@ -555,20 +586,37 @@ public class FontOptions
 								   rightAligned);
 		}
 
-		private IPredicatedSupplier<FontOptions> buildSupplier()
+		private void addSupplier()
 		{
-			IPredicatedSupplier<FontOptions> ps = new PredicatedSupplier<>(currentSupplier, buildBase());
-			return supplier == null ? ps : supplier.or(ps);
+			if (currentPredicate != null)
+				suppliers.add(Pair.of(currentPredicate, buildBase()));
+		}
+
+		public FontOptions build(Object predicateParameter)
+		{
+			addSupplier();
+
+			if (suppliers.size() == 0)
+				return buildBase();
+
+			return new PredicatedFontOptions(font,
+											 fontScale,
+											 color,
+											 shadow,
+											 bold,
+											 italic,
+											 underline,
+											 strikethrough,
+											 obfuscated,
+											 lineSpacing,
+											 rightAligned,
+											 suppliers,
+											 predicateParameter);
 		}
 
 		public FontOptions build()
 		{
-			if (base != null) //predicated
-			{
-				buildSupplier();
-				return new PredicatedFontOptions(base, buildSupplier());
-			}
-			return buildBase();
+			return build(null);
 		}
 
 	}

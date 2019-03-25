@@ -24,16 +24,16 @@
 
 package net.malisis.ego.gui.element.size;
 
-import java.util.function.IntSupplier;
-
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.IChild;
+import net.malisis.ego.gui.element.position.Position.IPositioned;
+
+import java.util.function.IntSupplier;
 
 /**
  * @author Ordinastie
- *
  */
 public class Size
 {
@@ -62,9 +62,9 @@ public class Size
 
 		public default ISize plus(ISize other)
 		{
-			if (other == null || other == ZERO)
+			if (other == null || other == Size.ZERO)
 				return this;
-			if (this == ZERO)
+			if (this == Size.ZERO)
 				return other;
 
 			return Size.of(() -> width() + other.width(), () -> height() + other.height());
@@ -72,9 +72,9 @@ public class Size
 
 		public default ISize minus(ISize other)
 		{
-			if (other == null || other == ZERO)
+			if (other == null || other == Size.ZERO)
 				return this;
-			if (this == ZERO)
+			if (this == Size.ZERO)
 				return other;
 
 			return Size.of(() -> width() - other.width(), () -> height() - other.height());
@@ -104,7 +104,7 @@ public class Size
 
 		private void updateWidth()
 		{
-			if (lastFrameWidth == MalisisGui.counter && CACHED)
+			if (lastFrameWidth == MalisisGui.counter && Size.CACHED)
 				return;
 			lastFrameWidth = MalisisGui.counter;
 			cachedWidth = widthFunction.getAsInt();
@@ -113,7 +113,7 @@ public class Size
 
 		private void updateHeight()
 		{
-			if (lastFrameHeight == MalisisGui.counter && CACHED)
+			if (lastFrameHeight == MalisisGui.counter && Size.CACHED)
 				return;
 			lastFrameHeight = MalisisGui.counter;
 			cachedHeight = heightFunction.getAsInt();
@@ -183,6 +183,16 @@ public class Size
 	public static ISize sizeOfContent(IContentHolder owner, int widthOffset, int heightOffset)
 	{
 		return new DynamicSize(0, 0, Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
+	}
+
+	public static <T extends IPositioned & IChild<UIComponent>> ISize fill(T owner)
+	{
+		return fill(owner, 0, 0);
+	}
+
+	public static <T extends IPositioned & IChild<UIComponent>> ISize fill(T owner, int rightOffset, int bottomOffset)
+	{
+		return new DynamicSize(0, 0, Sizes.fillWidth(owner, rightOffset), Sizes.fillHeight(owner, bottomOffset));
 	}
 
 }

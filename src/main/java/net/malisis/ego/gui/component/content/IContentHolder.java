@@ -24,14 +24,20 @@
 
 package net.malisis.ego.gui.component.content;
 
+import net.malisis.ego.gui.component.decoration.UIImage;
+import net.malisis.ego.gui.component.interaction.UIButton;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
+import net.malisis.ego.gui.render.GuiIcon;
+import net.malisis.ego.gui.render.GuiTexture;
+import net.malisis.ego.gui.text.ITextBuilder;
+
+import java.util.function.Function;
 
 /**
  * @author Ordinastie
- *
  */
 public interface IContentHolder
 {
@@ -45,5 +51,30 @@ public interface IContentHolder
 	public default ISize contentSize()
 	{
 		return content() != null ? content().size() : Size.ZERO;
+	}
+
+	public static interface IContentBuilder<BUILDER> extends ITextBuilder<BUILDER>
+	{
+		public BUILDER content(Function<UIButton, IContent> content);
+
+		public default BUILDER image(UIImage image)
+		{
+			return content(image);
+		}
+
+		public default BUILDER content(IContent content)
+		{
+			return content(b -> content);
+		}
+
+		public default BUILDER icon(GuiIcon icon)
+		{
+			return content(UIImage.builder().icon(icon).build());
+		}
+
+		public default BUILDER texture(GuiTexture texture)
+		{
+			return content(UIImage.builder().icon(new GuiIcon(texture)).build());
+		}
 	}
 }

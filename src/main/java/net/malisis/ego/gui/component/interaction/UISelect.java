@@ -162,7 +162,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	@SuppressWarnings("unchecked")
 	public <U extends UIComponent & IOptionComponent> void setComponentFactory(Function<T, U> factory)
 	{
-	//	optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
+		//	optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
 	}
 
 	//#end Getters/Setters
@@ -470,16 +470,11 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 													   .build();
 		protected FontOptions selectedfontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 
-		GuiShape background = GuiShape.builder(this).color(0x5E789F).alpha(() -> {
-			if (isHovered())
-				return 255;
-			else
-				return 0;
-		}).build();
+		GuiShape background = GuiShape.builder(this).color(0x5E789F).alpha(() -> isHovered() ? 255 : 0).build();
 
 		public Option(T element)
 		{
-			super(false);
+
 			text.setPosition(Position.of(1, 1));
 			text.setText(stringFunction.apply(element));
 			text.setFontOptions(fontOptions);

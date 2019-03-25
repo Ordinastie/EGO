@@ -27,6 +27,7 @@ package net.malisis.ego.gui.component.container;
 import com.google.common.collect.Lists;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.control.ICloseable;
 import net.malisis.ego.gui.component.control.IScrollable;
@@ -37,10 +38,11 @@ import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size.ISize;
-import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
-import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.render.background.BoxBackground;
+import net.malisis.ego.gui.render.background.PanelBackground;
+import net.malisis.ego.gui.render.background.WindowBackground;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -306,47 +308,39 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		return super.getPropertyString() + " | O : " + offset;
 	}
 
-	/**
-	 * Creates a centered {@link UIContainer} with a window background and a padding of 5.
-	 *
-	 * @return the UI parent
-	 */
-	public static UIContainer window()
+	public static UIContainerBuilder builder()
 	{
-		UIContainer container = new UIContainer();
-		container.setName("Window");
-		container.setBackground(GuiShape.builder(container).icon(GuiIcon.WINDOW).border(5).build());
-		container.setPosition(Position.middleCenter(container));
-		container.setPadding(Padding.of(5));
-		return container;
+		return new UIContainerBuilder();
 	}
 
 	/**
-	 * Creates a {@link UIContainer} with a Panel background and a padding of 3.
+	 * Creates a builder with default values for a centered {@link UIContainer} with a window background and a padding of 5.
 	 *
 	 * @return the UI parent
 	 */
-	public static UIContainer panel()
+	public static UIContainerBuilder window()
 	{
-		UIContainer container = new UIContainer();
-		container.setName("Panel");
-		container.setBackground(GuiShape.builder(container).icon(GuiIcon.PANEL).border(3).build());
-		container.setPadding(Padding.of(3));
-		return container;
+		return builder().name("Window").background(WindowBackground::new).position(Position::middleCenter).padding(5);
 	}
 
 	/**
-	 * Creates a {@link UIContainer} with a Box background and a padding of 1.
+	 * Creates a builder with default values for a {@link UIContainer} with a panel background and a padding of 3.
 	 *
 	 * @return the UI parent
 	 */
-	public static UIContainer box()
+	public static UIContainerBuilder panel()
 	{
-		UIContainer container = new UIContainer();
-		container.setName("box");
-		container.setBackground(GuiShape.builder(container).icon(GuiIcon.BOX).border(1).build());
-		container.setPadding(Padding.of(1));
-		return container;
+		return builder().name("Panel").background(PanelBackground::new).padding(3);
+	}
+
+	/**
+	 * Creates a builder with default values for a {@link UIContainer} with a box background and a padding of 1.
+	 *
+	 * @return the UI parent
+	 */
+	public static UIContainerBuilder box()
+	{
+		return builder().name("Box").background(BoxBackground::new).padding(1);
 	}
 
 	public class ContainerContent implements IContent, IGuiRenderer, ISize
@@ -445,6 +439,44 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		public void render(GuiRenderer renderer)
 		{
 			components.forEach(c -> c.render(renderer));
+		}
+	}
+
+	public static class UIContainerBuilder extends UIComponentBuilder<UIContainerBuilder, UIContainer>
+	{
+		protected Padding padding = Padding.NO_PADDING;
+		protected boolean clipContent = true;
+
+		protected UIContainerBuilder()
+		{
+		}
+
+		public UIContainerBuilder padding(Padding padding)
+		{
+			this.padding = padding;
+			return this;
+		}
+
+		public UIContainerBuilder padding(int padding)
+		{
+			this.padding = Padding.of(padding);
+			return this;
+		}
+
+		public UIContainerBuilder noClipContent()
+		{
+			clipContent = false;
+			return this;
+		}
+
+		@Override
+		public UIContainer build()
+		{
+			UIContainer container = build(new UIContainer());
+			container.setPadding(padding);
+			container.setClipContent(clipContent);
+
+			return container;
 		}
 	}
 }

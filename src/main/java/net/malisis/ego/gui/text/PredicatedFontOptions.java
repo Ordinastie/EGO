@@ -26,27 +26,31 @@ package net.malisis.ego.gui.text;
 
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.MalisisFont;
-import net.malisis.ego.gui.IPredicatedSupplier;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author Ordinastie
  */
 public class PredicatedFontOptions extends FontOptions
 {
-	private FontOptions base;
-	private IPredicatedSupplier<FontOptions> supplier;
+	private final List<Pair<Predicate<Object>, FontOptions>> suppliers;
+	private final Object param;
 
-	public PredicatedFontOptions(FontOptions base, IPredicatedSupplier<FontOptions> supplier)
+	public PredicatedFontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic,
+			boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned,
+			List<Pair<Predicate<Object>, FontOptions>> suppliers, Object param)
 	{
-		super(null, 0, 0, false, false, false, false, false, false, 0, false);
-		this.base = base;
-		this.supplier = supplier;
+		super(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing, rightAligned);
+		this.suppliers = suppliers;
+		this.param = param;
 	}
 
 	private FontOptions get()
 	{
-		FontOptions opt = supplier.get();
-		return opt != null ? opt : base;
+		return suppliers.stream().filter(p -> p.getLeft().test(param)).findFirst().map(Pair::getRight).orElse(this);
 	}
 
 	@Override

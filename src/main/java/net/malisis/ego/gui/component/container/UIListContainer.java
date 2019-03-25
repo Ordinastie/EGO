@@ -46,7 +46,7 @@ public class UIListContainer<S> extends UIContainer
 	protected Collection<S> elements = Collections.emptyList();
 	protected Map<S, UIComponent> componentElements = Maps.newHashMap();
 	protected int lastSize = 0;
-	protected Function<S, UIComponent> elementComponentFactory = e -> new UILabel(Objects.toString(e));
+	protected Function<S, UIComponent> elementComponentFactory = e -> UILabel.builder().text(Objects.toString(e)).build();
 	protected int elementsSize;
 
 	public UIListContainer()

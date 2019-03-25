@@ -101,7 +101,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private IPosition position;
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
 	private ISize size = Size.ZERO;
-	private IntSupplier zIndex = () -> 0;
+	private IntSupplier zIndex;
 
 	private boolean buildLines = true;
 	private boolean buildCache = true;
@@ -565,9 +565,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		private boolean literal = false;
 		private IntSupplier wrapSize;
 
-		public Builder()
+		protected Builder()
 		{
-
 		}
 
 		public Builder text(String text)

@@ -33,12 +33,10 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 
 /**
  * @author Ordinastie
- *
  */
 public interface IContent extends IPositioned, ISized, IGuiRenderer, IChild<UIComponent>
 {
 	public void setParent(UIComponent parent);
 
 	public void setPosition(IPosition position);
-
 }

@@ -24,9 +24,13 @@
 
 package net.malisis.ego.gui.component.interaction;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
@@ -36,10 +40,16 @@ import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.text.GuiText.Builder;
+import net.malisis.ego.gui.text.ITextBuilder;
+import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author Ordinastie
@@ -145,7 +155,7 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 	/**
 	 * Sets state of this {@link UIRadioButton} to selected.<br>
 	 * If a radio button with the same name is currently selected, unselects it.<br>
-	 * Does not fire {@link SelectEvent}.
+	 * Does not fire {@link ValueChange} event.
 	 */
 	public void setSelected()
 	{
@@ -155,14 +165,33 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 		selected = true;
 	}
 
+	public void select()
+	{
+		if (selected)
+			return;
+		UIRadioButton old = getSelected(name);
+		if (fireEvent(new ValueChange.Pre<>(this, old, this)))
+			return;
+		setSelected();
+		fireEvent(new ValueChange.Post<>(this, old, this));
+	}
+
 	//#end Getters/Setters
+	@Override
 	public void click(MouseButton button)
 	{
-		if(isDisabled() || button != MouseButton.LEFT)
+		if (isDisabled() || button != MouseButton.LEFT)
 			return;
+		select();
+	}
 
-		if (fireEvent(new UIRadioButton.SelectEvent(this)))
-			setSelected();
+	@Override
+	public boolean keyTyped(char keyChar, int keyCode)
+	{
+		if (keyCode != Keyboard.KEY_SPACE)
+			return false;
+		select();
+		return true;
 	}
 
 	public static void addRadioButton(UIRadioButton rb)
@@ -192,16 +221,84 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 		return getSelected(rb.name);
 	}
 
-	/**
-	 * Event fired when a {@link UIRadioButton} changes its selection.<br>
-	 * When catching the event, the state is not applied to the {@code UIRadioButton} yet.<br>
-	 * Cancelling the event will prevent the value to be changed.
-	 */
-	public static class SelectEvent extends ValueChange<UIRadioButton, UIRadioButton>
+	public static UIRadioButtonBuilder builder(String name)
 	{
-		public SelectEvent(UIRadioButton component)
+		return new UIRadioButtonBuilder().name(name);
+	}
+
+	public static class UIRadioButtonBuilder extends UIComponentBuilder<UIRadioButton.UIRadioButtonBuilder, UIRadioButton>
+			implements IValueChangeEventRegister<UIRadioButton, Boolean>, ITextBuilder<UIRadioButton.UIRadioButtonBuilder>
+	{
+
+		protected GuiText.Builder guiTextBuilder;
+		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder()
+																	 .color(0x444444)
+																	 .when(UIRadioButton::isHovered)
+																	 .color(0x777777)
+																	 .when(UIRadioButton::isDisabled)
+																	 .color(0xCCCCCC)
+																	 .base();
+		protected Function<UIRadioButton, FontOptionsBuilder> fontOptionsBuilderSupplier;
+
+		protected Function<UIRadioButton, IContent> content;
+
+		protected boolean selected;
+
+		protected UIRadioButtonBuilder()
 		{
-			super(component, getSelected(component), component);
+		}
+
+		@Override
+		public Builder getGuiTextBuilder()
+		{
+			if (guiTextBuilder == null)
+				guiTextBuilder = GuiText.builder();
+			return guiTextBuilder;
+		}
+
+		@Override
+		public FontOptionsBuilder getFontOptionsBuilder()
+		{
+			return fontOptionsBuilder;
+		}
+
+		@Override
+		public UIRadioButton.UIRadioButtonBuilder fontOptions(@Nonnull FontOptions fontOptions)
+		{
+			fontOptionsBuilder = checkNotNull(fontOptions).toBuilder();
+			return this;
+		}
+
+		public UIRadioButton.UIRadioButtonBuilder fontOptionsBuilder(@Nonnull Function<UIRadioButton, FontOptionsBuilder> supplier)
+		{
+			fontOptionsBuilderSupplier = checkNotNull(supplier);
+			return this;
+		}
+
+		public UIRadioButton.UIRadioButtonBuilder select()
+		{
+			selected = true;
+			return this;
+		}
+
+		@Override
+		public UIRadioButton build()
+		{
+			UIRadioButton rb = build(new UIRadioButton(name));
+			if (guiTextBuilder != null)
+			{
+				if (fontOptionsBuilderSupplier != null)
+					fontOptionsBuilder = fontOptionsBuilderSupplier.apply(rb);
+
+				content = b -> guiTextBuilder.fontOptions(fontOptionsBuilder.build(rb)).build();
+			}
+
+			if (content != null)
+				rb.setContent(content.apply(rb));
+			if (selected)
+				rb.select();
+
+			return rb;
 		}
 	}
 }

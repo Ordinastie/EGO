@@ -24,25 +24,34 @@
 
 package net.malisis.ego.gui.component.interaction;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.event.MouseEvent.MouseClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseDown;
+import net.malisis.ego.gui.event.MouseEvent.MouseLeftClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseUp;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.text.GuiText.Builder;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
+
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
 
 /**
  * UIButton
@@ -51,16 +60,6 @@ import org.lwjgl.input.Keyboard;
  */
 public class UIButton extends UIComponent implements IContentHolder
 {
-	/** The {@link FontOptions} to use by default for the {@link UIButton} content. */
-	protected final FontOptions fontOptions = FontOptions.builder()
-														 .color(0xFFFFFF)
-														 .shadow()
-														 .when(this::isHovered)
-														 .color(0xFFFFA0)
-														 .when(this::isDisabled)
-														 .color(0xCCCCCC)
-														 .build();
-
 	protected IPosition offsetPosition = Position.of(() -> isPressed() ? 1 : 0, () -> isPressed() ? 1 : 0);
 	protected IPosition contentPosition = null;
 
@@ -75,14 +74,16 @@ public class UIButton extends UIComponent implements IContentHolder
 	public UIButton()
 	{
 		setAutoSize();
-		setBackground(GuiShape.builder(this).border(5).icon(() -> {
-			if (isDisabled())
-				return GuiIcon.BUTTON_DISABLED;
-			if (isHovered())
-				return isPressed() ? GuiIcon.BUTTON_HOVER_PRESSED : GuiIcon.BUTTON_HOVER;
-			return GuiIcon.BUTTON;
-		}).build());
-		setForeground(this::content);
+		setBackground(GuiShape.builder(this)
+							  .border(5)
+							  .icon(() -> {
+								  if (isDisabled())
+									  return GuiIcon.BUTTON_DISABLED;
+								  if (isHovered())
+									  return isPressed() ? GuiIcon.BUTTON_HOVER_PRESSED : GuiIcon.BUTTON_HOVER;
+								  return GuiIcon.BUTTON;
+							  })
+							  .build());
 	}
 
 	/**
@@ -118,11 +119,16 @@ public class UIButton extends UIComponent implements IContentHolder
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(Position.middleCenter(content).plus(offsetPosition));
+		content.setPosition(Position.middleCenter(content)
+									.plus(offsetPosition));
+		setForeground(content);
 	}
 
 	public void setText(String text)
 	{
+		FontOptions fontOptions = FontOptions.EMPTY;
+		if (content instanceof GuiText)
+			fontOptions = ((GuiText) content).getFontOptions();
 		GuiText gt = GuiText.of(text, fontOptions);
 		setContent(gt);
 	}
@@ -156,19 +162,14 @@ public class UIButton extends UIComponent implements IContentHolder
 		setSize(Size.sizeOfContent(this, 6, 6));
 	}
 
-	public FontOptions defaultFontOptions()
-	{
-		return fontOptions;
-	}
-
 	/**
-	 * Convenience methods to register onClick callback.
+	 * Convenience methods to register onLeftClick callback.
 	 *
 	 * @param onClick callback when this {@link UIButton} is clicked.
 	 */
 	public void onClick(Runnable onClick)
 	{
-		register(MouseClick.class, e -> {
+		register(MouseLeftClick.class, e -> {
 			onClick.run();
 			return true;
 		});
@@ -181,7 +182,7 @@ public class UIButton extends UIComponent implements IContentHolder
 		if (!isEnabled())
 			return;
 
-		fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this));
+		fireEvent(button == MouseButton.LEFT ? new MouseLeftClick<>(this) : new MouseRightClick<>(this));
 		if (button == MouseButton.LEFT)
 			MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
 	}
@@ -214,7 +215,7 @@ public class UIButton extends UIComponent implements IContentHolder
 		if (keyCode != Keyboard.KEY_RETURN && keyCode != Keyboard.KEY_NUMPADENTER && keyCode != Keyboard.KEY_SPACE)
 			return false;
 
-		fireEvent(new MouseClick<>(this));
+		fireEvent(new MouseLeftClick<>(this));
 		MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
 		return true;
 	}
@@ -225,4 +226,99 @@ public class UIButton extends UIComponent implements IContentHolder
 		return "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
 
+	public static UIButtonBuilder builder()
+	{
+		return new UIButtonBuilder();
+	}
+
+	public static class UIButtonBuilder extends UIComponentBuilder<UIButtonBuilder, UIButton> implements IContentBuilder<UIButtonBuilder>
+	{
+		protected GuiText.Builder guiTextBuilder;
+		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder()
+																	 .color(0xFFFFFF)
+																	 .shadow()
+																	 .when(UIButton::isHovered)
+																	 .color(0xFFFFA0)
+																	 .when(UIButton::isDisabled)
+																	 .color(0xCCCCCC)
+																	 .base();
+		protected Function<UIButton, FontOptionsBuilder> fontOptionsBuilderSupplier;
+
+		protected Function<UIButton, IContent> content;
+		protected Runnable onClick;
+		protected Object data;
+
+		protected UIButtonBuilder()
+		{
+		}
+
+		@Override
+		public Builder getGuiTextBuilder()
+		{
+			if (guiTextBuilder == null)
+				guiTextBuilder = GuiText.builder();
+			return guiTextBuilder;
+		}
+
+		@Override
+		public FontOptionsBuilder getFontOptionsBuilder()
+		{
+			return fontOptionsBuilder;
+		}
+
+		@Override
+		public UIButtonBuilder fontOptions(@Nonnull FontOptions fontOptions)
+		{
+			fontOptionsBuilder = checkNotNull(fontOptions).toBuilder();
+			return this;
+		}
+
+		public UIButtonBuilder fontOptionsBuilder(@Nonnull Function<UIButton, FontOptionsBuilder> supplier)
+		{
+			fontOptionsBuilderSupplier = checkNotNull(supplier);
+			return this;
+		}
+
+		@Override
+		public UIButtonBuilder content(Function<UIButton, IContent> content)
+		{
+			this.content = checkNotNull(content);
+			return this;
+		}
+
+		public UIButtonBuilder onClick(Runnable onClick)
+		{
+			this.onClick = onClick;
+			return this;
+		}
+
+		public UIButtonBuilder data(Object data)
+		{
+			this.data = data;
+			return this;
+		}
+
+		@Override
+		public UIButton build()
+		{
+			UIButton button = build(new UIButton());
+			if (guiTextBuilder != null)
+			{
+				if (fontOptionsBuilderSupplier != null)
+					fontOptionsBuilder = fontOptionsBuilderSupplier.apply(button);
+
+				content = b -> guiTextBuilder.fontOptions(fontOptionsBuilder.build(button))
+											 .build();
+			}
+
+			if (content != null)
+				button.setContent(content.apply(button));
+			if (onClick != null)
+				button.onClick(onClick);
+			if (data != null)
+				button.attachData(data);
+
+			return button;
+		}
+	}
 }

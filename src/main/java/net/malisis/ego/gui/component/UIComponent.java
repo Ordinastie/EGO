@@ -48,10 +48,10 @@ import net.malisis.ego.gui.event.EventHandler;
 import net.malisis.ego.gui.event.GuiEvent;
 import net.malisis.ego.gui.event.KeyTypedEvent;
 import net.malisis.ego.gui.event.MouseEvent.IMouseEventRegister;
-import net.malisis.ego.gui.event.MouseEvent.MouseClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseDoubleClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseDown;
 import net.malisis.ego.gui.event.MouseEvent.MouseDrag;
+import net.malisis.ego.gui.event.MouseEvent.MouseLeftClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseMove;
 import net.malisis.ego.gui.event.MouseEvent.MouseOut;
 import net.malisis.ego.gui.event.MouseEvent.MouseOver;
@@ -70,7 +70,6 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
@@ -121,9 +120,9 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	protected boolean focused = false;
 
 	/** Rendering for the background of this {@link UIComponent}. */
-	protected Supplier<IGuiRenderer> backgroundRenderer = () -> null;
+	protected IGuiRenderer backgroundRenderer = null;
 	/** Rendering for the foreground of this {@link UIComponent}. */
-	protected Supplier<IGuiRenderer> foregroundRenderer = () -> null;
+	protected IGuiRenderer foregroundRenderer = null;
 
 	private Object data;
 
@@ -156,7 +155,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	public void setPosition(@Nonnull IPosition position)
 	{
 		//if(fireEvent(this, this.position, position);
-		this.position = position;
+		this.position = checkNotNull(position);
 	}
 
 	/**
@@ -191,7 +190,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	public void setSize(@Nonnull ISize size)
 	{
 		//if(fireEvent(this, this.size, size)
-		this.size = size;
+		this.size = checkNotNull(size);
 	}
 
 	/**
@@ -469,33 +468,13 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	}
 
 	/**
-	 * Sets a supplier for background for this {@link UIComponent}
-	 *
-	 * @param supplier the new background
-	 */
-	public void setBackground(Supplier<IGuiRenderer> supplier)
-	{
-		backgroundRenderer = checkNotNull(supplier);
-	}
-
-	/**
 	 * Sets the background for this {@link UIComponent}.
 	 *
 	 * @param render the new background
 	 */
 	public void setBackground(IGuiRenderer render)
 	{
-		setBackground(() -> render);
-	}
-
-	/**
-	 * Sets a supplier for foreground for this {@link UIComponent}
-	 *
-	 * @param supplier the new foreground
-	 */
-	public void setForeground(Supplier<IGuiRenderer> supplier)
-	{
-		foregroundRenderer = checkNotNull(supplier);
+		backgroundRenderer = render;
 	}
 
 	/**
@@ -505,7 +484,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public void setForeground(IGuiRenderer render)
 	{
-		setForeground(() -> render);
+		foregroundRenderer = render;
 	}
 
 	public void attachData(Object data)
@@ -596,7 +575,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	{
 		if (!isEnabled())
 			return;
-		if (fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this)))
+		if (fireEvent(button == MouseButton.LEFT ? new MouseLeftClick<>(this) : new MouseRightClick<>(this)))
 			return;
 		if (parent != null)
 			parent.click(button);
@@ -792,17 +771,15 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		UIComponent oldComponent = renderer.currentComponent;
 
 		//draw background
-		IGuiRenderer gr = backgroundRenderer.get();
-		if (gr != null)
+		if (backgroundRenderer != null)
 		{
 			renderer.currentComponent = this;
-			gr.render(renderer);
+			backgroundRenderer.render(renderer);
 			renderer.next();
 		}
 
 		//draw foreground
-		gr = foregroundRenderer.get();
-		if (gr != null)
+		if (foregroundRenderer != null)
 		{
 			ClipArea area = IClipable.intersected(this);
 			if (!area.fullClip())
@@ -810,7 +787,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 				if (!(this instanceof IControlComponent))
 					renderer.startClipping(area);
 				renderer.currentComponent = this;
-				gr.render(renderer);
+				foregroundRenderer.render(renderer);
 				if (!(this instanceof IControlComponent))
 					renderer.endClipping(area);
 

@@ -40,7 +40,7 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 
 	//@formatter:off
 	public static class MouseMove		<T extends UIComponent> extends MouseEvent<T> { public MouseMove(T source) 			{ super(source, UNKNOWN); }}
-	public static class MouseClick		<T extends UIComponent> extends MouseEvent<T> { public MouseClick(T source) 		{ super(source, LEFT); }}
+	public static class MouseLeftClick	<T extends UIComponent> extends MouseEvent<T> { public MouseLeftClick(T source) 	{ super(source, LEFT); }}
 	public static class MouseRightClick	<T extends UIComponent> extends MouseEvent<T> { public MouseRightClick(T source) 	{ super(source, RIGHT); }}
 	public static class MouseDoubleClick<T extends UIComponent> extends MouseEvent<T> { public MouseDoubleClick(T source) 	{ super(source, LEFT); }}
 	public static class MouseOver		<T extends UIComponent> extends MouseEvent<T> { public MouseOver(T source) 			{ super(source, UNKNOWN); }}
@@ -86,9 +86,9 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 			register(MouseMove.class, onMouseMove);
 		}
 
-		public default void onClick(Predicate<MouseClick> onClick)
+		public default void onLeftClick(Predicate<MouseLeftClick> onClick)
 		{
-			register(MouseClick.class, onClick);
+			register(MouseLeftClick.class, onClick);
 		}
 
 		public default void onRightClick(Predicate<MouseRightClick> onRightClick)

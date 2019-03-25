@@ -24,9 +24,13 @@
 
 package net.malisis.ego.gui.component.interaction;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
@@ -36,8 +40,14 @@ import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.text.GuiText.Builder;
+import net.malisis.ego.gui.text.ITextBuilder;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
+
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
 
 /**
  * UICheckBox
@@ -136,7 +146,8 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 	}
 
 	/**
-	 * Sets the state for this {@link UICheckBox}. Does not fire {@link ValueChange} event.
+	 * Sets the state for this {@link UICheckBox}.<br>
+	 * Does not fire {@link ValueChange} event.
 	 *
 	 * @param checked true if checked
 	 * @return this {@link UIComponent}
@@ -147,14 +158,47 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 		return this;
 	}
 
+	/**
+	 * Checks this {@link UICheckBox} if it is unchecked. Unchecks it otherwise.
+	 */
+	public void toggle()
+	{
+		if (isChecked())
+			uncheck();
+		else
+			check();
+	}
+
+	/**
+	 * Checks this {@link UICheckBox}. Does nothing if already checked.
+	 */
+	public void check()
+	{
+		if (checked || fireEvent(new ValueChange.Pre<>(this, false, true)))
+			return;
+
+		checked = false;
+		fireEvent(new ValueChange.Post<>(this, false, true));
+	}
+
+	/**
+	 * Unchecks this {@link UICheckBox}. Does nothing if already unchecked.
+	 */
+	public void uncheck()
+	{
+		if (!checked || fireEvent(new ValueChange.Pre<>(this, true, false)))
+			return;
+
+		checked = false;
+		fireEvent(new ValueChange.Post<>(this, true, false));
+	}
+
 	@Override
 	public void click(MouseButton button)
 	{
 		if (isDisabled() || button != MouseButton.LEFT)
 			return;
-		if (fireEvent(new ValueChange.Pre<>(this, !checked, checked)))
-			checked = !checked;
-		fireEvent(new ValueChange.Post<>(this, checked, !checked));
+		toggle();
 	}
 
 	@Override
@@ -162,10 +206,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 	{
 		if (keyCode != Keyboard.KEY_SPACE)
 			return false;
-
-		if (fireEvent(new ValueChange.Pre<>(this, !checked, checked)))
-			checked = !checked;
-		fireEvent(new ValueChange.Post<>(this, checked, !checked));
+		toggle();
 		return true;
 	}
 
@@ -173,5 +214,97 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 	public String getPropertyString()
 	{
 		return (checked ? "checked " : "") + "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
+	}
+
+	public static UICheckBoxBuilder builder()
+	{
+		return new UICheckBoxBuilder();
+	}
+
+	public static class UICheckBoxBuilder extends UIComponentBuilder<UICheckBoxBuilder, UICheckBox>
+			implements IValueChangeEventRegister<UICheckBox, Boolean>, ITextBuilder<UICheckBoxBuilder>
+	{
+
+		protected GuiText.Builder guiTextBuilder;
+		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder()
+																	 .color(0x444444)
+																	 .when(UICheckBox::isHovered)
+																	 .color(0x777777)
+																	 .when(UICheckBox::isDisabled)
+																	 .color(0xCCCCCC)
+																	 .base();
+		protected Function<UICheckBox, FontOptionsBuilder> fontOptionsBuilderSupplier;
+
+		protected Function<UICheckBox, IContent> content;
+
+		protected boolean check;
+		protected boolean uncheck;
+
+		protected UICheckBoxBuilder()
+		{
+		}
+
+		@Override
+		public Builder getGuiTextBuilder()
+		{
+			if (guiTextBuilder == null)
+				guiTextBuilder = GuiText.builder();
+			return guiTextBuilder;
+		}
+
+		@Override
+		public FontOptionsBuilder getFontOptionsBuilder()
+		{
+			return fontOptionsBuilder;
+		}
+
+		@Override
+		public UICheckBoxBuilder fontOptions(@Nonnull FontOptions fontOptions)
+		{
+			fontOptionsBuilder = checkNotNull(fontOptions).toBuilder();
+			return this;
+		}
+
+		public UICheckBoxBuilder fontOptionsBuilder(@Nonnull Function<UICheckBox, FontOptionsBuilder> supplier)
+		{
+			fontOptionsBuilderSupplier = checkNotNull(supplier);
+			return this;
+		}
+
+		public UICheckBoxBuilder check()
+		{
+			check = true;
+			uncheck = false;
+			return this;
+		}
+
+		public UICheckBoxBuilder uncheck()
+		{
+			check = false;
+			uncheck = true;
+			return this;
+		}
+
+		@Override
+		public UICheckBox build()
+		{
+			UICheckBox checkbox = build(new UICheckBox());
+			if (guiTextBuilder != null)
+			{
+				if (fontOptionsBuilderSupplier != null)
+					fontOptionsBuilder = fontOptionsBuilderSupplier.apply(checkbox);
+
+				content = b -> guiTextBuilder.fontOptions(fontOptionsBuilder.build(checkbox)).build();
+			}
+
+			if (content != null)
+				checkbox.setContent(content.apply(checkbox));
+			if (check)
+				checkbox.check();
+			if (uncheck)
+				checkbox.uncheck();
+
+			return checkbox;
+		}
 	}
 }

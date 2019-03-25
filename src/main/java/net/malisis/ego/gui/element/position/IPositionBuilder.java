@@ -38,7 +38,7 @@ import java.util.function.IntSupplier;
  *
  * @author Ordinastie
  * @see GuiText.Builder
- * @see GuiShape.ColoredBackgroundBuilder
+ * @see GuiShape.Builder
  */
 public interface IPositionBuilder<BUILDER, OWNER>
 {

@@ -24,17 +24,20 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import javax.swing.Icon;
-
-import org.apache.commons.lang3.ObjectUtils;
-
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiIcon;
+import net.malisis.ego.gui.render.GuiTexture;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.apache.commons.lang3.ObjectUtils;
+
+import javax.annotation.Nonnull;
+import javax.swing.Icon;
 
 /**
  * UIImage.
@@ -50,7 +53,9 @@ public class UIImage extends UIComponent
 	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
 
-	private final IGuiRenderer ICON_RENDER = GuiShape.builder(this).icon(this::getIcon).build();
+	private final IGuiRenderer ICON_RENDER = GuiShape.builder(this)
+													 .icon(this::getIcon)
+													 .build();
 	private final IGuiRenderer IS_RENDER = (r) -> r.drawItemStack(itemStack);
 
 	/**
@@ -82,7 +87,7 @@ public class UIImage extends UIComponent
 	 */
 	public UIImage setIcon(GuiIcon icon)
 	{
-		this.itemStack = null;
+		itemStack = null;
 		this.icon = icon;
 		setForeground(ICON_RENDER);
 		return this;
@@ -96,7 +101,7 @@ public class UIImage extends UIComponent
 	 */
 	public UIImage setItemStack(ItemStack itemStack)
 	{
-		this.icon = null;
+		icon = null;
 		this.itemStack = itemStack;
 		setSize(ITEMSTACK_SIZE);
 		setForeground(IS_RENDER);
@@ -130,7 +135,7 @@ public class UIImage extends UIComponent
 	 * @param size the new size
 	 */
 	@Override
-	public void setSize(ISize size)
+	public void setSize(@Nonnull ISize size)
 	{
 		//UIImage for itemStack have a fixed 16*16 size
 		if (itemStack != null)
@@ -142,6 +147,61 @@ public class UIImage extends UIComponent
 	public String getPropertyString()
 	{
 		return ObjectUtils.firstNonNull(itemStack, icon) + " " + super.getPropertyString();
+	}
+
+	public static UIImageBuilder builder()
+	{
+		return new UIImageBuilder();
+	}
+
+	public static class UIImageBuilder extends UIComponentBuilder<UIImageBuilder, UIImage>
+	{
+		protected GuiIcon icon;
+		protected ItemStack itemStack;
+
+		protected UIImageBuilder()
+		{
+		}
+
+		public UIImageBuilder icon(GuiIcon icon)
+		{
+			this.icon = icon;
+			itemStack = null;
+			return this;
+		}
+
+		public UIImageBuilder texture(GuiTexture texture)
+		{
+			icon = new GuiIcon(texture);
+			itemStack = null;
+			return this;
+		}
+
+		public UIImageBuilder itemStack(ItemStack itemStack)
+		{
+			this.itemStack = itemStack;
+			icon = null;
+			return this;
+		}
+
+		public UIImageBuilder item(Item item)
+		{
+			itemStack = new ItemStack(item);
+			icon = null;
+			return this;
+		}
+
+		@Override
+		public UIImage build()
+		{
+			UIImage image = build(new UIImage((GuiIcon) null));
+			if (icon != null)
+				image.setIcon(icon);
+			if (itemStack != null)
+				image.setItemStack(itemStack);
+
+			return image;
+		}
 	}
 
 }

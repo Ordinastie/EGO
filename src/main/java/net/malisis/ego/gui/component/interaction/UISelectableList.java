@@ -25,7 +25,7 @@ public class UISelectableList<T> extends UIListContainer<T> implements IValueCha
 	@SuppressWarnings("unchecked")
 	private void applyEventToElements()
 	{
-		componentElements.values().forEach(c -> c.onClick(e -> {
+		componentElements.values().forEach(c -> c.onLeftClick(e -> {
 			select((T) c.getData());
 			return true;
 		}));

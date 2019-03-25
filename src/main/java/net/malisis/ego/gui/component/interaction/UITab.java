@@ -37,7 +37,7 @@ import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
-import net.malisis.ego.gui.event.MouseEvent.MouseClick;
+import net.malisis.ego.gui.event.MouseEvent.MouseLeftClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
@@ -78,7 +78,6 @@ public class UITab extends UIComponent implements IContentHolder
 		setAutoSize();
 
 		setBackground(GuiShape.builder(this).icon(this::getIcon).color(this::getColor).border(3).build());
-		setForeground(this::content);
 	}
 
 	/**
@@ -116,6 +115,7 @@ public class UITab extends UIComponent implements IContentHolder
 		content.setParent(this);
 		content.setPosition(Position.middleCenter(content));
 		contentSize = content.size().plus(Size.of(6, 6));
+		setForeground(content);
 	}
 
 	public void setText(String text)
@@ -287,7 +287,7 @@ public class UITab extends UIComponent implements IContentHolder
 
 		UITab old = tabGroup().activeTab();
 		tabGroup().setActiveTab(this);
-		fireEvent(button == MouseButton.LEFT ? new MouseClick<>(this) : new MouseRightClick<>(this));
+		fireEvent(button == MouseButton.LEFT ? new MouseLeftClick<>(this) : new MouseRightClick<>(this));
 		fireEvent(new TabChangeEvent(this, old));
 	}
 

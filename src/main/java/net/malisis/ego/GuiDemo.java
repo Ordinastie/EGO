@@ -1,8 +1,6 @@
 package net.malisis.ego;
 
-import static net.malisis.ego.gui.element.position.Positions.bottomAligned;
 import static net.malisis.ego.gui.element.position.Positions.centered;
-import static net.malisis.ego.gui.element.position.Positions.middleAligned;
 import static net.malisis.ego.gui.element.position.Positions.middleAlignedTo;
 import static net.malisis.ego.gui.element.position.Positions.rightOf;
 import static net.malisis.ego.gui.element.position.Positions.topAligned;
@@ -25,7 +23,6 @@ import net.malisis.ego.gui.component.control.UIResizeHandle;
 import net.malisis.ego.gui.component.decoration.UIImage;
 import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.decoration.UIProgressBar;
-import net.malisis.ego.gui.component.decoration.UITooltip;
 import net.malisis.ego.gui.component.interaction.UIButton;
 import net.malisis.ego.gui.component.interaction.UICheckBox;
 import net.malisis.ego.gui.component.interaction.UIPasswordField;
@@ -40,8 +37,6 @@ import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
-import net.malisis.ego.gui.text.GuiText;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -64,9 +59,6 @@ public class GuiDemo extends MalisisGui
 	private UIContainer panel;
 	private UITab tabSlider;
 	private UIProgressBar bar;
-	private UIButton btnL, btnR, btnHorizontal;
-	private UIRadioButton rbMC, rbBS, rbH;
-	private UICheckBox cb;
 	private UISelect<String> select;
 	private int selectSize = 100;
 	private int currentSize = 100;
@@ -79,20 +71,8 @@ public class GuiDemo extends MalisisGui
 
 	private UIComponent debug()
 	{
-		UIContainer window = UIContainer.window();
-		window.setSize(Size.of(400, 210));
 
-		//RadioButton with custom fonts
-		UIButton button = new UIButton();
-		GuiText.builder().bind("zindex", button::zIndex);
-		button.onClick(() -> panel.setZIndex(panel.zIndex() + (GuiScreen.isCtrlKeyDown() ? -25 : 25)));
-
-		cb = new UICheckBox("CheckBox with label");
-		cb.setPosition(Position.of(centered(cb, 0), middleAligned(cb, -10)));
-		cb.setTooltip(new UITooltip(TextFormatting.AQUA + "with delayed a tooltip!", 5));
-
-		window.add(cb);
-		return window;
+		return null;
 	}
 
 	@Override
@@ -105,10 +85,11 @@ public class GuiDemo extends MalisisGui
 			return;
 		}
 
-		UIContainer window = UIContainer.window();
-		window.setSize(Size.of(400, 240));
 		//allow contents to be drawn outside of the window's borders
-		window.setClipContent(false);
+		UIContainer window = UIContainer.window()
+										.size(400, 240)
+										.noClipContent()
+										.build();
 
 		//get the first parent
 		UIContainer panel1 = panel1();
@@ -120,13 +101,17 @@ public class GuiDemo extends MalisisGui
 		//UIContainer listPanel = listPanel();
 
 		//create a panel to hold the containers
-		panel = UIContainer.panel();
-		panel.setSize(Size.of(parentWidth(panel, 1.0F, 0), 140));
+		panel = UIContainer.panel()
+						   .size(p -> parentWidth(p, 1.0F, 0), 140)
+						   .build();
 
 		//create the tabs for the containers
-		UIImage img = new UIImage(new ItemStack(Blocks.END_BRICKS));
+		UIImage img = UIImage.builder()
+							 .itemStack(new ItemStack(Blocks.END_BRICKS))
+							 .build();
 		UITab tab1 = new UITab(img);
-		tab1.size().width();
+		tab1.size()
+			.width();
 		UITab tab2 = new UITab("Inputs");
 		tab2.setColor(0xCCCCFF);
 		tab2.setActive(true);
@@ -168,37 +153,66 @@ public class GuiDemo extends MalisisGui
 
 	private UIContainer panel1()
 	{
-		UIImage img = new UIImage(GuiIcon.from(Items.DIAMOND_HORSE_ARMOR));
+		UIContainer tabCont1 = UIContainer.builder()
+										  .name("Panel 1")
+										  .build();
+
+		UIImage img = UIImage.builder()
+							 .parent(tabCont1)
+							 .icon(GuiIcon.from(Items.DIAMOND_HORSE_ARMOR))
+							 .build();
 		//Colored Label
-		UILabel label1 = new UILabel(TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + "Colored label!");
-		label1.setPosition(Position.rightOf(label1, img, 4));
+		UILabel label1 = UILabel.builder()
+								.parent(tabCont1)
+								.text("Colored label!")
+								.color(TextFormatting.YELLOW)
+								.underline()
+								.position(l -> Position.rightOf(l, img, 4))
+								.build();
 
 		//progress bar
 		bar = new UIProgressBar(Size.of(16, 16), GuiIcon.from(Items.IRON_PICKAXE), GuiIcon.from(Items.DIAMOND_PICKAXE));
 		bar.setPosition(Position.below(bar, img, 2));
 		bar.setVertical();
-		//Smaller label with FontRenderOptions
-		FontOptions fontOptions = FontOptions.builder().scale(2F / 3F).color(0x660066).build();
-		UILabel smallLabel = new UILabel("Smaller label!");
-		smallLabel.setPosition(Position.rightOf(smallLabel, bar, 4));
-		smallLabel.setFontOptions(fontOptions);
-		smallLabel.setTooltip("Testing label tooltip.");
+
+		UILabel.builder()
+			   .parent(tabCont1)
+			   .text("Smaller label!")
+			   .position(l -> Position.rightOf(l, bar, 4))
+			   .color(0x660066)
+			   .scale(2F / 3F)
+			   .tooltip("Testing label tooltip.")
+			   .build();
 
 		//CheckBox
-		cb = new UICheckBox("CheckBox with label");
-		cb.setPosition(Position.below(cb, bar, 2));
-		cb.setTooltip(new UITooltip(TextFormatting.AQUA + "with delayed a tooltip!", 5));
+		UICheckBox cb = UICheckBox.builder()
+								  .parent(tabCont1)
+								  .text("CheckBox with label")
+								  .position(c -> Position.below(c, bar, 2))
+								  .tooltip(TextFormatting.AQUA + "with delayed a tooltip!")
+								  .build();
 
 		//RadioButton with custom fonts
-		rbMC = new UIRadioButton("newRb", "MF");
-		rbMC.setPosition(Position.below(rbMC, cb, 2));
-		rbMC.setSelected();
-		//rbMC.setFont(fontMC);
-		rbBS = new UIRadioButton("newRb", "BS");
-		rbBS.setPosition(Position.rightOf(rbBS, rbMC, 5));
-		//rbBS.setFont(fontBS);
-		rbH = new UIRadioButton("newRb", "H");
-		rbH.setPosition(Position.rightOf(rbH, rbBS, 5));
+		UIRadioButton rbMC = UIRadioButton.builder("newRb")
+										  .parent(tabCont1)
+										  .text("MF")
+										  .position(rb -> Position.below(rb, cb, 2))
+										  .select()
+										  .build();
+
+		UIRadioButton rbBS = UIRadioButton.builder("newRb")
+										  .parent(tabCont1)
+										  .text("BS")
+										  .position(rb -> Position.rightOf(rb, rbMC, 5))
+										  .select()
+										  .build();
+
+		UIRadioButton.builder("newRb")
+					 .parent(tabCont1)
+					 .text("H")
+					 .position(rb -> Position.rightOf(rb, rbBS, 5))
+					 .select()
+					 .build();
 
 		//Select
 		select = new UISelect<>(100,
@@ -217,48 +231,44 @@ public class GuiDemo extends MalisisGui
 		//select.setColors(0x660000, 0xFFCCCC, 0xFF0000, 0x999999, 0x6600CC, 0x664444, false);
 
 		//uiselect size change button
-		UIButton selectSizeButton = new UIButton("<-");
-		selectSizeButton.setPosition(Position.rightOf(selectSizeButton, select, 5));
-		selectSizeButton.setSize(Size.of(12, 12));
-		selectSizeButton.onClick(() -> {
-			currentSize += 20;
-			if (currentSize > 190)
-				currentSize = selectSize;
-			select.setSize(Size.of(currentSize, 12));
-		});
+		UIButton.builder()
+				.parent(tabCont1)
+				.text("<-")
+				.position(b -> Position.rightOf(b, select, 5))
+				.size(12, 12)
+				.onClick(() -> {
+					currentSize += 20;
+					if (currentSize > 190)
+						currentSize = selectSize;
+					select.setSize(Size.of(currentSize, 12));
+				})
+				.build();
 
 		//3 Buttons
-		btnHorizontal = new UIButton("Horizontal");
-		btnHorizontal.setPosition(Position.of(centered(btnHorizontal, 0), bottomAligned(btnHorizontal, 5)));
-		btnHorizontal.setSize(Size.of(90, 20));
-		btnHorizontal.setEnabled(true);
-		btnL = new UIButton("O");
-		btnL.setPosition(Position.leftOf(btnL, btnHorizontal, 1));
-		btnL.setSize(Size.of(10, 10));
-		btnR = new UIButton("O");
-		btnR.setPosition(Position.rightOf(btnR, btnHorizontal, 1));
-		btnR.setSize(Size.of(10, 10));
+		UIButton btnHorizontal = UIButton.builder()
+										 .parent(tabCont1)
+										 .text("Horizontal")
+										 .position(Position::bottomCenter)
+										 .size(90, 20)
+										 .build();
+
+		UIButton.builder()
+				.parent(tabCont1)
+				.text("O")
+				.position(b -> Position.leftOf(b, btnHorizontal, 1))
+				.size(10, 10)
+				.build();
+
+		UIButton.builder()
+				.parent(tabCont1)
+				.text("O")
+				.position(b -> Position.rightOf(b, btnHorizontal, 1))
+				.size(10, 10)
+				.build();
 
 		//Add all elements
-		UIContainer tabCont1 = new UIContainer();
-		tabCont1.setName("Panel 1");
-
-		tabCont1.add(img);
-		tabCont1.add(label1);
 		tabCont1.add(bar);
-		tabCont1.add(smallLabel);
-
-		tabCont1.add(cb);
-		tabCont1.add(rbMC);
-		tabCont1.add(rbBS);
-		tabCont1.add(rbH);
-
 		tabCont1.add(select);
-		tabCont1.add(selectSizeButton);
-
-		tabCont1.add(btnHorizontal);
-		tabCont1.add(btnL);
-		tabCont1.add(btnR);
 
 		//Create 5 buttons with itemStack as images
 		UIButton lastBtn = null;
@@ -268,21 +278,28 @@ public class GuiDemo extends MalisisGui
 									  Items.COOKED_CHICKEN,
 									  Item.getItemFromBlock(Blocks.GLASS_PANE) })
 		{
-			img = new UIImage(new ItemStack(item));
-			UIContainer cont = new UIContainer();
-			cont.setSize(Size.sizeOfContent(cont, 0, 0));
-			UILabel lbl = new UILabel(item.getTranslationKey() + ".name");
-			lbl.setPosition(Position.rightOf(lbl, img, 2));
-			lbl.setFontOptions(FontOptions.builder().color(0xFFFFFF).shadow().scale(2 / 3F).build());
-			cont.add(img, lbl);
+			UIContainer cont = UIContainer.builder()
+										  .size(Size::sizeOfContent)
+										  .build();
+			UIImage i = UIImage.builder()
+							   .parent(cont)
+							   .item(item)
+							   .build();
 
-			UIButton btnImage = new UIButton(cont);
-			if (lastBtn == null)
-				btnImage.setPosition(Position.topRight(btnImage));
-			else
-				btnImage.setPosition(Position.below(btnImage, lastBtn, 1));
-			tabCont1.add(btnImage);
-			lastBtn = btnImage;
+			UILabel.builder()
+				   .parent(cont)
+				   .text(item.getTranslationKey() + ".name")
+				   .position(l -> Position.rightOf(l, i, 2))
+				   .color(0xFFFFFF)
+				   .shadow()
+				   .scale(2 / 3F)
+				   .build();
+
+			lastBtn = UIButton.builder()
+							  .parent(tabCont1)
+							  .content(cont)
+							  //				  .position(b -> lastBtn == null ? Position.topRight(b) : Position.below(b, lastBtn, 1))
+							  .build();
 		}
 
 		return tabCont1;
@@ -290,6 +307,10 @@ public class GuiDemo extends MalisisGui
 
 	private UIContainer textPanel()
 	{
+		UIContainer textTabCont = UIContainer.builder()
+											 .name("Text tab")
+											 .build();
+
 		//Textfield
 		UITextField tf = new UITextField("This is a textfield. You can type in it.");
 		tf.setSize(Size.of(parentWidth(tf, 0.5F, -5), 14));
@@ -297,15 +318,23 @@ public class GuiDemo extends MalisisGui
 		//tf.setOptions(0x660000, 0xFFCCCC, 0x770000, 0xFF0000, false);
 
 		//Password
-		UILabel pwdLabel = new UILabel("Password :");
-		pwdLabel.setPosition(Position.below(pwdLabel, tf, 5));
+		UILabel pwdLabel = UILabel.builder()
+								  .parent(textTabCont)
+								  .text("Password :")
+								  .position(l -> Position.below(l, tf, 5))
+								  .build();
 		UIPasswordField pwd = new UIPasswordField();
 		pwd.setPosition(Position.rightOf(pwd, pwdLabel, 4));
-		pwd.setSize(Size.of(() -> tf.size().width() - pwdLabel.size().width() - 4, 14));
+		pwd.setSize(Size.of(() -> tf.size()
+									.width() - pwdLabel.size()
+													   .width() - 4, 14));
 		pwd.setAutoSelectOnFocus(true);
 
 		//Multiline Textfield with FontRendererOptions
-		FontOptions fontOptions = FontOptions.builder().scale(2F / 3F).color(0x006600).build();
+		FontOptions fontOptions = FontOptions.builder()
+											 .scale(2F / 3F)
+											 .color(0x006600)
+											 .build();
 		//		UITextArea mltf = new UITextArea();
 		//		mltf.setPosition(Position.below(mltf, pwd, 5));
 		//		mltf.setSize(Size.of(Sizes.relativeWidth(mltf, 0.5f, -2), 50));
@@ -354,36 +383,38 @@ public class GuiDemo extends MalisisGui
 		//tf.setSize(Size.of(Sizes.widthRelativeTo(mltf, 1.0F, 0), 12));
 
 		//Multiline label
-		fontOptions = FontOptions.builder().scale(2F / 3F).color(0x338899).build();
-		UILabel ipsum = new UILabel(true);
-		ipsum.setPosition(Position.topRight(ipsum));
-		ipsum.setSize(Size.of(parentWidth(ipsum, .5f, -5), parentHeight(ipsum, 1.0f, 0)));
-		//ipsum.setSize(Size.of(	() -> ipsum.getParent() != null ? ipsum.getParent().size().width() - mltf.size().width() - 4 : 0,
-		//						Sizes.relativeHeight(ipsum, 1.0F, 0)));
-		ipsum.setText(TextFormatting.UNDERLINE + "Contrairement à une opinion répandue, " + TextFormatting.BOLD
-							  + "le Lorem Ipsum n'est pas simplement du texte aléatoire" + TextFormatting.RESET
-							  + ". Il trouve ses racines dans une oeuvre de la littérature latine classique" + TextFormatting.AQUA
-							  + " datant de 45 av. J.-C., le rendant" + TextFormatting.RESET + " vieux de 2000 ans. " + TextFormatting.BLUE
-							  + "Un professeur du " + TextFormatting.RESET + "Hampden-Sydney College" + TextFormatting.BLUE
-							  + ", en Virginie, s'est intéressé" + TextFormatting.RESET + " à un des mots latins les plus obscurs, "
-							  + TextFormatting.UNDERLINE + TextFormatting.DARK_RED + "consectetur" + TextFormatting.RESET
-							  + ", extrait d'un passage du Lorem Ipsum, et en étudiant tous les usages de ce mot dans la littérature "
-							  + "classique, découvrit la source incontestable du Lorem Ipsum. Il provient en fait des sections 1.10.32 et "
-							  + "1.10.33 du \"De Finibus Bonorum et Malorum\" (Des Suprêmes Biens et des Suprêmes Maux) de Cicéron. Cet "
-							  + "ouvrage, très populaire pendant la Renaissance, est un traité sur la théorie de l'éthique. Les premières "
-							  + "lignes du Lorem Ipsum, \"Lorem ipsum dolor sit amet...\", proviennent de la section 1.10.32");
-		ipsum.setFontOptions(fontOptions);
-		//ipsum.setFont(new MalisisFont(new ResourceLocation(MalisisDemos.modid + ":fonts/HoboStd.otf")));
+		UILabel ipsum = UILabel.builder()
+							   .parent(textTabCont)
+							   .position(Position::topRight)
+							   .size(l -> parentWidth(l, .5f, -5), l -> parentHeight(l, 1.0f, 0))
+							   .text(TextFormatting.UNDERLINE + "Contrairement à une opinion répandue, " + TextFormatting.BOLD
+											 + "le Lorem Ipsum n'est pas simplement du texte aléatoire" + TextFormatting.RESET
+											 + ". Il trouve ses racines dans une oeuvre de la littérature latine classique"
+											 + TextFormatting.AQUA + " datant de 45 av. J.-C., le rendant" + TextFormatting.RESET
+											 + " vieux de 2000 ans. " + TextFormatting.BLUE + "Un professeur du " + TextFormatting.RESET
+											 + "Hampden-Sydney College" + TextFormatting.BLUE + ", en Virginie, s'est intéressé"
+											 + TextFormatting.RESET + " à un des mots latins les plus obscurs, " + TextFormatting.UNDERLINE
+											 + TextFormatting.DARK_RED + "consectetur" + TextFormatting.RESET
+											 + ", extrait d'un passage du Lorem Ipsum, et en étudiant tous les usages de ce mot dans la "
+											 + "littérature "
+											 + "classique, découvrit la source incontestable du Lorem Ipsum. Il provient en fait des "
+											 + "sections 1.10.32 et "
+											 + "1.10.33 du \"De Finibus Bonorum et Malorum\" (Des Suprêmes Biens et des Suprêmes Maux) de "
+											 + "Cicéron. Cet "
+											 + "ouvrage, très populaire pendant la Renaissance, est un traité sur la théorie de l'éthique."
+											 + " Les premières "
+											 + "lignes du Lorem Ipsum, \"Lorem ipsum dolor sit amet...\", proviennent de la section 1.10"
+											 + ".32")
+							   .scale(2F / 3F)
+							   .color(0x338899)
+							   .build();
 		new UISlimScrollbar(ipsum, UIScrollBar.Type.VERTICAL);
 
 		//Add all elements
-		UIContainer textTabCont = new UIContainer();
-		textTabCont.setName("Text Tab");
+
 		textTabCont.add(tf);
-		textTabCont.add(pwdLabel);
 		textTabCont.add(pwd);
 		//textTabCont.add(mltf);
-		textTabCont.add(ipsum);
 
 		//Add the block's inventory's slots directly into the parent
 		//		UIInventory invCont = new UIInventory("Block's inventory", inventoryContainer.getInventory(0));
@@ -395,10 +426,13 @@ public class GuiDemo extends MalisisGui
 	UISlider<Integer> sliderRed;
 	UISlider<Integer> sliderGreen;
 	UISlider<Integer> sliderBlue;
-	UILabel sliderColorLabel;
 
 	private UIContainer sliderPanel()
 	{
+		UIContainer sliderPanel = UIContainer.builder()
+											 .name("Slider Tab")
+											 .build();
+
 		//Sliders with event caught to change the panel background color
 		Converter<Float, Integer> colorConv = Converter.from(f -> (int) (f * 255), i -> (float) i / 255);
 		sliderRed = new UISlider<>(150, colorConv, "{slider.red} {value}");
@@ -417,33 +451,37 @@ public class GuiDemo extends MalisisGui
 		sliderBlue.setValue(255);
 		sliderBlue.setScrollStep(1 / 255F);
 
-		sliderColorLabel = new UILabel(GuiText.builder().text("Color : {COLOR}").bind("COLOR", tabSlider::getColor).build());
-		sliderColorLabel.setPosition(Position.rightOf(sliderColorLabel, sliderRed, 2));
+		UILabel colorLabel = UILabel.builder()
+									.parent(sliderPanel)
+									.text("Color : {COLOR}")
+									.position(l -> Position.rightOf(l, sliderRed, 2))
+									.bind("COLOR", tabSlider::getColor)
+									.build();
 
-		UIButton invertButton = new UIButton("Invert");
-		invertButton.setPosition(Position.rightOf(invertButton, sliderGreen, 2));
-		invertButton.setSize(Size.of(widthRelativeTo(sliderColorLabel, 1.0F, 0), heightRelativeTo(sliderBlue, 1.0F, 0)));
-		invertButton.onClick(() -> {
-			sliderRed.setValue(255 - sliderRed.getValue());
-			sliderGreen.setValue(255 - sliderGreen.getValue());
-			sliderBlue.setValue(255 - sliderBlue.getValue());
-		});
+		UIButton.builder()
+				.parent(sliderPanel)
+				.text("Invert")
+				.position(b -> Position.rightOf(b, sliderGreen, 2))
+				.size(b -> Size.of(widthRelativeTo(colorLabel, 1.0F, 0), heightRelativeTo(sliderBlue, 1.0F, 0)))
+				.onClick(() -> {
+					sliderRed.setValue(255 - sliderRed.getValue());
+					sliderGreen.setValue(255 - sliderGreen.getValue());
+					sliderBlue.setValue(255 - sliderBlue.getValue());
+				})
+				.build();
 
 		//Slider with custom values with days of the week
 		Converter<Float, DayOfWeek> dayConv = Converter.from(f -> DayOfWeek.values()[Math.round(f * 6)], d -> (float) d.ordinal() / 6);
 		UISlider<DayOfWeek> sliderDay = new UISlider<>(70, dayConv, "{value}");
 		sliderDay.setPosition(Position.of(centered(sliderDay, 0), topAligned(sliderDay, 64)));
 		sliderDay.setSize(Size.of(240, 30));
-		sliderDay.setValue(LocalDate.now().getDayOfWeek());
+		sliderDay.setValue(LocalDate.now()
+									.getDayOfWeek());
 		sliderDay.setScrollStep(1 / 6F);
 
-		UIContainer sliderPanel = new UIContainer();
-		sliderPanel.setName("Slider Tab");
 		sliderPanel.add(sliderRed);
 		sliderPanel.add(sliderGreen);
 		sliderPanel.add(sliderBlue);
-		sliderPanel.add(sliderColorLabel);
-		sliderPanel.add(invertButton);
 		sliderPanel.add(sliderDay);
 
 		return sliderPanel;
@@ -471,30 +509,39 @@ public class GuiDemo extends MalisisGui
 					ItemStack is = new ItemStack(item);
 					setName(is.getDisplayName());
 					setSize(Size.of(parentWidth(this, 1.0F, 0), 20));
-					setBackground(GuiShape.builder(this).color(0xFFFFFF).border(1, 0x6666DD).build());
+					setBackground(GuiShape.builder(this)
+										  .color(0xFFFFFF)
+										  .border(1, 0x6666DD)
+										  .build());
 
 					UIImage img = new UIImage(is);
 					img.setPosition(Position.middleCenter(this));
 					add(img);
 
-					UILabel label = new UILabel(is.getDisplayName() + ".name");
-					label.setPosition(Position.of(rightOf(img, 4), middleAlignedTo(label, img, 0)));
-					add(label);
+					UILabel.builder()
+						   .parent(this)
+						   .text(is.getDisplayName() + ".name")
+						   .position(rightOf(img, 4), l -> middleAlignedTo(l, img, 0))
+						   .build();
 
-					UIButton btn1 = new UIButton("1");
-					btn1.setPosition(Position.topRight(btn1));
-					btn1.setSize(Size.of(15, 10));
-					btn1.attachData(1);
-					add(btn1);
+					UIButton.builder()
+							.parent(this)
+							.text("1")
+							.position(Position::topRight)
+							.size(15, 10)
+							.data(1)
+							.build();
 
 					int stackSize = is.getMaxStackSize();
 					if (stackSize != 1)
 					{
-						UIButton btn2 = new UIButton("" + stackSize);
-						btn2.setPosition(Position.bottomRight(btn2));
-						btn2.setSize(Size.of(15, 10));
-						btn2.attachData(stackSize);
-						add(btn2);
+						UIButton.builder()
+								.parent(this)
+								.text("" + stackSize)
+								.position(Position::bottomRight)
+								.size(15, 10)
+								.data(stackSize)
+								.build();
 					}
 
 				}

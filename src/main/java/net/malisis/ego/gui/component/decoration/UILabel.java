@@ -25,7 +25,9 @@
 package net.malisis.ego.gui.component.decoration;
 
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.element.IClipable;
@@ -33,7 +35,11 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.text.GuiText.Builder;
+import net.malisis.ego.gui.text.ITextBuilder;
 import net.minecraft.util.text.TextFormatting;
+
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
@@ -48,63 +54,20 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 	protected boolean autoSize = false;
 	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
 
-	public UILabel(GuiText text)
-	{
-		this.text = text;
-		text.setParent(this);
-		setAutoSize();
-		setForeground(this.text);
-	}
-
 	/**
 	 * Instantiates a new {@link UILabel}.
 	 *
-	 * @param text the text
-	 * @param multiLine the multiLine
+	 * @param builder
+	 * @param autoSize
 	 */
-	public UILabel(String text, boolean multiLine)
+	protected UILabel(GuiText.Builder builder, boolean autoSize)
 	{
-		this.text = GuiText.builder()
-						   .parent(this)
-						   .multiLine(multiLine)
-						   .literal(false)
-						   .translated(true)
-						   .text(text)
-						   .fontOptions(FontOptions.builder().color(0x444444).build())
-						   .wrapSize(() -> autoSize ? 0 : innerSize().width())
-						   .build();
-
-		setAutoSize();
-		setForeground(this.text);
-
-	}
-
-	/**
-	 * Instantiates a new {@link UILabel}.
-	 *
-	 * @param text the text
-	 */
-	public UILabel(String text)
-	{
-		this(text, text.contains("\r") || text.contains("\n"));
-	}
-
-	/**
-	 * Instantiates a new {@link UILabel}.
-	 *
-	 * @param multiLine the multi line
-	 */
-	public UILabel(boolean multiLine)
-	{
-		this("", multiLine);
-	}
-
-	/**
-	 * Instantiates a new {@link UILabel}.
-	 */
-	public UILabel()
-	{
-		this("", false);
+		builder.parent(this);
+		//autosize means label size matches text size
+		if (!autoSize)
+			builder.wrapSize(innerSize()::width); //label has custom size, wrap should match it
+		text = builder.build();
+		setForeground(text);
 	}
 
 	// #region getters/setters
@@ -142,17 +105,11 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 		return text.size();
 	}
 
-	public void setAutoSize()
-	{
-		setSize(Size.sizeOfContent(this, 0, 0));
-		autoSize = true;
-	}
-
 	@Override
 	public void setSize(@Nonnull ISize size)
 	{
 		super.setSize(size);
-		autoSize = false;
+		text.setWrapSize(innerSize().width());
 	}
 
 	@Override
@@ -179,6 +136,59 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 	public String getPropertyString()
 	{
 		return "[" + TextFormatting.DARK_AQUA + text + TextFormatting.RESET + "] " + super.getPropertyString();
+	}
+
+	public static UILabelBuilder builder()
+	{
+		return new UILabelBuilder();
+	}
+
+	public static class UILabelBuilder extends UIComponentBuilder<UILabelBuilder, UILabel> implements ITextBuilder<UILabelBuilder>
+	{
+		protected GuiText.Builder guiTextBuilder = GuiText.builder();
+		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
+		private boolean autoSize = true;
+
+		protected UILabelBuilder()
+		{
+			guiTextBuilder.wrapSize(0);
+			size(Size::sizeOfContent);
+		}
+
+		@Override
+		public UILabelBuilder size(Function<UILabel, ISize> func)
+		{
+			super.size(func);
+			autoSize = false;
+			return this;
+		}
+
+		@Override
+		public Builder getGuiTextBuilder()
+		{
+			return guiTextBuilder;
+		}
+
+		@Override
+		public FontOptionsBuilder getFontOptionsBuilder()
+		{
+			return fontOptionsBuilder;
+		}
+
+		@Override
+		public UILabelBuilder fontOptions(FontOptions fontOptions)
+		{
+			fontOptionsBuilder = fontOptions.toBuilder();
+			return this;
+		}
+
+		@Override
+		public UILabel build()
+		{
+			guiTextBuilder.fontOptions(fontOptionsBuilder.build());
+			return build(new UILabel(guiTextBuilder, autoSize));
+		}
+
 	}
 
 }

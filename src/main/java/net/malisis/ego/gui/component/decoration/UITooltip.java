@@ -63,8 +63,6 @@ public class UITooltip extends UIComponent implements IContentHolder
 		setSize(Size.sizeOfContent(this, 8, 4));
 
 		setBackground(GuiShape.builder(this).icon(GuiIcon.TOOLTIP).border(5).build());
-		setForeground(this::content);
-
 		//animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
 	}
 
@@ -103,6 +101,7 @@ public class UITooltip extends UIComponent implements IContentHolder
 			c.setParent(this);
 			c.setPosition(Position.of(centered(c, 0), middleAligned(c, 2)));
 		}
+		setForeground(content);
 	}
 
 	public void setText(String text)
