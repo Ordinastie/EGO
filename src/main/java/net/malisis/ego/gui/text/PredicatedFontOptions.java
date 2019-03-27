@@ -29,6 +29,7 @@ import net.malisis.ego.font.MalisisFont;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -39,24 +40,28 @@ public class PredicatedFontOptions extends FontOptions
 	private final List<Pair<Predicate<Object>, FontOptions>> suppliers;
 	private final Object param;
 
-	public PredicatedFontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic,
-			boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned,
-			List<Pair<Predicate<Object>, FontOptions>> suppliers, Object param)
+	public PredicatedFontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned, List<Pair<Predicate<Object>, FontOptions>> suppliers, Object param)
 	{
 		super(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing, rightAligned);
 		this.suppliers = suppliers;
 		this.param = param;
 	}
 
-	private FontOptions get()
+	private <T> T get(Function<FontOptions, T> func, T superValue)
 	{
-		return suppliers.stream().filter(p -> p.getLeft().test(param)).findFirst().map(Pair::getRight).orElse(this);
+		return suppliers.stream()
+						.filter(p -> p.getLeft()
+									  .test(param))
+						.findFirst()
+						.map(Pair::getRight)
+						.map(func)
+						.orElse(superValue);
 	}
 
 	@Override
 	public MalisisFont getFont()
 	{
-		return get().getFont();
+		return get(FontOptions::getFont, super.getFont());
 	}
 
 	/**
@@ -67,7 +72,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public float getFontScale()
 	{
-		return get().getFontScale();
+		return get(FontOptions::getFontScale, super.getFontScale());
 	}
 
 	/**
@@ -78,7 +83,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public boolean isBold()
 	{
-		return get().isBold();
+		return get(FontOptions::isBold, super.isBold());
 	}
 
 	/**
@@ -89,7 +94,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public boolean isItalic()
 	{
-		return get().isItalic();
+		return get(FontOptions::isItalic, super.isItalic());
 	}
 
 	/**
@@ -100,7 +105,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public boolean isUnderline()
 	{
-		return get().isBold();
+		return get(FontOptions::isUnderline, super.isUnderline());
 	}
 
 	/**
@@ -111,7 +116,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public boolean isStrikethrough()
 	{
-		return get().isStrikethrough();
+		return get(FontOptions::isStrikethrough, super.isStrikethrough());
 	}
 
 	/**
@@ -122,7 +127,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public boolean isObfuscated()
 	{
-		return get().isObfuscated();
+		return get(FontOptions::isObfuscated, super.isObfuscated());
 	}
 
 	/**
@@ -133,7 +138,7 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public boolean hasShadow()
 	{
-		return get().hasShadow();
+		return get(FontOptions::hasShadow, super.hasShadow());
 	}
 
 	/**
@@ -144,12 +149,12 @@ public class PredicatedFontOptions extends FontOptions
 	@Override
 	public int getColor()
 	{
-		return get().getColor();
+		return get(FontOptions::getColor, super.getColor());
 	}
 
 	@Override
 	public boolean isRightAligned()
 	{
-		return get().isRightAligned();
+		return get(FontOptions::isRightAligned, super.isRightAligned());
 	}
 }
