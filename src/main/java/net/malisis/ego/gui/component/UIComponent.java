@@ -511,7 +511,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	}
 
 	@Override
-	public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler)
+	public <T extends GuiEvent<? extends UIComponent>> void register(Class<T> clazz, Predicate<T> handler)
 	{
 		eventHandler.register(clazz, handler);
 	}
