@@ -1,9 +1,7 @@
 package net.malisis.ego;
 
-import static net.malisis.ego.gui.element.position.Positions.centered;
 import static net.malisis.ego.gui.element.position.Positions.middleAlignedTo;
 import static net.malisis.ego.gui.element.position.Positions.rightOf;
-import static net.malisis.ego.gui.element.position.Positions.topAligned;
 import static net.malisis.ego.gui.element.size.Sizes.heightRelativeTo;
 import static net.malisis.ego.gui.element.size.Sizes.parentHeight;
 import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
@@ -29,6 +27,7 @@ import net.malisis.ego.gui.component.interaction.UIPasswordField;
 import net.malisis.ego.gui.component.interaction.UIRadioButton;
 import net.malisis.ego.gui.component.interaction.UISelect;
 import net.malisis.ego.gui.component.interaction.UISlider;
+import net.malisis.ego.gui.component.interaction.UISlider.UISliderBuilder;
 import net.malisis.ego.gui.component.interaction.UITab;
 import net.malisis.ego.gui.component.interaction.UITextField;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
@@ -89,6 +88,10 @@ public class GuiDemo extends MalisisGui
 		UIContainer window = UIContainer.window()
 										.size(400, 240)
 										.noClipContent()
+										.onLeftClick(e -> {
+											EGO.message("Clicked");
+											return false;
+										})
 										.build();
 
 		//get the first parent
@@ -435,21 +438,21 @@ public class GuiDemo extends MalisisGui
 
 		//Sliders with event caught to change the panel background color
 		Converter<Float, Integer> colorConv = Converter.from(f -> (int) (f * 255), i -> (float) i / 255);
-		sliderRed = new UISlider<>(150, colorConv, "{slider.red} {value}");
-		sliderRed.setSize(Size.of(150, 12));
-		sliderRed.setValue(255);
-		sliderRed.setScrollStep(1 / 255F);
-		sliderRed.onChange(this::calculateColor);
-		sliderGreen = new UISlider<>(150, colorConv, "{slider.green} {value}");
-		sliderGreen.setPosition(Position.below(sliderGreen, sliderRed, 2));
-		sliderGreen.setSize(Size.of(150, 12));
-		sliderGreen.setValue(255);
-		sliderGreen.setScrollStep(1 / 255F);
-		sliderBlue = new UISlider<>(150, colorConv, "{slider.blue} {value}");
-		sliderBlue.setPosition(Position.below(sliderBlue, sliderGreen, 2));
-		sliderBlue.setSize(Size.of(150, 12));
-		sliderBlue.setValue(255);
-		sliderBlue.setScrollStep(1 / 255F);
+		UISliderBuilder<Integer> builder = UISlider.builder(colorConv)
+												   .size(150, 12)
+												   .value(255)
+												   .scrollStep(1 / 255F)
+												   .onChange(this::calculateColor);
+		sliderRed = builder.text("{slider.red} {value}")
+						   .build();
+
+		sliderGreen = builder.text("{slider.green} {value}")
+							 .position(s -> Position.below(s, sliderRed, 2))
+							 .build();
+
+		sliderBlue = builder.text("{slider.green} {value}")
+							.position(s -> Position.below(s, sliderGreen, 2))
+							.build();
 
 		UILabel colorLabel = UILabel.builder()
 									.parent(sliderPanel)
@@ -472,12 +475,13 @@ public class GuiDemo extends MalisisGui
 
 		//Slider with custom values with days of the week
 		Converter<Float, DayOfWeek> dayConv = Converter.from(f -> DayOfWeek.values()[Math.round(f * 6)], d -> (float) d.ordinal() / 6);
-		UISlider<DayOfWeek> sliderDay = new UISlider<>(70, dayConv, "{value}");
-		sliderDay.setPosition(Position.of(centered(sliderDay, 0), topAligned(sliderDay, 64)));
-		sliderDay.setSize(Size.of(240, 30));
-		sliderDay.setValue(LocalDate.now()
-									.getDayOfWeek());
-		sliderDay.setScrollStep(1 / 6F);
+		UISlider<DayOfWeek> sliderDay = UISlider.builder(dayConv)
+												.position(Position::topCenter)
+												.size(240, 30)
+												.value(LocalDate.now()
+																.getDayOfWeek())
+												.scrollStep(1 / 6F)
+												.build();
 
 		sliderPanel.add(sliderRed);
 		sliderPanel.add(sliderGreen);
@@ -487,7 +491,6 @@ public class GuiDemo extends MalisisGui
 		return sliderPanel;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private UIContainer listPanel()
 	{
 		List<Item> items = ImmutableList.of(Items.APPLE,

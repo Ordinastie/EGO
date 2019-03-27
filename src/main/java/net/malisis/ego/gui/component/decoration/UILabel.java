@@ -25,9 +25,7 @@
 package net.malisis.ego.gui.component.decoration;
 
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.element.IClipable;
@@ -35,8 +33,7 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.text.GuiText;
-import net.malisis.ego.gui.text.GuiText.Builder;
-import net.malisis.ego.gui.text.ITextBuilder;
+import net.malisis.ego.gui.text.UITextComponentBuilder;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.function.Function;
@@ -51,27 +48,18 @@ import javax.annotation.Nonnull;
 public class UILabel extends UIComponent implements IScrollable, IClipable
 {
 	protected final GuiText text;
-	protected boolean autoSize = false;
 	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
 
 	/**
 	 * Instantiates a new {@link UILabel}.
-	 *
-	 * @param builder
-	 * @param autoSize
 	 */
-	protected UILabel(GuiText.Builder builder, boolean autoSize)
+	protected UILabel(UILabelBuilder builder)
 	{
-		builder.parent(this);
-		//autosize means label size matches text size
-		if (!autoSize)
-			builder.wrapSize(innerSize()::width); //label has custom size, wrap should match it
-		text = builder.build();
+		text = builder.buildText(this);
 		setForeground(text);
 	}
 
 	// #region getters/setters
-
 	@Override
 	public GuiText content()
 	{
@@ -143,14 +131,13 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 		return new UILabelBuilder();
 	}
 
-	public static class UILabelBuilder extends UIComponentBuilder<UILabelBuilder, UILabel> implements ITextBuilder<UILabelBuilder>
+	public static class UILabelBuilder extends UITextComponentBuilder<UILabelBuilder, UILabel>
 	{
-		protected GuiText.Builder guiTextBuilder = GuiText.builder();
-		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
 		private boolean autoSize = true;
 
 		protected UILabelBuilder()
 		{
+			//by default, label size spans to fit the text
 			guiTextBuilder.wrapSize(0);
 			size(Size::sizeOfContent);
 		}
@@ -164,29 +151,13 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 		}
 
 		@Override
-		public Builder getGuiTextBuilder()
-		{
-			return guiTextBuilder;
-		}
-
-		@Override
-		public FontOptionsBuilder getFontOptionsBuilder()
-		{
-			return fontOptionsBuilder;
-		}
-
-		@Override
-		public UILabelBuilder fontOptions(FontOptions fontOptions)
-		{
-			fontOptionsBuilder = fontOptions.toBuilder();
-			return this;
-		}
-
-		@Override
 		public UILabel build()
 		{
-			guiTextBuilder.fontOptions(fontOptionsBuilder.build());
-			return build(new UILabel(guiTextBuilder, autoSize));
+			UILabel label = build(new UILabel(this));
+			//autosize means label size matches text size
+			if (!autoSize)
+				wrapSize(label.innerSize()::width); //label has custom size, wrap should match it
+			return label;
 		}
 
 	}

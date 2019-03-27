@@ -1,6 +1,7 @@
 package net.malisis.ego.gui.event;
 
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -76,27 +77,56 @@ public abstract class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
 		}
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public interface IValueChangeEventRegister<T extends UIComponent, S> extends IEventRegister
 	{
-		@SuppressWarnings("unchecked")
 		public default void onPreChange(Predicate<ValueChange.Pre<T, S>> onChange)
 		{
 			register(ValueChange.Pre.class, (Predicate) onChange);
 		}
 
-		@SuppressWarnings("unchecked")
 		public default void onChange(Predicate<ValueChange.Post<T, S>> onChange)
 		{
 			register(ValueChange.Post.class, (Predicate) onChange);
 		}
 
-		@SuppressWarnings("unchecked")
 		public default void onChange(Consumer<S> onChange)
 		{
 			register(ValueChange.Post.class, e -> {
 				onChange.accept((S) e.getNewValue());
 				return true;
 			});
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public interface IValueChangeBuilder<BUILDER extends UIComponentBuilder<?, ?>, T extends UIComponent, S> extends IEventRegister
+	{
+		@SuppressWarnings("unchecked")
+		public default BUILDER self()
+		{
+			return (BUILDER) this;
+		}
+
+		public default BUILDER onPreChange(Predicate<ValueChange.Pre<T, S>> onChange)
+		{
+			register(ValueChange.Pre.class, (Predicate) onChange);
+			return self();
+		}
+
+		public default BUILDER onPostChange(Predicate<ValueChange.Post<T, S>> onChange)
+		{
+			register(ValueChange.Post.class, (Predicate) onChange);
+			return self();
+		}
+
+		public default BUILDER onChange(Consumer<S> onChange)
+		{
+			register(ValueChange.Post.class, e -> {
+				onChange.accept((S) e.getNewValue());
+				return true;
+			});
+			return self();
 		}
 	}
 }

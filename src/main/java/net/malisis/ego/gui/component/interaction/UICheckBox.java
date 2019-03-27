@@ -24,15 +24,12 @@
 
 package net.malisis.ego.gui.component.interaction;
 
-import static com.google.common.base.Preconditions.*;
-
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
@@ -40,21 +37,15 @@ import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
-import net.malisis.ego.gui.text.GuiText.Builder;
-import net.malisis.ego.gui.text.ITextBuilder;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
-
-import java.util.function.Function;
-
-import javax.annotation.Nonnull;
 
 /**
  * UICheckBox
  *
  * @author Ordinastie
  */
-public class UICheckBox extends UIComponent implements IContentHolder, IValueChangeEventRegister<UICheckBox, Boolean>
+public class UICheckBox extends UIComponent implements IContentHolder, IContentSetter, IValueChangeEventRegister<UICheckBox, Boolean>
 {
 	protected final FontOptions fontOptions = FontOptions.builder()
 														 .color(0x444444)
@@ -75,10 +66,19 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 		setSize(Size.sizeOfContent(this, 15, 4));
 
 		//Background
-		setBackground(GuiShape.builder(this).position(1, 0).size(12, 12).icon(GuiIcon.CHECKBOX_BG).build());
+		setBackground(GuiShape.builder(this)
+							  .position(1, 0)
+							  .size(12, 12)
+							  .icon(GuiIcon.CHECKBOX_BG)
+							  .build());
 
 		//Foreground
-		GuiShape overlay = GuiShape.builder(this).position(2, 1).size(10, 10).color(0xFFFFFF).alpha(80).build();
+		GuiShape overlay = GuiShape.builder(this)
+								   .position(2, 1)
+								   .size(10, 10)
+								   .color(0xFFFFFF)
+								   .alpha(80)
+								   .build();
 		GuiShape check = GuiShape.builder(this)
 								 .position(1, 1)
 								 .size(12, 10)
@@ -109,6 +109,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 	 *
 	 * @param content the content
 	 */
+	@Override
 	public void setContent(IContent content)
 	{
 		this.content = content;
@@ -221,54 +222,20 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 		return new UICheckBoxBuilder();
 	}
 
-	public static class UICheckBoxBuilder extends UIComponentBuilder<UICheckBoxBuilder, UICheckBox>
-			implements IValueChangeEventRegister<UICheckBox, Boolean>, ITextBuilder<UICheckBoxBuilder>
+	public static class UICheckBoxBuilder extends UIContentHolderBuilder<UICheckBoxBuilder, UICheckBox>
+			implements IValueChangeEventRegister<UICheckBox, Boolean>
 	{
-
-		protected GuiText.Builder guiTextBuilder;
-		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder()
-																	 .color(0x444444)
-																	 .when(UICheckBox::isHovered)
-																	 .color(0x777777)
-																	 .when(UICheckBox::isDisabled)
-																	 .color(0xCCCCCC)
-																	 .base();
-		protected Function<UICheckBox, FontOptionsBuilder> fontOptionsBuilderSupplier;
-
-		protected Function<UICheckBox, IContent> content;
-
 		protected boolean check;
 		protected boolean uncheck;
 
 		protected UICheckBoxBuilder()
 		{
-		}
-
-		@Override
-		public Builder getGuiTextBuilder()
-		{
-			if (guiTextBuilder == null)
-				guiTextBuilder = GuiText.builder();
-			return guiTextBuilder;
-		}
-
-		@Override
-		public FontOptionsBuilder getFontOptionsBuilder()
-		{
-			return fontOptionsBuilder;
-		}
-
-		@Override
-		public UICheckBoxBuilder fontOptions(@Nonnull FontOptions fontOptions)
-		{
-			fontOptionsBuilder = checkNotNull(fontOptions).toBuilder();
-			return this;
-		}
-
-		public UICheckBoxBuilder fontOptionsBuilder(@Nonnull Function<UICheckBox, FontOptionsBuilder> supplier)
-		{
-			fontOptionsBuilderSupplier = checkNotNull(supplier);
-			return this;
+			fontOptionsBuilder.color(0x444444)
+							  .when(UICheckBox::isHovered)
+							  .color(0x777777)
+							  .when(UICheckBox::isDisabled)
+							  .color(0xCCCCCC)
+							  .base();
 		}
 
 		public UICheckBoxBuilder check()
@@ -288,23 +255,12 @@ public class UICheckBox extends UIComponent implements IContentHolder, IValueCha
 		@Override
 		public UICheckBox build()
 		{
-			UICheckBox checkbox = build(new UICheckBox());
-			if (guiTextBuilder != null)
-			{
-				if (fontOptionsBuilderSupplier != null)
-					fontOptionsBuilder = fontOptionsBuilderSupplier.apply(checkbox);
-
-				content = b -> guiTextBuilder.fontOptions(fontOptionsBuilder.build(checkbox)).build();
-			}
-
-			if (content != null)
-				checkbox.setContent(content.apply(checkbox));
+			UICheckBox cb = build(new UICheckBox());
 			if (check)
-				checkbox.check();
+				cb.check();
 			if (uncheck)
-				checkbox.uncheck();
-
-			return checkbox;
+				cb.uncheck();
+			return cb;
 		}
 	}
 }

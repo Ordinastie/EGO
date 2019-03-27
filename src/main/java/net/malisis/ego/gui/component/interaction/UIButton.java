@@ -24,16 +24,13 @@
 
 package net.malisis.ego.gui.component.interaction;
 
-import static com.google.common.base.Preconditions.*;
-
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
@@ -44,21 +41,16 @@ import net.malisis.ego.gui.event.MouseEvent.MouseUp;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
-import net.malisis.ego.gui.text.GuiText.Builder;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
-
-import java.util.function.Function;
-
-import javax.annotation.Nonnull;
 
 /**
  * UIButton
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIButton extends UIComponent implements IContentHolder
+public class UIButton extends UIComponent implements IContentHolder, IContentSetter
 {
 	protected IPosition offsetPosition = Position.of(() -> isPressed() ? 1 : 0, () -> isPressed() ? 1 : 0);
 	protected IPosition contentPosition = null;
@@ -115,6 +107,7 @@ public class UIButton extends UIComponent implements IContentHolder
 	 *
 	 * @param content the content
 	 */
+	@Override
 	public void setContent(IContent content)
 	{
 		this.content = content;
@@ -231,59 +224,19 @@ public class UIButton extends UIComponent implements IContentHolder
 		return new UIButtonBuilder();
 	}
 
-	public static class UIButtonBuilder extends UIComponentBuilder<UIButtonBuilder, UIButton> implements IContentBuilder<UIButtonBuilder>
+	public static class UIButtonBuilder extends UIContentHolderBuilder<UIButtonBuilder, UIButton>
 	{
-		protected GuiText.Builder guiTextBuilder;
-		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder()
-																	 .color(0xFFFFFF)
-																	 .shadow()
-																	 .when(UIButton::isHovered)
-																	 .color(0xFFFFA0)
-																	 .when(UIButton::isDisabled)
-																	 .color(0xCCCCCC)
-																	 .base();
-		protected Function<UIButton, FontOptionsBuilder> fontOptionsBuilderSupplier;
-
-		protected Function<UIButton, IContent> content;
 		protected Runnable onClick;
-		protected Object data;
 
 		protected UIButtonBuilder()
 		{
-		}
-
-		@Override
-		public Builder getGuiTextBuilder()
-		{
-			if (guiTextBuilder == null)
-				guiTextBuilder = GuiText.builder();
-			return guiTextBuilder;
-		}
-
-		@Override
-		public FontOptionsBuilder getFontOptionsBuilder()
-		{
-			return fontOptionsBuilder;
-		}
-
-		@Override
-		public UIButtonBuilder fontOptions(@Nonnull FontOptions fontOptions)
-		{
-			fontOptionsBuilder = checkNotNull(fontOptions).toBuilder();
-			return this;
-		}
-
-		public UIButtonBuilder fontOptionsBuilder(@Nonnull Function<UIButton, FontOptionsBuilder> supplier)
-		{
-			fontOptionsBuilderSupplier = checkNotNull(supplier);
-			return this;
-		}
-
-		@Override
-		public UIButtonBuilder content(Function<UIButton, IContent> content)
-		{
-			this.content = checkNotNull(content);
-			return this;
+			optionsBuilder().color(0xFFFFFF)
+							.shadow()
+							.when(UIButton::isHovered)
+							.color(0xFFFFA0)
+							.when(UIButton::isDisabled)
+							.color(0xCCCCCC)
+							.base();
 		}
 
 		public UIButtonBuilder onClick(Runnable onClick)
@@ -292,31 +245,13 @@ public class UIButton extends UIComponent implements IContentHolder
 			return this;
 		}
 
-		public UIButtonBuilder data(Object data)
-		{
-			this.data = data;
-			return this;
-		}
-
 		@Override
 		public UIButton build()
 		{
 			UIButton button = build(new UIButton());
-			if (guiTextBuilder != null)
-			{
-				if (fontOptionsBuilderSupplier != null)
-					fontOptionsBuilder = fontOptionsBuilderSupplier.apply(button);
 
-				content = b -> guiTextBuilder.fontOptions(fontOptionsBuilder.build(button))
-											 .build();
-			}
-
-			if (content != null)
-				button.setContent(content.apply(button));
 			if (onClick != null)
 				button.onClick(onClick);
-			if (data != null)
-				button.attachData(data);
 
 			return button;
 		}

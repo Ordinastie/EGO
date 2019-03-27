@@ -78,8 +78,8 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		zIndex = 5;
 
 		parent.addControlComponent(this);
-		parent.onScrollWheel(this::scrollWheel);
-		parent.onKeyTyped(this::keyTyped);
+		//		parent.onScrollWheel(this::scrollWheel);
+		//		parent.onKeyTyped(this::keyTyped);
 
 		if (type == Type.VERTICAL)
 			verticalScrollbars.put(parent, this);
@@ -165,9 +165,13 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 			return super.isVisible();
 
 		if (isHorizontal())
-			return scrollable().contentSize().width() > parent().size().width();
+			return scrollable().contentSize()
+							   .width() > parent().size()
+												  .width();
 		else
-			return scrollable().contentSize().height() > parent().size().height();
+			return scrollable().contentSize()
+							   .height() > parent().size()
+												   .height();
 
 		//		if (hide == isEnabled() || offset < 0)
 		//			scrollTo(0);
@@ -261,12 +265,16 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		float offset = offset();
 		if (isHorizontal())
 		{
-			if (scrollable.contentSize().width() <= parent.size().width() - delta)
+			if (scrollable.contentSize()
+						  .width() <= parent.size()
+											.width() - delta)
 				hide = true;
 		}
 		else
 		{
-			if (scrollable.contentSize().height() <= parent.size().height() - delta)
+			if (scrollable.contentSize()
+						  .height() <= parent.size()
+											 .height() - delta)
 				hide = true;
 		}
 
@@ -364,14 +372,20 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	{
 		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = verticalScrollbars.get(component);
-		return scrollbar != null ? scrollbar.size().width() : 0; //always count the width even if it's not visible
+		return scrollbar != null ?
+			   scrollbar.size()
+						.width() :
+			   0; //always count the width even if it's not visible
 	}
 
 	public static int scrollbarHeight(Object component)
 	{
 		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = horizontalScrollbars.get(component);
-		return scrollbar != null ? scrollbar.size().height() : 0; //always count the height even if it's not visible
+		return scrollbar != null ?
+			   scrollbar.size()
+						.height() :
+			   0; //always count the height even if it's not visible
 	}
 
 	private class ScrollbarPosition implements IPosition
@@ -380,18 +394,23 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		public int x()
 		{
 			if (isHorizontal())
-				return Padding.of(getParent()).left();
+				return Padding.of(getParent())
+							  .left();
 			else
-				return getParent().size().width() - size().width() - Padding.of(getParent()).right();
+				return getParent().size()
+								  .width() - size().width() - Padding.of(getParent())
+																	 .right();
 		}
 
 		@Override
 		public int y()
 		{
 			if (isHorizontal())
-				return getParent().size().height() - size().height();
+				return getParent().size()
+								  .height() - size().height();
 			else
-				return Padding.of(getParent()).right();
+				return Padding.of(getParent())
+							  .right();
 		}
 
 		@Override
@@ -409,7 +428,8 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 			if (!isHorizontal())
 				return scrollThickness() + 2;
 
-			return getParent().innerSize().width();
+			return getParent().innerSize()
+							  .width();
 		}
 
 		@Override
@@ -418,7 +438,8 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 			if (isHorizontal())
 				return scrollThickness() + 2;
 
-			return getParent().innerSize().height();
+			return getParent().innerSize()
+							  .height();
 		}
 
 		@Override

@@ -34,12 +34,16 @@ import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.text.UITextComponentBuilder;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
+
+import java.util.function.Predicate;
 
 /**
  * @author Ordinastie
@@ -62,21 +66,16 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 	/** Converter from float (0-1 offset) to the value. */
 	protected Converter<Float, T> converter;
 
-	public UISlider(int width, Converter<Float, T> converter, String text)
+	protected UISlider(UISliderBuilder<T> builder, Converter<Float, T> converter)
 	{
 		this.converter = checkNotNull(converter);
+
+		builder.textBuilder()
+			   .bind("value", this::getValue)
+			   .position(this::textPosition, middleAligned(this, 0));
+
+		text = builder.buildText(this);
 		value = converter.convert(0F);
-
-		this.text = GuiText.builder()
-						   .parent(this)
-						   .text(text)
-						   .position(this::textPosition, o -> middleAligned(o, 0))
-						   .bind("value", this::getValue)
-						   .zIndex(this::zIndex)
-						   .fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().when(this::isHovered).color(0xFFFFA0).build())
-						   .build();
-
-		setSize(Size.of(width, 20));
 
 		GuiShape sliderShape = GuiShape.builder(this)
 									   .position(this::scrollPosition, 0)
@@ -84,8 +83,11 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 									   .icon(GuiIcon.SLIDER)
 									   .border(5)
 									   .build();
-		setBackground(GuiShape.builder(this).icon(GuiIcon.SLIDER_BG).build());
-		setForeground(this.text.and(sliderShape));
+
+		setBackground(GuiShape.builder(this)
+							  .icon(GuiIcon.SLIDER_BG)
+							  .build());
+		setForeground(text.and(sliderShape));
 	}
 
 	//#region Getters/Setters
@@ -101,6 +103,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 	 * @param value the value
 	 * @return this UI slider
 	 */
+	@SuppressWarnings("ConstantConditions")
 	public UISlider<T> setValue(T value)
 	{
 		if (this.value == value)
@@ -110,7 +113,8 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 			return this;
 
 		this.value = value;
-		offset = MathHelper.clamp(converter.reverse().convert(value), 0, 1);
+		offset = MathHelper.clamp(converter.reverse()
+										   .convert(value), 0, 1);
 
 		fireEvent(new ValueChange.Post<>(this, old, value));
 		return this;
@@ -139,7 +143,8 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 	public int textPosition()
 	{
 		int w = size().width(); //width
-		int tw = text.size().width(); //text width
+		int tw = text.size()
+					 .width(); //text width
 		int tx = (w - tw) / 2; //text x
 		int sx = scrollPosition(); //scroll x
 
@@ -214,5 +219,70 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 	{
 		return "[" + TextFormatting.GREEN + text + " | " + text.position() + "@" + text.size() + TextFormatting.RESET + "] "
 				+ super.getPropertyString();
+	}
+
+	public static <T> UISliderBuilder<T> builder(Converter<Float, T> converter)
+	{
+		return new UISliderBuilder<>(converter);
+	}
+
+	public static class UISliderBuilder<T> extends UITextComponentBuilder<UISliderBuilder<T>, UISlider<T>>
+			implements IValueChangeBuilder<UISliderBuilder<T>, UISlider<T>, T>
+	{
+		protected Converter<Float, T> converter;
+		protected float scrollStep = 0.05F;
+		protected T defaultValue = null;
+
+		protected UISliderBuilder(Converter<Float, T> converter)
+		{
+			this.converter = converter;
+			optionsBuilder().color(0xFFFFFF)
+							.shadow()
+							.when((Predicate<UISlider<T>>) UISlider::isHovered)
+							.color(0xFFFFA0)
+							.base();
+		}
+
+		@Override
+		public UISliderBuilder<T> self()
+		{
+			return this;
+		}
+
+		public UISliderBuilder<T> width(int width)
+		{
+			return size(width, 20);
+		}
+
+		public UISliderBuilder<T> scrollStep(float scrollStep)
+		{
+			checkArgument(scrollStep > 0 && scrollStep < 1);
+			this.scrollStep = scrollStep;
+			return this;
+		}
+
+		public UISliderBuilder<T> steps(int step)
+		{
+			checkArgument(step > 0);
+			scrollStep = 1F / step;
+			return this;
+		}
+
+		public UISliderBuilder<T> value(T value)
+		{
+			defaultValue = value;
+			return this;
+		}
+
+		@Override
+		public UISlider<T> build()
+		{
+			UISlider<T> slider = build(new UISlider<>(this, converter));
+			slider.setScrollStep(scrollStep);
+			if (defaultValue != null)
+				slider.setValue(defaultValue);
+
+			return slider;
+		}
 	}
 }

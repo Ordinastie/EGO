@@ -24,9 +24,6 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.size.Size;
@@ -34,9 +31,11 @@ import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+
 /**
  * @author Ordinastie
- *
  */
 public class UIProgressBar extends UIComponent
 {
@@ -67,8 +66,14 @@ public class UIProgressBar extends UIComponent
 		}
 
 		//backgroundIcon = new GuiIcon(MalisisGui.BLOCK_TEXTURE, (float) 0, (float) 0, (float) 1, (float) 1);
-		setBackground(GuiShape.builder(this).icon(backgroundIcon).build());
-		setForeground(GuiShape.builder(this).position(xSupplier, ySupplier).size(fillSize).icon(fillIcon).build());
+		setBackground(GuiShape.builder(this)
+							  .icon(backgroundIcon)
+							  .build());
+		setForeground(GuiShape.builder(this)
+							  .position(xSupplier, ySupplier)
+							  .size(fillSize)
+							  .icon(fillIcon)
+							  .build());
 	}
 
 	//by default, use furnace arrows
@@ -113,4 +118,5 @@ public class UIProgressBar extends UIComponent
 	{
 		return (float) getProgressLength() / (vertical ? size().height() : size().width());
 	}
+
 }

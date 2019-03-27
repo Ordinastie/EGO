@@ -37,7 +37,6 @@ import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIListContainer;
-import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
@@ -51,6 +50,7 @@ import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.text.GuiText;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Collection;
@@ -336,11 +336,18 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		public OptionsContainer()
 		{
 			//TODO: place it above if room below is too small
-			setPosition(Position.of(() -> UISelect.this.screenPosition().x(),
-									() -> UISelect.this.screenPosition().y() + UISelect.this.size().height()));
+			setPosition(Position.of(() -> UISelect.this.screenPosition()
+													   .x(),
+									() -> UISelect.this.screenPosition()
+													   .y() + UISelect.this.size()
+																		   .height()));
 			setSize(Size.of(widthRelativeTo(UISelect.this, 1.0F, 0), heightOfContent(this, 0)));
 			setZIndex(300);
-			setBackground(GuiShape.builder(this).color(UISelect.this::getColor).icon(GuiIcon.SELECT_BOX).border(1).build());
+			setBackground(GuiShape.builder(this)
+								  .color(UISelect.this::getColor)
+								  .icon(GuiIcon.SELECT_BOX)
+								  .border(1)
+								  .build());
 
 			hide();
 
@@ -457,8 +464,9 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 			}
 		}*/
 
-	public class Option extends UILabel implements IOptionComponent
+	public class Option extends UIComponent implements IOptionComponent
 	{
+		protected T element;
 		/** The default {@link FontOptions} to use for this {@link UISelect}. */
 		protected FontOptions fontOptions = FontOptions.builder()
 													   .color(0xFFFFFF)
@@ -468,19 +476,27 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 													   .when(this::isSelected)
 													   .color(0x9EA8DF)
 													   .build();
-		protected FontOptions selectedfontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 
-		GuiShape background = GuiShape.builder(this).color(0x5E789F).alpha(() -> isHovered() ? 255 : 0).build();
+		protected GuiText text = GuiText.builder()
+										.text(() -> stringFunction.apply(element))
+										.position(1, 1)
+										.fontOptions(fontOptions)
+										.build();
+
+		protected FontOptions selectedfontOptions = FontOptions.builder()
+															   .color(0xFFFFFF)
+															   .shadow()
+															   .build();
+
+		protected GuiShape background = GuiShape.builder(this)
+												.color(0x5E789F)
+												.alpha(() -> isHovered() ? 255 : 0)
+												.build();
 
 		public Option(T element)
 		{
-
-			text.setPosition(Position.of(1, 1));
-			text.setText(stringFunction.apply(element));
-			text.setFontOptions(fontOptions);
-
+			this.element = element;
 			attachData(element);
-
 			setSize(Size.of(parentWidth(this, 1.0F, 0), heightRelativeTo(text, 1.0F, 2)));
 
 			setBackground(background);

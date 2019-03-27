@@ -24,15 +24,18 @@
 
 package net.malisis.ego.gui.component.content;
 
+import static com.google.common.base.Preconditions.*;
+
+import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.decoration.UIImage;
-import net.malisis.ego.gui.component.interaction.UIButton;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
-import net.malisis.ego.gui.text.ITextBuilder;
+import net.malisis.ego.gui.text.UITextComponentBuilder;
 
 import java.util.function.Function;
 
@@ -53,28 +56,56 @@ public interface IContentHolder
 		return content() != null ? content().size() : Size.ZERO;
 	}
 
-	public static interface IContentBuilder<BUILDER> extends ITextBuilder<BUILDER>
+	public interface IContentSetter
 	{
-		public BUILDER content(Function<UIButton, IContent> content);
+		public void setContent(IContent content);
+	}
 
-		public default BUILDER image(UIImage image)
+	public abstract class UIContentHolderBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent & IContentSetter>
+			extends UITextComponentBuilder<BUILDER, COMPONENT>
+	{
+
+		protected Function<COMPONENT, IContent> content = this::buildText;
+
+		public BUILDER content(Function<COMPONENT, IContent> content)
+		{
+			this.content = checkNotNull(content);
+			return self();
+		}
+
+		public BUILDER image(UIImage image)
 		{
 			return content(image);
 		}
 
-		public default BUILDER content(IContent content)
+		public BUILDER content(IContent content)
 		{
 			return content(b -> content);
 		}
 
-		public default BUILDER icon(GuiIcon icon)
+		public BUILDER icon(GuiIcon icon)
 		{
-			return content(UIImage.builder().icon(icon).build());
+			return content(UIImage.builder()
+								  .icon(icon)
+								  .build());
 		}
 
-		public default BUILDER texture(GuiTexture texture)
+		public BUILDER texture(GuiTexture texture)
 		{
-			return content(UIImage.builder().icon(new GuiIcon(texture)).build());
+			return content(UIImage.builder()
+								  .icon(new GuiIcon(texture))
+								  .build());
+		}
+
+		@Override
+		protected COMPONENT build(COMPONENT component)
+		{
+			super.build(component);
+
+			if (content != null)
+				component.setContent(content.apply(component));
+
+			return component;
 		}
 	}
 }

@@ -24,15 +24,12 @@
 
 package net.malisis.ego.gui.component.interaction;
 
-import static com.google.common.base.Preconditions.*;
-
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
@@ -40,21 +37,16 @@ import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
-import net.malisis.ego.gui.text.GuiText.Builder;
-import net.malisis.ego.gui.text.ITextBuilder;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
-
-import javax.annotation.Nonnull;
 
 /**
  * @author Ordinastie
  */
-public class UIRadioButton extends UIComponent implements IContentHolder, IValueChangeEventRegister<UIRadioButton, Boolean>
+public class UIRadioButton extends UIComponent implements IContentHolder, IContentSetter, IValueChangeEventRegister<UIRadioButton, Boolean>
 {
 	//TODO:needs to cleared at some point
 	private final static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
@@ -91,7 +83,11 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 								 .icon(GuiIcon.forComponent(this, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED))
 								 .build();
 		//Overlay
-		GuiShape overlay = GuiShape.builder(this).position(2, 2).size(6, 6).alpha(80).build();
+		GuiShape overlay = GuiShape.builder(this)
+								   .position(2, 2)
+								   .size(6, 6)
+								   .alpha(80)
+								   .build();
 
 		setForeground(r -> {
 			if (isSelected())
@@ -118,6 +114,7 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 	 *
 	 * @param content the content
 	 */
+	@Override
 	public void setContent(IContent content)
 	{
 		this.content = content;
@@ -226,53 +223,20 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 		return new UIRadioButtonBuilder().name(name);
 	}
 
-	public static class UIRadioButtonBuilder extends UIComponentBuilder<UIRadioButton.UIRadioButtonBuilder, UIRadioButton>
-			implements IValueChangeEventRegister<UIRadioButton, Boolean>, ITextBuilder<UIRadioButton.UIRadioButtonBuilder>
+	public static class UIRadioButtonBuilder extends UIContentHolderBuilder<UIRadioButtonBuilder, UIRadioButton>
+			implements IValueChangeEventRegister<UIRadioButton, Boolean>
 	{
-
-		protected GuiText.Builder guiTextBuilder;
-		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder()
-																	 .color(0x444444)
-																	 .when(UIRadioButton::isHovered)
-																	 .color(0x777777)
-																	 .when(UIRadioButton::isDisabled)
-																	 .color(0xCCCCCC)
-																	 .base();
-		protected Function<UIRadioButton, FontOptionsBuilder> fontOptionsBuilderSupplier;
-
-		protected Function<UIRadioButton, IContent> content;
 
 		protected boolean selected;
 
 		protected UIRadioButtonBuilder()
 		{
-		}
-
-		@Override
-		public Builder getGuiTextBuilder()
-		{
-			if (guiTextBuilder == null)
-				guiTextBuilder = GuiText.builder();
-			return guiTextBuilder;
-		}
-
-		@Override
-		public FontOptionsBuilder getFontOptionsBuilder()
-		{
-			return fontOptionsBuilder;
-		}
-
-		@Override
-		public UIRadioButton.UIRadioButtonBuilder fontOptions(@Nonnull FontOptions fontOptions)
-		{
-			fontOptionsBuilder = checkNotNull(fontOptions).toBuilder();
-			return this;
-		}
-
-		public UIRadioButton.UIRadioButtonBuilder fontOptionsBuilder(@Nonnull Function<UIRadioButton, FontOptionsBuilder> supplier)
-		{
-			fontOptionsBuilderSupplier = checkNotNull(supplier);
-			return this;
+			fontOptionsBuilder.color(0x444444)
+							  .when(UIRadioButton::isHovered)
+							  .color(0x777777)
+							  .when(UIRadioButton::isDisabled)
+							  .color(0xCCCCCC)
+							  .base();
 		}
 
 		public UIRadioButton.UIRadioButtonBuilder select()
@@ -285,19 +249,8 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IValue
 		public UIRadioButton build()
 		{
 			UIRadioButton rb = build(new UIRadioButton(name));
-			if (guiTextBuilder != null)
-			{
-				if (fontOptionsBuilderSupplier != null)
-					fontOptionsBuilder = fontOptionsBuilderSupplier.apply(rb);
-
-				content = b -> guiTextBuilder.fontOptions(fontOptionsBuilder.build(rb)).build();
-			}
-
-			if (content != null)
-				rb.setContent(content.apply(rb));
 			if (selected)
 				rb.select();
-
 			return rb;
 		}
 	}

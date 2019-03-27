@@ -11,15 +11,15 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.ISizeBuilder;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.event.GuiEvent;
-import net.malisis.ego.gui.event.MouseEvent.IMouseEventRegister;
+import net.malisis.ego.gui.event.MouseEvent.IMouseEventBuilder;
 import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder, COMPONENT extends UIComponent>
-		implements IPositionBuilder<BUILDER, COMPONENT>, ISizeBuilder<BUILDER, COMPONENT>, IMouseEventRegister
+public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent>
+		implements IPositionBuilder<BUILDER, COMPONENT>, ISizeBuilder<BUILDER, COMPONENT>, IMouseEventBuilder<BUILDER, COMPONENT>
 {
 
 	private Multimap<Class<?>, Predicate<?>> handlers = HashMultimap.create();
@@ -33,7 +33,9 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder, COM
 	protected boolean visible = true;
 	protected Function<COMPONENT, IGuiRenderer> background = null;
 	protected Function<COMPONENT, IGuiRenderer> foreground = null;
+	protected Object data;
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public BUILDER self()
 	{
@@ -125,6 +127,12 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder, COM
 		return self();
 	}
 
+	public BUILDER data(Object data)
+	{
+		this.data = data;
+		return self();
+	}
+
 	protected COMPONENT build(COMPONENT component)
 	{
 		checkNotNull(component);
@@ -150,8 +158,13 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder, COM
 		if (foreground != null)
 			component.setForeground(foreground.apply(component));
 
+		//extra data
+		if (data != null)
+			component.attachData(data);
+
 		//events
-		handlers.entries().forEach(e -> registerHandler(component, e));
+		handlers.entries()
+				.forEach(e -> registerHandler(component, e));
 
 		return component;
 	}

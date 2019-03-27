@@ -80,7 +80,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister
+public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister<UIComponent>
 {
 	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
 	protected MalisisGui gui;
@@ -516,9 +516,10 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		eventHandler.register(clazz, handler);
 	}
 
-	public void onKeyTyped(Predicate<KeyTypedEvent> handler)
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void onKeyTyped(Predicate<KeyTypedEvent<UIComponent>> handler)
 	{
-		register(KeyTypedEvent.class, handler);
+		register(KeyTypedEvent.class, (Predicate) handler);
 	}
 
 	//#region Inputs
