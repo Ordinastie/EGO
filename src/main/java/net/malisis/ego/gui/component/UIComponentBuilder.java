@@ -43,7 +43,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	}
 
 	@Override
-	public <T extends GuiEvent<?>> void register(Class<T> clazz, Predicate<T> handler)
+	public <T extends GuiEvent<? extends UIComponent>> void register(Class<T> clazz, Predicate<T> handler)
 	{
 		handlers.put(clazz, handler);
 	}
