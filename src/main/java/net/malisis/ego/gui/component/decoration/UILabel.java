@@ -73,7 +73,7 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 
 	public String getText()
 	{
-		return text.getRawText();
+		return text.getBase();
 	}
 
 	public void setFontOptions(FontOptions fontOptions)
@@ -97,7 +97,7 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 	public void setSize(@Nonnull ISize size)
 	{
 		super.setSize(size);
-		text.setWrapSize(innerSize().width());
+		//text.setWrapSize(innerSize().width());
 	}
 
 	@Override
@@ -133,33 +133,34 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 
 	public static class UILabelBuilder extends UITextComponentBuilder<UILabelBuilder, UILabel>
 	{
-		private boolean autoSize = true;
-
 		protected UILabelBuilder()
 		{
 			//by default, label size spans to fit the text
 			guiTextBuilder.wrapSize(0);
-			size(Size::sizeOfContent);
+			contentSize();
+		}
+
+		public UILabelBuilder contentSize()
+		{
+			super.size(Size::sizeOfContent);
+			wrapSize(0);
+			wrapSize = null;
+			return this;
 		}
 
 		@Override
 		public UILabelBuilder size(Function<UILabel, ISize> func)
 		{
 			super.size(func);
-			autoSize = false;
+			wrapSize(l -> l.innerSize()::width);
 			return this;
 		}
 
 		@Override
 		public UILabel build()
 		{
-			UILabel label = build(new UILabel(this));
-			//autosize means label size matches text size
-			if (!autoSize)
-				wrapSize(label.innerSize()::width); //label has custom size, wrap should match it
-			return label;
+			return build(new UILabel(this));
 		}
-
 	}
 
 }

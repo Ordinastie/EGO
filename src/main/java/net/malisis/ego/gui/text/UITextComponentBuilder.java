@@ -13,6 +13,7 @@ import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.text.GuiText.Builder;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -28,6 +29,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 {
 	protected GuiText.Builder guiTextBuilder = GuiText.builder();
 	protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
+	protected Function<COMPONENT, IntSupplier> wrapSize;
 
 	public Builder textBuilder()
 	{
@@ -139,6 +141,12 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	public BUILDER wrapSize(IntSupplier supplier)
 	{
 		textBuilder().wrapSize(supplier);
+		return self();
+	}
+
+	public BUILDER wrapSize(Function<COMPONENT, IntSupplier> func)
+	{
+		wrapSize = func;
 		return self();
 	}
 
@@ -265,8 +273,11 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public GuiText buildText(COMPONENT component)
 	{
-		return guiTextBuilder.parent(component)
-							 .fontOptions(fontOptionsBuilder.build(component))
-							 .build();
+		guiTextBuilder.parent(component)
+					  .fontOptions(fontOptionsBuilder.build(component));
+		if (wrapSize != null)
+			guiTextBuilder.wrapSize(wrapSize.apply(component));
+
+		return guiTextBuilder.build();
 	}
 }

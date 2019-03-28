@@ -67,7 +67,11 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
 	private GuiText text;
-	private FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).scale(scale).shadow().build();
+	private FontOptions fontOptions = FontOptions.builder()
+												 .color(0xFFFFFF)
+												 .scale(scale)
+												 .shadow()
+												 .build();
 	private Padding padding = Padding.of(5, 5);
 	private GuiShape borderShape = GuiShape.builder()
 										   .icon(GuiIcon.BORDER)
@@ -78,7 +82,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private GuiText cachedText = GuiText.builder()
 										.parent(this)
-										.text("FPS: {FPS}\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size")
+										.text("FPS: {FPS}\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size\n{TEXT}Text")
 										.bind("FPS", Minecraft::getDebugFPS)
 										.bind("POS",
 											  new PredicatedData<>(() -> Position.CACHED,
@@ -86,8 +90,17 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 																   ChatFormatting.DARK_RED))
 										.bind("SIZE",
 											  new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
+										.bind("TEXT",
+											  new PredicatedData<>(() -> GuiText.CACHED,
+																   ChatFormatting.DARK_GREEN,
+																   ChatFormatting.DARK_RED))
 										.translated(false)
-										.fontOptions(FontOptions.builder().color(0xFFFFFF).scale(scale).shadow().rightAligned().build())
+										.fontOptions(FontOptions.builder()
+																.color(0xFFFFFF)
+																.scale(scale)
+																.shadow()
+																.rightAligned()
+																.build())
 										.position(Position::topRight)
 										.build();
 
@@ -105,7 +118,10 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 			setPosition(Position.bottomLeft(this));
 		setSize(Size.of(parentWidth(this, 1.0F, 0), heightOfContent(this, 0)));
 
-		setBackground(GuiShape.builder(this).color(0).alpha(this::getAlpha).build());
+		setBackground(GuiShape.builder(this)
+							  .color(0)
+							  .alpha(this::getAlpha)
+							  .build());
 		setForeground(((IGuiRenderer) this::drawHierarchy).and(r -> {
 			text.render(r);
 			cachedText.render(r);
@@ -119,7 +135,8 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	{
 		debugMap.put("Mouse",
 					 () -> MalisisGui.MOUSE_POSITION + (MalisisGui.getHoveredComponent() != null ?
-														" (" + MalisisGui.getHoveredComponent().mousePosition() + ")" :
+														" (" + MalisisGui.getHoveredComponent()
+																		 .mousePosition() + ")" :
 														""));
 		debugMap.put("Focus", () -> String.valueOf(MalisisGui.getFocusedComponent()));
 		debugMap.put("Hover", () -> String.valueOf(MalisisGui.getHoveredComponent()));
@@ -131,14 +148,19 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private void updateGuiText()
 	{
-		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions);
+		Builder tb = GuiText.builder()
+							.parent(this)
+							.multiLine()
+							.translated(false)
+							.fontOptions(fontOptions);
 
 		String str = debugMap.entrySet()
 							 .stream()
 							 .peek(e -> tb.bind(e.getKey(), e.getValue()))
 							 .map(e -> e.getKey() + " : {" + e.getKey() + "}")
 							 .collect(Collectors.joining("\n"));
-		text = tb.text(str).build();
+		text = tb.text(str)
+				 .build();
 	}
 
 	@Override
@@ -201,8 +223,12 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 			scale += 1 / 3F * delta;
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
-			text.setFontOptions(fontOptions.toBuilder().scale(scale).build());
-			cachedText.setFontOptions(fontOptions.toBuilder().scale(scale).build());
+			text.setFontOptions(fontOptions.toBuilder()
+										   .scale(scale)
+										   .build());
+			cachedText.setFontOptions(fontOptions.toBuilder()
+												 .scale(scale)
+												 .build());
 		}
 		else if (GuiScreen.isShiftKeyDown())
 		{
@@ -229,6 +255,9 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 				break;
 			case Keyboard.KEY_S:
 				Size.CACHED = !Size.CACHED;
+				break;
+			case Keyboard.KEY_T:
+				GuiText.CACHED = !GuiText.CACHED;
 				break;
 			case Keyboard.KEY_DOWN:
 				isTop = false;

@@ -69,15 +69,13 @@ import java.util.regex.Pattern;
  */
 public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 {
-	public static int MULTILINE = 1;
-	public static int TRANSLATED = 2;
-	public static int LITTERAL = 4;
+	public static boolean CACHED = true;
 
 	/** Pattern for named parameters. */
-	private static final Pattern pattern = Pattern.compile("\\{(?<key>.*?)\\}");
+	private static final Pattern pattern = Pattern.compile("\\{(?<key>.*?)}");
 
 	/** Base text to be translated and parameterized. */
-	private String base = "";
+	private Supplier<String> base;
 	/** Lines composing the text. */
 	private final List<LineInfo> lines = Lists.newArrayList();
 	/** Parameters. */
@@ -108,10 +106,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private UIComponent parent;
 
-	private GuiText(String text, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex,
-			UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(Supplier<String> base, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
 	{
-		base = text;
+		this.base = base;
 		this.parameters = parameters;
 		this.position = position.apply(this);
 		this.zIndex = zIndex != null ? zIndex : () -> 0;
@@ -166,9 +163,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 *
 	 * @return the raw text
 	 */
-	public String getRawText()
+	public String getBase()
 	{
-		return base;
+		return base.get();
 	}
 
 	/**
@@ -190,7 +187,13 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public void setText(String text)
 	{
-		base = text != null ? text : "";
+		checkNotNull(text);
+		setText(() -> text);
+	}
+
+	public void setText(Supplier<String> supplier)
+	{
+		base = checkNotNull(supplier);
 		buildCache = true;
 	}
 
@@ -246,7 +249,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public boolean isMultiLine()
 	{
-		return multiLine;
+		return true;//multiLine;
 	}
 
 	/**
@@ -312,7 +315,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		ICachedData<?> o = parameters.get(key);
 		if (o == null) //not actual parameter : translate it
 			return translated ? I18n.format(key) : key;
-		return Objects.toString(o.get()).replace("$", "\\$");
+		return Objects.toString(o.get())
+					  .replace("$", "\\$");
 	}
 
 	/**
@@ -344,7 +348,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private void update()
 	{
-		if (StringUtils.isEmpty(base))
+		String str = base.get();
+		if (StringUtils.isEmpty(str))
 		{
 			cache = "";
 			return;
@@ -377,10 +382,10 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private void generateCache()
 	{
 		buildCache |= hasParametersChanged();
-		if (!buildCache)
+		if (!buildCache && CACHED)
 			return;
 
-		String str = base;
+		String str = base.get();
 		str = applyParameters(str);
 		cache = str;
 		buildCache = false;
@@ -414,7 +419,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	{
 		wrapSize.update();
 		buildLines |= wrapSize.hasChanged();
-		if (!buildLines)
+		if (!buildLines && CACHED)
 			return;
 
 		lines.clear();
@@ -425,7 +430,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		StringBuilder word = new StringBuilder();
 		//FontRenderOptions fro = new FontRenderOptions();
 
-		int wrapWidth = multiLine ? getWrapSize() : -1;
+		int wrapWidth = isMultiLine() ? getWrapSize() : -1;
 		float lineWidth = 0;
 		float wordWidth = 0;
 		float lineHeight = 0;
@@ -512,7 +517,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		if (StringUtils.isEmpty(cache))
 			return;
 
-		fontOptions.getFont().render(renderer, this, x, y, z, fontOptions, area);
+		fontOptions.getFont()
+				   .render(renderer, this, x, y, z, fontOptions, area);
 		renderer.forceRebind();
 	}
 
@@ -529,7 +535,11 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	@Override
 	public String toString()
 	{
-		String str = lines.size() > 0 ? lines.get(0).text().replace("\n", "") : "";
+		String str = lines.size() > 0 ?
+					 lines.get(0)
+						  .text()
+						  .replace("\n", "") :
+					 "";
 		str += position + "@" + size;
 		if (isMultiLine())
 			str += " (wrap: " + getWrapSize() + ")";
@@ -544,17 +554,20 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	public static GuiText of(String text)
 	{
-		return new Builder().text(text).build();
+		return new Builder().text(text)
+							.build();
 	}
 
 	public static GuiText of(String text, FontOptions options)
 	{
-		return new Builder().text(text).fontOptions(options).build();
+		return new Builder().text(text)
+							.fontOptions(options)
+							.build();
 	}
 
 	public static class Builder implements IPositionBuilder<Builder, GuiText>
 	{
-		private String text;
+		private Supplier<String> base;
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
 		private Function<GuiText, IPosition> position = o -> Position.ZERO;
@@ -571,16 +584,13 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public Builder text(String text)
 		{
-			this.text = text;
-			if (text.contains("\r") || text.contains("\n"))
-				multiLine = true;
-			return this;
+			return text(() -> text != null ? text : "");
 		}
 
 		public Builder text(Supplier<String> supplier)
 		{
-			text = "{text}";
-			return bind("text", supplier);
+			base = checkNotNull(supplier);
+			return this;
 		}
 
 		@Override
@@ -703,7 +713,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public GuiText build()
 		{
-			return new GuiText(text, parameters, position, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
+			return new GuiText(base, parameters, position, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
 		}
 
 	}
