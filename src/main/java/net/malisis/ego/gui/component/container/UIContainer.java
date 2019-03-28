@@ -253,7 +253,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public void add(UIComponent... components)
 	{
-		Arrays.stream(components).filter(Objects::nonNull).forEach(content::add);
+		Arrays.stream(components)
+			  .filter(Objects::nonNull)
+			  .forEach(content::add);
 		onContentUpdate();
 	}
 
@@ -293,6 +295,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		{
 			component.onAddedToScreen(gui);
 		}
+		onContentUpdate();
 	}
 
 	@Override
@@ -320,7 +323,10 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public static UIContainerBuilder window()
 	{
-		return builder().name("Window").background(WindowBackground::new).position(Position::middleCenter).padding(5);
+		return builder().name("Window")
+						.background(WindowBackground::new)
+						.position(Position::middleCenter)
+						.padding(5);
 	}
 
 	/**
@@ -330,7 +336,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public static UIContainerBuilder panel()
 	{
-		return builder().name("Panel").background(PanelBackground::new).padding(3);
+		return builder().name("Panel")
+						.background(PanelBackground::new)
+						.padding(3);
 	}
 
 	/**
@@ -340,7 +348,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public static UIContainerBuilder box()
 	{
-		return builder().name("Box").background(BoxBackground::new).padding(1);
+		return builder().name("Box")
+						.background(BoxBackground::new)
+						.padding(1);
 	}
 
 	public class ContainerContent implements IContent, IGuiRenderer, ISize
@@ -390,10 +400,20 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		private void updateSize()
 		{
-			width = components.stream().filter(UIComponent::isVisible).mapToInt(c -> c.position().x() + c.size().width()).max().orElse(0)
-					- padding().left();
-			height = components.stream().filter(UIComponent::isVisible).mapToInt(c -> c.position().y() + c.size().height()).max().orElse(0)
-					- padding().top();
+			width = components.stream()
+							  .filter(UIComponent::isVisible)
+							  .mapToInt(c -> c.position()
+											  .x() + c.size()
+													  .width())
+							  .max()
+							  .orElse(0) - padding().left();
+			height = components.stream()
+							   .filter(UIComponent::isVisible)
+							   .mapToInt(c -> c.position()
+											   .y() + c.size()
+													   .height())
+							   .max()
+							   .orElse(0) - padding().top();
 		}
 
 		@Override
