@@ -70,9 +70,9 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 	{
 		this.converter = checkNotNull(converter);
 
-		builder.textBuilder()
+		builder.tb()
 			   .bind("value", this::getValue)
-			   .position(this::textPosition, middleAligned(this, 0));
+			   .position(this::textPosition, t -> middleAligned(t, 0));
 
 		text = builder.buildText(this);
 		value = converter.convert(0F);
@@ -87,7 +87,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 		setBackground(GuiShape.builder(this)
 							  .icon(GuiIcon.SLIDER_BG)
 							  .build());
-		setForeground(text.and(sliderShape));
+		setForeground(sliderShape.and(text));
 	}
 
 	//#region Getters/Setters
@@ -109,7 +109,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 		if (this.value == value)
 			return this;
 		T old = this.value;
-		if (!fireEvent(new ValueChange.Pre<>(this, old, value)))
+		if (fireEvent(new ValueChange.Pre<>(this, old, value)))
 			return this;
 
 		this.value = value;
@@ -150,13 +150,15 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 
 		if (sx > w / 2)
 		{
-			if (tx + tw + 2 > sx)
-				return sx - tw - 2;
+			int x = sx - tw - 2;
+			if (tx + tw + 2 > sx && x > 0)
+				return x;
 		}
 		else
 		{
-			if (sx + SLIDER_WIDTH + 2 > tx)
-				return sx + SLIDER_WIDTH + 2;
+			int x = sx + SLIDER_WIDTH + 2;
+			if (sx + SLIDER_WIDTH + 2 > tx && x < w - tw)
+				return x;
 		}
 		return tx;
 	}
@@ -226,6 +228,23 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 		return new UISliderBuilder<>(converter);
 	}
 
+	public static <E extends Enum<E>> UISliderBuilder<E> builder(Class<E> clazz)
+	{
+		E[] values = clazz.getEnumConstants();
+		Converter<Float, E> converter = Converter.from(f -> values[Math.round(f == null ? 0 : f * (values.length - 1))],
+													   e -> e == null ? 0 : (float) e.ordinal() / (values.length - 1));
+
+		return new UISliderBuilder<>(converter).scrollStep(1f / (values.length - 1));
+	}
+
+	public static UISliderBuilder<Integer> builder(int min, int max)
+	{
+		Converter<Float, Integer> converter = Converter.from(f -> f == null ? min : (int) (min + f * (max - min)),
+															 i -> i == null ? 0 : (float) i / (max - min));
+
+		return new UISliderBuilder<>(converter).scrollStep(1f / (max - min));
+	}
+
 	public static class UISliderBuilder<T> extends UITextComponentBuilder<UISliderBuilder<T>, UISlider<T>>
 			implements IValueChangeBuilder<UISliderBuilder<T>, UISlider<T>, T>
 	{
@@ -236,11 +255,11 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 		protected UISliderBuilder(Converter<Float, T> converter)
 		{
 			this.converter = converter;
-			optionsBuilder().color(0xFFFFFF)
-							.shadow()
-							.when((Predicate<UISlider<T>>) UISlider::isHovered)
-							.color(0xFFFFA0)
-							.base();
+			fob().color(0xFFFFFF)
+				 .shadow()
+				 .when((Predicate<UISlider<T>>) UISlider::isHovered)
+				 .color(0xFFFFA0)
+				 .base();
 		}
 
 		@Override
