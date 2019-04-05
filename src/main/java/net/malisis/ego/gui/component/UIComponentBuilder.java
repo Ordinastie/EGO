@@ -28,6 +28,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected Function<COMPONENT, IPosition> position = null;
 	protected Function<COMPONENT, ISize> size = null;
 	protected int zIndex;
+	protected int alpha = 255;
 	protected UITooltip tooltip;
 	protected boolean enabled = true;
 	protected boolean visible = true;
@@ -77,6 +78,12 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER zIndex(int zIndex)
 	{
 		this.zIndex = zIndex;
+		return self();
+	}
+
+	public BUILDER alpha(int alpha)
+	{
+		this.alpha = alpha;
 		return self();
 	}
 
@@ -138,10 +145,6 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		checkNotNull(component);
 
 		component.setName(name);
-		if (parent instanceof UIContainer)
-			((UIContainer) parent).add(component);
-		else if (parent != null)
-			component.setParent(parent);
 		if (position != null)
 			component.setPosition(position.apply(component));
 		if (size != null)
@@ -149,6 +152,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		component.setEnabled(enabled);
 		component.setVisible(visible);
 		component.setZIndex(zIndex);
+		component.setAlpha(alpha);
 		if (tooltip != null)
 			component.setTooltip(tooltip);
 
@@ -165,6 +169,11 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		//events
 		handlers.entries()
 				.forEach(e -> registerHandler(component, e));
+
+		if (parent instanceof UIContainer)
+			((UIContainer) parent).add(component);
+		else if (parent != null)
+			component.setParent(parent);
 
 		return component;
 	}

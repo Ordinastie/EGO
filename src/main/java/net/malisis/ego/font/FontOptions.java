@@ -43,7 +43,8 @@ import java.util.function.Predicate;
  */
 public class FontOptions
 {
-	public static final FontOptions EMPTY = FontOptions.builder().build();
+	public static final FontOptions EMPTY = FontOptions.builder()
+													   .build();
 
 	/** Map of TextFormatting **/
 	protected static Map<Character, TextFormatting> charFormats = new HashMap<>();
@@ -55,7 +56,8 @@ public class FontOptions
 		//could reflect to get TextFormatting.formattingCodeMapping instead
 		for (TextFormatting ecf : TextFormatting.values())
 		{
-			charFormats.put(ecf.toString().charAt(1), ecf);
+			charFormats.put(ecf.toString()
+							   .charAt(1), ecf);
 		}
 
 		//build colors for ECF
@@ -95,8 +97,7 @@ public class FontOptions
 	/** Right aligned. */
 	protected final boolean rightAligned;
 
-	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline,
-			boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned)
+	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned)
 	{
 		this.font = font;
 		this.fontScale = fontScale;
@@ -384,8 +385,6 @@ public class FontOptions
 		 */
 		public FontOptionsBuilder base()
 		{
-			if (currentPredicate == null)
-				return this;
 			addSupplier();
 			return from(base);
 		}
@@ -573,23 +572,17 @@ public class FontOptions
 
 		private FontOptions buildBase()
 		{
-			return new FontOptions(font,
-								   fontScale,
-								   color,
-								   shadow,
-								   bold,
-								   italic,
-								   underline,
-								   strikethrough,
-								   obfuscated,
-								   lineSpacing,
+			return new FontOptions(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing,
 								   rightAligned);
 		}
 
 		private void addSupplier()
 		{
 			if (currentPredicate != null)
+			{
 				suppliers.add(Pair.of(currentPredicate, buildBase()));
+				from(base);
+			}
 		}
 
 		public FontOptions build(Object predicateParameter)
@@ -599,19 +592,8 @@ public class FontOptions
 			if (suppliers.size() == 0)
 				return buildBase();
 
-			return new PredicatedFontOptions(font,
-											 fontScale,
-											 color,
-											 shadow,
-											 bold,
-											 italic,
-											 underline,
-											 strikethrough,
-											 obfuscated,
-											 lineSpacing,
-											 rightAligned,
-											 suppliers,
-											 predicateParameter);
+			return new PredicatedFontOptions(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated,
+											 lineSpacing, rightAligned, suppliers, predicateParameter);
 		}
 
 		public FontOptions build()

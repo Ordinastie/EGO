@@ -33,6 +33,7 @@ import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
@@ -178,7 +179,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 		if (checked || fireEvent(new ValueChange.Pre<>(this, false, true)))
 			return;
 
-		checked = false;
+		checked = true;
 		fireEvent(new ValueChange.Post<>(this, false, true));
 	}
 
@@ -223,7 +224,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 	}
 
 	public static class UICheckBoxBuilder extends UIContentHolderBuilder<UICheckBoxBuilder, UICheckBox>
-			implements IValueChangeEventRegister<UICheckBox, Boolean>
+			implements IValueChangeBuilder<UICheckBoxBuilder, UICheckBox, Boolean>
 	{
 		protected boolean check;
 		protected boolean uncheck;
@@ -236,6 +237,14 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 							  .when(UICheckBox::isDisabled)
 							  .color(0xCCCCCC)
 							  .base();
+		}
+
+		public UICheckBoxBuilder checked(boolean checked)
+		{
+			if (checked)
+				return check();
+			else
+				return uncheck();
 		}
 
 		public UICheckBoxBuilder check()

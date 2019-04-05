@@ -100,10 +100,11 @@ public interface IContentHolder
 		@Override
 		protected COMPONENT build(COMPONENT component)
 		{
-			super.build(component);
-
+			//set content first so size is correct when added to container
 			if (content != null)
 				component.setContent(content.apply(component));
+
+			super.build(component);
 
 			return component;
 		}

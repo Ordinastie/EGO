@@ -230,13 +230,13 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 		protected UIButtonBuilder()
 		{
-			optionsBuilder().color(0xFFFFFF)
-							.shadow()
-							.when(UIButton::isHovered)
-							.color(0xFFFFA0)
-							.when(UIButton::isDisabled)
-							.color(0xCCCCCC)
-							.base();
+			fob().color(0xFFFFFF)
+				 .shadow()
+				 .when(UIButton::isHovered)
+				 .color(0xFFFFA0)
+				 .when(UIButton::isDisabled)
+				 .color(0xCCCCCC)
+				 .base();
 		}
 
 		public UIButtonBuilder onClick(Runnable onClick)

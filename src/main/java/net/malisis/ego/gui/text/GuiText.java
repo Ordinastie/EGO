@@ -570,7 +570,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		private Supplier<String> base;
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
-		private Function<GuiText, IPosition> position = o -> Position.ZERO;
+		private Function<GuiText, IPosition> position = Position::topLeft;
 		private IntSupplier zIndex;
 		private UIComponent parent;
 		private boolean multiLine = false;
@@ -615,7 +615,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		{
 			this.parent = parent;
 			//Assume default position to be top left in parent
-			position(Position::topLeft);
+			//position(Position::topLeft);
 			zIndex(parent::zIndex);
 			return this;
 		}

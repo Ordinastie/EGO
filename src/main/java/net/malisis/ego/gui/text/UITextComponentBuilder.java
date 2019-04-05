@@ -13,8 +13,10 @@ import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.text.GuiText.Builder;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
@@ -31,12 +33,12 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
 	protected Function<COMPONENT, IntSupplier> wrapSize;
 
-	public Builder textBuilder()
+	public Builder tb()
 	{
 		return guiTextBuilder;
 	}
 
-	public FontOptionsBuilder optionsBuilder()
+	public FontOptionsBuilder fob()
 	{
 		return fontOptionsBuilder;
 	}
@@ -47,15 +49,21 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 		return self();
 	}
 
+	public BUILDER fontOptionsBuilder(@Nonnull FontOptionsBuilder builder)
+	{
+		fontOptionsBuilder = checkNotNull(builder);
+		return self();
+	}
+
 	public BUILDER text(String text)
 	{
-		textBuilder().text(text);
+		tb().text(text);
 		return self();
 	}
 
 	public BUILDER text(Supplier<String> supplier)
 	{
-		textBuilder().text(supplier);
+		tb().text(supplier);
 		return self();
 	}
 
@@ -92,55 +100,55 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	 */
 	public <T> BUILDER bind(String key, ICachedData<T> data)
 	{
-		textBuilder().bind(key, data);
+		tb().bind(key, data);
 		return self();
 	}
 
 	public BUILDER multiLine(boolean multiLine)
 	{
-		textBuilder().multiLine(multiLine);
+		tb().multiLine(multiLine);
 		return self();
 	}
 
 	public BUILDER multiLine()
 	{
-		textBuilder().multiLine();
+		tb().multiLine();
 		return self();
 	}
 
 	public BUILDER translated(boolean translated)
 	{
-		textBuilder().translated(translated);
+		tb().translated(translated);
 		return self();
 	}
 
 	public BUILDER translated()
 	{
-		textBuilder().translated();
+		tb().translated();
 		return self();
 	}
 
 	public BUILDER literal(boolean literal)
 	{
-		textBuilder().literal(literal);
+		tb().literal(literal);
 		return self();
 	}
 
 	public BUILDER literal()
 	{
-		textBuilder().literal();
+		tb().literal();
 		return self();
 	}
 
 	public BUILDER wrapSize(int size)
 	{
-		textBuilder().wrapSize(size);
+		tb().wrapSize(size);
 		return self();
 	}
 
 	public BUILDER wrapSize(IntSupplier supplier)
 	{
-		textBuilder().wrapSize(supplier);
+		tb().wrapSize(supplier);
 		return self();
 	}
 
@@ -153,25 +161,25 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	//FontOptions
 	public BUILDER font(MalisisFont font)
 	{
-		optionsBuilder().font(font);
+		fob().font(font);
 		return self();
 	}
 
 	public BUILDER scale(float scale)
 	{
-		optionsBuilder().scale(scale);
+		fob().scale(scale);
 		return self();
 	}
 
 	public BUILDER color(int color)
 	{
-		optionsBuilder().color(color);
+		fob().color(color);
 		return self();
 	}
 
 	public BUILDER color(TextFormatting color)
 	{
-		optionsBuilder().color(color);
+		fob().color(color);
 		return self();
 	}
 
@@ -182,7 +190,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER bold(boolean bold)
 	{
-		optionsBuilder().bold(bold);
+		fob().bold(bold);
 		return self();
 	}
 
@@ -193,7 +201,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER italic(boolean italic)
 	{
-		optionsBuilder().italic(italic);
+		fob().italic(italic);
 		return self();
 	}
 
@@ -204,7 +212,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER underline(boolean underline)
 	{
-		optionsBuilder().underline(underline);
+		fob().underline(underline);
 		return self();
 	}
 
@@ -215,7 +223,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER strikethrough(boolean strikethrough)
 	{
-		optionsBuilder().strikethrough(strikethrough);
+		fob().strikethrough(strikethrough);
 		return self();
 	}
 
@@ -226,7 +234,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER obfuscated(boolean obfuscated)
 	{
-		optionsBuilder().obfuscated(obfuscated);
+		fob().obfuscated(obfuscated);
 		return self();
 	}
 
@@ -237,37 +245,48 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER shadow(boolean shadow)
 	{
-		optionsBuilder().shadow(shadow);
+		fob().shadow(shadow);
 		return self();
 	}
 
 	public BUILDER lineSpacing(int spacing)
 	{
-		optionsBuilder().lineSpacing(spacing);
+		fob().lineSpacing(spacing);
 		return self();
 	}
 
 	public BUILDER rightAligned()
 	{
-		optionsBuilder().rightAligned();
+		fob().rightAligned();
 		return self();
 	}
 
 	public BUILDER leftAligned()
 	{
-		optionsBuilder().leftAligned();
+		fob().leftAligned();
 		return self();
 	}
 
 	public BUILDER styles(String styles)
 	{
-		optionsBuilder().styles(styles);
+		fob().styles(styles);
 		return self();
 	}
 
 	public BUILDER styles(TextFormatting... formats)
 	{
-		optionsBuilder().styles(formats);
+		fob().styles(formats);
+		return self();
+	}
+
+	public BUILDER when(BooleanSupplier supplier)
+	{
+		return when(o -> supplier.getAsBoolean());
+	}
+
+	public BUILDER when(Predicate<COMPONENT> predicate)
+	{
+		fob().when(predicate);
 		return self();
 	}
 

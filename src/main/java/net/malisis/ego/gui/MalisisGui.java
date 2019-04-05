@@ -30,7 +30,6 @@ import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.element.IKeyListener;
-import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiRenderer;
@@ -100,7 +99,7 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	/** The resolution for the GUI **/
 	protected ScaledResolution resolution;
 	/** Top level parent which hold the user components. Spans across the whole screen. */
-	private UIContainer screen;
+	protected final UIContainer screen;
 	/** Determines if the screen should be darkened when the GUI is opened. */
 	protected IGuiRenderer background = null;
 	/** Last clicked button */
@@ -139,10 +138,11 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		itemRender = mc.getRenderItem();
 		fontRenderer = mc.fontRenderer;
 		renderer = new GuiRenderer();
-		screen = new UIContainer();
-		screen.setName("Screen");
-		screen.setSize(size);
-		screen.setClipContent(false);
+		screen = UIContainer.builder()
+							.name("Screen")
+							.size(size)
+							.noClipContent()
+							.build();
 		Keyboard.enableRepeatEvents(true);
 
 		debug = false;
@@ -187,11 +187,6 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	public GuiRenderer getRenderer()
 	{
 		return renderer;
-	}
-
-	public UIComponent getScreen()
-	{
-		return screen;
 	}
 
 	public ISize getSize()
@@ -280,10 +275,12 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	 */
 	public void addToScreen(UIComponent... components)
 	{
-		Arrays.stream(components).filter(Objects::nonNull).forEach(c -> {
-			screen.add(c);
-			c.onAddedToScreen(this);
-		});
+		Arrays.stream(components)
+			  .filter(Objects::nonNull)
+			  .forEach(c -> {
+				  screen.add(c);
+				  c.onAddedToScreen(this);
+			  });
 	}
 
 	/**
@@ -405,7 +402,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		}
 		catch (Exception e)
 		{
-			EGO.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			EGO.message("A problem occured : " + e.getClass()
+												  .getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 	}
@@ -442,7 +440,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		}
 		catch (Exception e)
 		{
-			EGO.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			EGO.message("A problem occured : " + e.getClass()
+												  .getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 	}
@@ -459,7 +458,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		}
 		catch (Exception e)
 		{
-			EGO.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			EGO.message("A problem occured : " + e.getClass()
+												  .getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 
@@ -483,7 +483,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		}
 		catch (Exception e)
 		{
-			EGO.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			EGO.message("A problem occured : " + e.getClass()
+												  .getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 	}
@@ -505,7 +506,7 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 			if (ret)
 				return;
 
-			if(debugComponent.keyTyped(keyChar, keyCode))
+			if (debugComponent.keyTyped(keyChar, keyCode))
 				return;
 
 			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)
@@ -526,7 +527,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		}
 		catch (Exception e)
 		{
-			EGO.message("A problem occured while handling key typed for " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			EGO.message("A problem occured while handling key typed for " + e.getClass()
+																			 .getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 
@@ -615,7 +617,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 			return;
 
 		MalisisGui.cancelClose = cancelClose;
-		Minecraft.getMinecraft().displayGuiScreen(this);
+		Minecraft.getMinecraft()
+				 .displayGuiScreen(this);
 	}
 
 	/**
@@ -838,7 +841,9 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 
 	public static void playSound(SoundEvent sound, float level)
 	{
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(sound, level));
+		Minecraft.getMinecraft()
+				 .getSoundHandler()
+				 .playSound(PositionedSoundRecord.getMasterRecord(sound, level));
 	}
 
 	public static boolean isGuiCloseKey(int keyCode)
@@ -852,7 +857,8 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 	{
 		try
 		{
-			Desktop.getDesktop().browse(new URI(url));
+			Desktop.getDesktop()
+				   .browse(new URI(url));
 		}
 		catch (IOException | URISyntaxException e)
 		{

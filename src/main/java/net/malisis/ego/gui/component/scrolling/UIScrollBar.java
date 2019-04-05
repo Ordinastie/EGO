@@ -56,7 +56,8 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 {
 	public enum Type
 	{
-		HORIZONTAL, VERTICAL
+		HORIZONTAL,
+		VERTICAL
 	}
 
 	private static final Map<IScrollable, UIScrollBar> verticalScrollbars = new WeakHashMap<>();
@@ -78,8 +79,8 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		zIndex = 5;
 
 		parent.addControlComponent(this);
-		//		parent.onScrollWheel(this::scrollWheel);
-		//		parent.onKeyTyped(this::keyTyped);
+		parent.onScrollWheel(this::scrollWheels);
+		parent.onKeyTyped(this::keyTyped);
 
 		if (type == Type.VERTICAL)
 			verticalScrollbars.put(parent, this);
@@ -321,7 +322,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	 * @param event ScrollWheel event
 	 * @return true if the event should propagate to parent
 	 */
-	protected boolean scrollWheel(ScrollWheel<UIScrollBar> event)
+	protected boolean scrollWheels(ScrollWheel<UIComponent> event)
 	{
 		//we want to propagate to (grand) parents so they can scroll too if needed
 		if ((isHorizontal() != GuiScreen.isShiftKeyDown()) && !isHovered())
@@ -333,7 +334,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		return (event.delta() <= 0 || o != 0) && (event.delta() >= 0 || o != 1);
 	}
 
-	protected boolean keyTyped(KeyTypedEvent<UIScrollBar> event)
+	protected boolean keyTyped(KeyTypedEvent<UIComponent> event)
 	{
 		if (event.isKey(Keyboard.KEY_HOME))
 		{
