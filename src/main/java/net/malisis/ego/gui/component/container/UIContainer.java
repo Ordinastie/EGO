@@ -24,6 +24,8 @@
 
 package net.malisis.ego.gui.component.container;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.collect.Lists;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
@@ -31,6 +33,7 @@ import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.control.ICloseable;
 import net.malisis.ego.gui.component.control.IScrollable;
+import net.malisis.ego.gui.component.layout.ILayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.Padding;
@@ -49,6 +52,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * {@link UIContainer} are the base for components holding other components.<br>
@@ -70,6 +74,8 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	protected boolean clipContent = true;
 
 	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
+
+	protected ILayout layout;
 
 	/**
 	 * Instantiates a new {@link UIContainer}.
@@ -127,6 +133,11 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	public IPosition offset()
 	{
 		return offset;
+	}
+
+	public void setLayout(ILayout layout)
+	{
+		this.layout = layout;
 	}
 
 	// #end getters/setters
@@ -368,6 +379,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			components.add(component);
 			components.sort(Comparator.comparingInt(UIComponent::zIndex));
 			component.setParent(getParent());
+
+			if (layout != null)
+				layout.add(component);
 		}
 
 		@Override
@@ -466,6 +480,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	{
 		protected Padding padding = Padding.NO_PADDING;
 		protected boolean clipContent = true;
+		protected Function<UIContainer, ILayout> layout = c -> null;
 
 		protected UIContainerBuilder()
 		{
@@ -489,12 +504,19 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			return this;
 		}
 
+		public UIContainerBuilder layout(Function<UIContainer, ILayout> layout)
+		{
+			this.layout = checkNotNull(layout);
+			return this;
+		}
+
 		@Override
 		public UIContainer build()
 		{
 			UIContainer container = build(new UIContainer());
 			container.setPadding(padding);
 			container.setClipContent(clipContent);
+			container.setLayout(layout.apply(container));
 
 			return container;
 		}

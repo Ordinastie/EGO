@@ -33,9 +33,8 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 
 /**
  * @author Ordinastie
- *
  */
-public class RowLayout
+public class RowLayout implements ILayout
 {
 	protected final UIContainer parent;
 	protected final IPosition offset;
@@ -59,10 +58,10 @@ public class RowLayout
 		this(checkNotNull(parent), spacing, null);
 	}
 
+	@Override
 	public void add(UIComponent component)
 	{
 		checkNotNull(component);
-		parent.add(component);
 		if (last == null)
 			component.setPosition(offset != null ? offset : Position.topLeft(component));
 		else
