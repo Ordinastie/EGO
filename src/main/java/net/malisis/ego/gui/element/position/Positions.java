@@ -26,14 +26,14 @@ package net.malisis.ego.gui.element.position;
 
 import static com.google.common.base.Preconditions.*;
 
-import java.util.function.IntSupplier;
-
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Position.IPositioned;
 import net.malisis.ego.gui.element.size.Size.ISized;
+
+import java.util.function.IntSupplier;
 
 /**
  * The Class PositionFunctions.
@@ -43,6 +43,7 @@ import net.malisis.ego.gui.element.size.Size.ISized;
 public class Positions
 {
 	//position inside parent
+
 	/**
 	 * Positions the owner to the left inside its parent.<br>
 	 * Respects the parent padding.
@@ -53,7 +54,8 @@ public class Positions
 	public static IntSupplier leftAligned(IChild<?> owner, int spacing)
 	{
 		return () -> {
-			return Padding.of(owner.getParent()).left() + spacing;
+			return Padding.of(owner.getParent())
+						  .left() + spacing;
 		};
 	}
 
@@ -73,7 +75,10 @@ public class Positions
 			U parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return parent.size().width() - owner.size().width() - Padding.of(parent).right() - spacing;
+			return parent.size()
+						 .width() - owner.size()
+										 .width() - Padding.of(parent)
+														   .right() - spacing;
 		};
 	}
 
@@ -92,7 +97,10 @@ public class Positions
 			U parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (parent.size().width() - Padding.of(parent).horizontal() - owner.size().width()) / 2 + offset;
+			return (parent.size()
+						  .width() - Padding.of(parent)
+											.horizontal() - owner.size()
+																 .width()) / 2 + offset;
 		};
 	}
 
@@ -106,7 +114,8 @@ public class Positions
 	public static IntSupplier topAligned(IChild<?> owner, int spacing)
 	{
 		return () -> {
-			return Padding.of(owner.getParent()).top() + spacing;
+			return Padding.of(owner.getParent())
+						  .top() + spacing;
 		};
 	}
 
@@ -126,7 +135,10 @@ public class Positions
 			U parent = owner.getParent();
 			if (owner.getParent() == null)
 				return 0;
-			return parent.size().height() - owner.size().height() - Padding.of(parent).bottom() - spacing;
+			return parent.size()
+						 .height() - owner.size()
+										  .height() - Padding.of(parent)
+															 .bottom() - spacing;
 		};
 
 	}
@@ -146,11 +158,15 @@ public class Positions
 			U parent = owner.getParent();
 			if (owner.getParent() == null)
 				return 0;
-			return (int) (Math.ceil(((float) parent.size().height() - Padding.of(parent).vertical() - owner.size().height()) / 2) + offset);
+			return (int) (Math.ceil(((float) parent.size()
+												   .height() - Padding.of(parent)
+																	  .vertical() - owner.size()
+																						 .height()) / 2) + offset);
 		};
 	}
 
 	//relative position to other
+
 	/**
 	 * Positions the owner to the left of the other.
 	 *
@@ -162,7 +178,9 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().x() - owner.size().width() - spacing;
+			return other.position()
+						.x() - owner.size()
+									.width() - spacing;
 		};
 	}
 
@@ -178,7 +196,9 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().x() + other.size().width() + spacing;
+			return other.position()
+						.x() + other.size()
+									.width() + spacing;
 		};
 	}
 
@@ -193,7 +213,9 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().y() - owner.size().height() - spacing;
+			return other.position()
+						.y() - owner.size()
+									.height() - spacing;
 		};
 	}
 
@@ -209,12 +231,15 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().y() + other.size().height() + spacing;
+			return other.position()
+						.y() + other.size()
+									.height() + spacing;
 		};
 
 	}
 
 	//alignment relative to another component
+
 	/**
 	 * Left aligns the owner to the other.
 	 *
@@ -226,7 +251,8 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().x() + offset;
+			return other.position()
+						.x() + offset;
 		};
 	}
 
@@ -242,7 +268,10 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().x() + other.size().width() - owner.size().width() + offset;
+			return other.position()
+						.x() + other.size()
+									.width() - owner.size()
+													.width() + offset;
 		};
 	}
 
@@ -258,7 +287,10 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().x() + (other.size().width() - owner.size().width()) / 2 + offset;
+			return other.position()
+						.x() + (other.size()
+									 .width() - owner.size()
+													 .width()) / 2 + offset;
 		};
 	}
 
@@ -273,7 +305,8 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return other.position().y() + offset;
+			return other.position()
+						.y() + offset;
 		};
 
 	}
@@ -291,7 +324,10 @@ public class Positions
 
 		checkNotNull(other);
 		return () -> {
-			return other.position().y() + other.size().height() - owner.size().height() + offset;
+			return other.position()
+						.y() + other.size()
+									.height() - owner.size()
+													 .height() + offset;
 		};
 
 	}
@@ -308,7 +344,53 @@ public class Positions
 	{
 		checkNotNull(other);
 		return () -> {
-			return (int) (other.position().y() + Math.ceil(((float) other.size().height() - owner.size().height()) / 2) + offset);
+			return (int) (other.position()
+							   .y() + Math.ceil(((float) other.size()
+															  .height() - owner.size()
+																			   .height()) / 2) + offset);
+		};
+	}
+
+	/**
+	 * Positions the owner to the left of the center of its parent.<br>
+	 * Respects the parent padding.
+	 *
+	 * @param <T> the generic type
+	 * @param <U> the generic type
+	 * @param offset the offset
+	 * @return the int supplier
+	 */
+	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier leftOfCenter(T owner, int offset)
+	{
+		return () -> {
+			U parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return (parent.size()
+						  .width() - Padding.of(parent)
+											.horizontal()) / 2 - owner.size()
+																	  .width() + offset;
+		};
+	}
+
+	/**
+	 * Positions the owner to the right of the center of its parent.<br>
+	 * Respects the parent padding.
+	 *
+	 * @param <T> the generic type
+	 * @param <U> the generic type
+	 * @param offset the offset
+	 * @return the int supplier
+	 */
+	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier rightOfCenter(T owner, int offset)
+	{
+		return () -> {
+			U parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return (parent.size()
+						  .width() - Padding.of(parent)
+											.horizontal()) / 2 + offset;
 		};
 	}
 
@@ -333,6 +415,7 @@ public class Positions
 	 */
 	public static IPosition of(UIComponent component, int xOffset, int yOffset)
 	{
-		return component.screenPosition().offset(xOffset, yOffset);
+		return component.screenPosition()
+						.offset(xOffset, yOffset);
 	}
 }
