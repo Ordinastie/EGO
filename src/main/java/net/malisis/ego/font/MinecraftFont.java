@@ -24,13 +24,7 @@
 
 package net.malisis.ego.font;
 
-import java.awt.Font;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import net.malisis.ego.EGO;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.minecraft.client.Minecraft;
@@ -38,9 +32,13 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
+import java.awt.Font;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Map;
+
 /**
  * @author Ordinastie
- *
  */
 public class MinecraftFont extends MalisisFont
 {
@@ -60,10 +58,10 @@ public class MinecraftFont extends MalisisFont
 	{
 		super((Font) null);
 
-		this.fontGeneratorOptions = new FontGeneratorOptions();
-		this.fontGeneratorOptions.fontSize = 9F;
-		this.textureRl = new ResourceLocation("textures/font/ascii.png");
-		this.size = 256;
+		fontGeneratorOptions = new FontGeneratorOptions();
+		fontGeneratorOptions.fontSize = 9F;
+		textureRl = new ResourceLocation("textures/font/ascii.png");
+		size = 256;
 
 		fontRenderer = Minecraft.getMinecraft().fontRenderer;
 		setFields();
@@ -104,7 +102,8 @@ public class MinecraftFont extends MalisisFont
 	{
 		String srg = "field_78286_d";
 		Field charWidthField = changeFieldAccess(FontRenderer.class, "charWidth", srg, true);
-		if (charWidthField == null && FMLClientHandler.instance().hasOptifine())
+		if (charWidthField == null && FMLClientHandler.instance()
+													  .hasOptifine())
 		{
 			srg = "d";
 			charWidthField = changeFieldAccess(FontRenderer.class, "charWidth", srg, true);
@@ -157,7 +156,9 @@ public class MinecraftFont extends MalisisFont
 		if (rl != lastFontTexture)
 		{
 			renderer.next();
-			Minecraft.getMinecraft().getTextureManager().bindTexture(rl);
+			Minecraft.getMinecraft()
+					 .getTextureManager()
+					 .bindTexture(rl);
 			lastFontTexture = rl;
 		}
 	}
@@ -190,7 +191,7 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options, int color)
+	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options, int color, int alpha)
 	{
 		bindFontTexture(cd);
 		if (drawingShadow && cd instanceof UnicodeCharData)
@@ -199,7 +200,7 @@ public class MinecraftFont extends MalisisFont
 			offsetY -= options.getFontScale() / 2;
 		}
 
-		super.drawChar(cd, offsetX, offsetY, options, color);
+		super.drawChar(cd, offsetX, offsetY, options, color, alpha);
 	}
 
 	@Override
@@ -215,9 +216,9 @@ public class MinecraftFont extends MalisisFont
 
 		public MCCharData(char c)
 		{
-			//§ => &
+			//ï¿½ => &
 			super(c == '\u00a7' ? '&' : c, 0, 0, 0);
-			this.pos = CHARLIST.indexOf(this.c);
+			pos = MalisisFont.CHARLIST.indexOf(this.c);
 		}
 
 		@Override
@@ -253,8 +254,8 @@ public class MinecraftFont extends MalisisFont
 		{
 			if (c == ' ' || c < 0 || c >= 256 || pos == -1)
 				return 4.0F;
-			//			else if (FMLClientHandler.instance().hasOptifine())
-			//				return optifineCharWidth[c];
+				//			else if (FMLClientHandler.instance().hasOptifine())
+				//				return optifineCharWidth[c];
 			else
 				return mcCharWidth[pos];
 		}
@@ -285,7 +286,7 @@ public class MinecraftFont extends MalisisFont
 		public UnicodeCharData(char c)
 		{
 			super(c, 0, glyphWidth[c] & 15, fontRenderer.FONT_HEIGHT);
-			this.pad = glyphWidth[c] >>> 4;
+			pad = glyphWidth[c] >>> 4;
 		}
 
 		@Override

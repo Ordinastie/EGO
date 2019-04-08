@@ -155,7 +155,9 @@ public class MalisisFont
 	{
 		renderer.next(GL11.GL_QUADS);
 
-		Minecraft.getMinecraft().getTextureManager().bindTexture(textureRl);
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .bindTexture(textureRl);
 		GL11.glPushMatrix();
 		GL11.glTranslatef(x, y, 0);
 
@@ -169,7 +171,10 @@ public class MalisisFont
 		else
 			renderer.draw();
 
-		Minecraft.getMinecraft().getTextureManager().bindTexture(renderer.getDefaultTexture().getResourceLocation());
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .bindTexture(renderer.getDefaultTexture()
+									  .getResourceLocation());
 		GL11.glPopMatrix();
 
 		zIndex = 0;
@@ -196,7 +201,7 @@ public class MalisisFont
 		return area.isInside(x, y) || area.isInside(x + (int) Math.ceil(walker.width()), y + (int) Math.ceil(walker.height()));
 	}
 
-	public void render(GuiRenderer renderer, GuiText text, int x, int y, int z, FontOptions options, ClipArea clipArea)
+	public void render(GuiRenderer renderer, GuiText text, int x, int y, int z, int alpha, FontOptions options, ClipArea clipArea)
 	{
 		if (text.length() <= 0)
 			return;
@@ -214,7 +219,7 @@ public class MalisisFont
 				if (isCharVisible((int) (x + walker.x()), (int) (y + walker.y()), walker, clipArea))
 				{
 					options = walker.currentStyle();
-					renderCharacter(walker.getChar(), walker.x(), walker.y(), options);
+					renderCharacter(walker.getChar(), walker.x(), walker.y(), options, alpha);
 				}
 				//rx += walker.width();
 
@@ -237,7 +242,7 @@ public class MalisisFont
 		clean(renderer, isDrawing);
 	}
 
-	protected void renderCharacter(char c, float x, float y, FontOptions options)
+	protected void renderCharacter(char c, float x, float y, FontOptions options, int alpha)
 	{
 		CharData cd = getCharData(c);
 		if (options.isObfuscated())
@@ -247,26 +252,27 @@ public class MalisisFont
 		//draw shadow first
 		if (options.hasShadow())
 		{
-			drawChar(cd, x + fs, y + fs, options, options.getShadowColor());
+			drawChar(cd, x + fs, y + fs, options, options.getShadowColor(), alpha);
 			if (options.isBold())
-				drawChar(cd, x + 2 * fs, y + fs, options, options.getShadowColor());
+				drawChar(cd, x + 2 * fs, y + fs, options, options.getShadowColor(), alpha);
 			if (options.isUnderline())
-				drawLine(cd, x + fs, y + 2 * fs, options, options.getShadowColor());
+				drawLine(cd, x + fs, y + 2 * fs, options, options.getShadowColor(), alpha);
 		}
 
-		drawChar(cd, x, y, options, options.getColor());
+		drawChar(cd, x, y, options, options.getColor(), alpha);
 		if (options.isBold())
-			drawChar(cd, x + fs, y, options, options.getColor());
+			drawChar(cd, x + fs, y, options, options.getColor(), alpha);
 		if (options.isUnderline())
-			drawLine(cd, x, y + fs, options, options.getColor());
+			drawLine(cd, x, y + fs, options, options.getColor(), alpha);
 	}
 
-	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options, int color)
+	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options, int color, int alpha)
 	{
 		if (Character.isWhitespace(cd.getChar()))
 			return;
 
-		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+		BufferBuilder buffer = Tessellator.getInstance()
+										  .getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) * factor;
@@ -274,28 +280,29 @@ public class MalisisFont
 
 		buffer.pos(offsetX + i, offsetY, zIndex);
 		buffer.tex(cd.u(), cd.v());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 
 		buffer.pos(offsetX - i, offsetY + h, zIndex);
 		buffer.tex(cd.u(), cd.V());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 
 		buffer.pos(offsetX + w - i, offsetY + h, zIndex);
 		buffer.tex(cd.U(), cd.V());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 
 		buffer.pos(offsetX + w + i, offsetY, zIndex);
 		buffer.tex(cd.U(), cd.v());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 	}
 
-	protected void drawLine(CharData cd, float offsetX, float offsetY, FontOptions options, int color)
+	protected void drawLine(CharData cd, float offsetX, float offsetY, FontOptions options, int color, int alpha)
 	{
-		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+		BufferBuilder buffer = Tessellator.getInstance()
+										  .getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor + options.getFontScale();
 		if (options.isBold())
@@ -307,22 +314,22 @@ public class MalisisFont
 
 		buffer.pos(offsetX, offsetY, zIndex);
 		buffer.tex(cd.u(), cd.v());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 
 		buffer.pos(offsetX, offsetY + h, zIndex);
 		buffer.tex(cd.u(), cd.V());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 
 		buffer.pos(offsetX + w, offsetY + h, zIndex);
 		buffer.tex(cd.U(), cd.V());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 
 		buffer.pos(offsetX + w, offsetY, zIndex);
 		buffer.tex(cd.U(), cd.v());
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, alpha);
 		buffer.endVertex();
 	}
 
@@ -548,10 +555,14 @@ public class MalisisFont
 			return false;
 
 		if (textureRl != null)
-			Minecraft.getMinecraft().getTextureManager().deleteTexture(textureRl);
+			Minecraft.getMinecraft()
+					 .getTextureManager()
+					 .deleteTexture(textureRl);
 
 		DynamicTexture dynTex = new DynamicTexture(img);
-		textureRl = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(font.getName(), dynTex);
+		textureRl = Minecraft.getMinecraft()
+							 .getTextureManager()
+							 .getDynamicTextureLocation(font.getName(), dynTex);
 		return true;
 	}
 
@@ -600,7 +611,10 @@ public class MalisisFont
 	//#region Font load
 	public static Font load(ResourceLocation rl, FontGeneratorOptions options)
 	{
-		try (InputStream is = Minecraft.getMinecraft().getResourceManager().getResource(rl).getInputStream())
+		try (InputStream is = Minecraft.getMinecraft()
+									   .getResourceManager()
+									   .getResource(rl)
+									   .getInputStream())
 		{
 			return load(is, options);
 		}

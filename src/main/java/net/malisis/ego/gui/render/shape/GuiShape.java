@@ -67,9 +67,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 	private final Supplier<GuiIcon> icon;
 	private final int border;
 
-	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size,
-			ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha,
-			Supplier<GuiIcon> icon, int border, boolean fixed)
+	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
 		this.position = position.apply(this);
@@ -139,7 +137,8 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 
 	public void render(GuiRenderer renderer, IPosition position, ISize size)
 	{
-		icon.get().bind(renderer);
+		icon.get()
+			.bind(renderer);
 		for (FacePosition fp : FacePosition.VALUES)
 			for (VertexPosition vp : VertexPosition.VALUES)
 				addVertexData(fp, vp, position, size);
@@ -255,6 +254,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			this.component = component;
 			size = s -> Size.relativeTo(component);
 			color = (fp, vp) -> component.getColor();
+			alpha = (fp, vp) -> component.getAlpha();
 			zIndex = component::zIndex;
 			return this;
 		}

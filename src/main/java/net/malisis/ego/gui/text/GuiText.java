@@ -100,25 +100,26 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
 	private ISize size = Size.ZERO;
 	private IntSupplier zIndex;
+	private IntSupplier alpha;
 
 	private boolean buildLines = true;
 	private boolean buildCache = true;
 
 	private UIComponent parent;
 
-	private GuiText(Supplier<String> base, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(Supplier<String> base, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex, IntSupplier alpha, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
 	{
 		this.base = base;
 		this.parameters = parameters;
 		this.position = position.apply(this);
-		this.zIndex = zIndex != null ? zIndex : () -> 0;
+		this.zIndex = zIndex;
+		this.alpha = alpha;
 		this.parent = parent;
 		this.fontOptions = fontOptions;
 		this.multiLine = multiLine;
 		this.translated = translated;
 		this.literal = literal;
 		this.wrapSize = wrapSize != null ? new IntCachedData(wrapSize) : new IntFixedData(0);
-		this.parent = parent;
 	}
 
 	@Override
@@ -497,10 +498,11 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		int x = screenPosition.x();
 		int y = screenPosition.y();
 		int z = zIndex.getAsInt();
+		int a = alpha.getAsInt();
 		ClipArea area = null;
 		if (parent instanceof IClipable)
 			area = ((IClipable) parent).getClipArea();
-		render(renderer, x, y, z, area);
+		render(renderer, x, y, z, a, area);
 	}
 
 	/**
@@ -512,13 +514,13 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 * @param z the z
 	 * @param area the area
 	 */
-	public void render(GuiRenderer renderer, int x, int y, int z, ClipArea area)
+	public void render(GuiRenderer renderer, int x, int y, int z, int alpha, ClipArea area)
 	{
 		if (StringUtils.isEmpty(cache))
 			return;
 
 		fontOptions.getFont()
-				   .render(renderer, this, x, y, z, fontOptions, area);
+				   .render(renderer, this, x, y, z, alpha, fontOptions, area);
 		renderer.forceRebind();
 	}
 
@@ -535,11 +537,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	@Override
 	public String toString()
 	{
-		String str = lines.size() > 0 ?
-					 lines.get(0)
-						  .text()
-						  .replace("\n", "") :
-					 "";
+		String str = lines.size() > 0 ? lines.get(0)
+											 .text()
+											 .replace("\n", "") : "";
 		str += position + "@" + size;
 		if (isMultiLine())
 			str += " (wrap: " + getWrapSize() + ")";
@@ -571,7 +571,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
 		private Function<GuiText, IPosition> position = Position::topLeft;
-		private IntSupplier zIndex;
+		private IntSupplier zIndex = () -> 0;
+		private IntSupplier alpha = () -> 255;
 		private UIComponent parent;
 		private boolean multiLine = false;
 		private boolean translated = true;
@@ -607,7 +608,18 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public Builder zIndex(IntSupplier zIndex)
 		{
-			this.zIndex = zIndex;
+			this.zIndex = checkNotNull(zIndex);
+			return this;
+		}
+
+		public Builder alpha(int alpha)
+		{
+			return alpha(() -> alpha);
+		}
+
+		public Builder alpha(IntSupplier alpha)
+		{
+			this.alpha = checkNotNull(alpha);
 			return this;
 		}
 
@@ -616,6 +628,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			this.parent = parent;
 			//Assume default position to be top left in parent
 			//position(Position::topLeft);
+			alpha(parent::getAlpha);
 			zIndex(parent::zIndex);
 			return this;
 		}
@@ -713,7 +726,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public GuiText build()
 		{
-			return new GuiText(base, parameters, position, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
+			return new GuiText(base, parameters, position, zIndex, alpha, parent, fontOptions, multiLine, translated, literal, wrapSize);
 		}
 
 	}
