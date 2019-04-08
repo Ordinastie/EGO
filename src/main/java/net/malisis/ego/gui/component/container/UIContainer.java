@@ -214,7 +214,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		return content.components.stream()
 								 .map(c -> c.getComponentAt(x, y))
 								 .filter(Objects::nonNull)
-								 .filter(UIComponent::isEnabled)
+								 //.filter(UIComponent::isEnabled)
 								 .max(Comparator.comparingInt(UIComponent::zIndex))
 								 .orElse(superComp);
 	}
