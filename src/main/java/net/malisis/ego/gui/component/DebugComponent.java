@@ -84,16 +84,12 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 										.parent(this)
 										.text("FPS: {FPS}\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size\n{TEXT}Text")
 										.bind("FPS", Minecraft::getDebugFPS)
-										.bind("POS",
-											  new PredicatedData<>(() -> Position.CACHED,
-																   ChatFormatting.DARK_GREEN,
-																   ChatFormatting.DARK_RED))
+										.bind("POS", new PredicatedData<>(() -> Position.CACHED, ChatFormatting.DARK_GREEN,
+																		  ChatFormatting.DARK_RED))
 										.bind("SIZE",
 											  new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
-										.bind("TEXT",
-											  new PredicatedData<>(() -> GuiText.CACHED,
-																   ChatFormatting.DARK_GREEN,
-																   ChatFormatting.DARK_RED))
+										.bind("TEXT", new PredicatedData<>(() -> GuiText.CACHED, ChatFormatting.DARK_GREEN,
+																		   ChatFormatting.DARK_RED))
 										.translated(false)
 										.fontOptions(FontOptions.builder()
 																.color(0xFFFFFF)
@@ -102,6 +98,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 																.rightAligned()
 																.build())
 										.position(Position::topRight)
+										.alpha(255) //do not respect the component alpha
 										.build();
 
 	private int hierarchyColor;
@@ -133,11 +130,10 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private void setDefaultDebug()
 	{
-		debugMap.put("Mouse",
-					 () -> MalisisGui.MOUSE_POSITION + (MalisisGui.getHoveredComponent() != null ?
-														" (" + MalisisGui.getHoveredComponent()
-																		 .mousePosition() + ")" :
-														""));
+		debugMap.put("Mouse", () -> MalisisGui.MOUSE_POSITION + (MalisisGui.getHoveredComponent() != null ?
+																 " (" + MalisisGui.getHoveredComponent()
+																				  .mousePosition() + ")" :
+																 ""));
 		debugMap.put("Focus", () -> String.valueOf(MalisisGui.getFocusedComponent()));
 		debugMap.put("Hover", () -> String.valueOf(MalisisGui.getHoveredComponent()));
 		debugMap.put("Dragged", () -> String.valueOf(MalisisGui.getDraggedComponent()));
@@ -152,7 +148,8 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 							.parent(this)
 							.multiLine()
 							.translated(false)
-							.fontOptions(fontOptions);
+							.fontOptions(fontOptions)
+							.alpha(255);//do not respect the component alpha
 
 		String str = debugMap.entrySet()
 							 .stream()
