@@ -46,13 +46,16 @@ public class UIListContainer<S> extends UIContainer
 	protected Collection<S> elements = Collections.emptyList();
 	protected Map<S, UIComponent> componentElements = Maps.newHashMap();
 	protected int lastSize = 0;
-	protected Function<S, UIComponent> elementComponentFactory = e -> UILabel.builder().text(Objects.toString(e)).build();
+	protected Function<S, UIComponent> elementComponentFactory = e -> UILabel.builder()
+																			 .text(Objects.toString(e))
+																			 .build();
 	protected int elementsSize;
 
 	public UIListContainer()
 	{
 		setSize(Size.sizeOfContent(this));
 		setClipContent(true);
+		setLayout(new RowLayout(this));
 	}
 
 	protected void buildElementComponents()
@@ -60,13 +63,12 @@ public class UIListContainer<S> extends UIContainer
 		removeAll();
 		componentElements.clear();
 
-		RowLayout layout = new RowLayout(this, elementSpacing);
 		for (S element : elements)
 		{
 			UIComponent comp = elementComponentFactory.apply(element);
 			comp.attachData(element);
-			layout.add(comp);
 			componentElements.put(element, comp);
+			add(comp);
 		}
 		elementsSize = elements.size();
 	}
