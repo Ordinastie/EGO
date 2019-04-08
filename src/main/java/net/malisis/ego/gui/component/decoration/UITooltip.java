@@ -34,6 +34,7 @@ import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position;
+import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
@@ -44,13 +45,16 @@ import net.malisis.ego.gui.text.GuiText;
  *
  * @author Ordinastie
  */
-public class UITooltip extends UIComponent implements IContentHolder
+public class UITooltip extends UIComponent implements IContentHolder, IPosition
 {
 	protected Padding padding = Padding.of(4);
 	protected IContent content;
 	protected int delay = 0;
 	/** The default {@link FontOptions} to use for this {@link UITooltip} when using text. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	protected FontOptions fontOptions = FontOptions.builder()
+												   .color(0xFFFFFF)
+												   .shadow()
+												   .build();
 
 	private int xOffset = 8;
 	private int yOffset = -16;
@@ -59,11 +63,32 @@ public class UITooltip extends UIComponent implements IContentHolder
 	{
 		setZIndex(300);
 
-		setPosition(MalisisGui.MOUSE_POSITION.offset(xOffset, yOffset));
+		setPosition(this);
 		setSize(Size.sizeOfContent(this, 8, 4));
 
-		setBackground(GuiShape.builder(this).icon(GuiIcon.TOOLTIP).border(5).build());
+		setBackground(GuiShape.builder(this)
+							  .icon(GuiIcon.TOOLTIP)
+							  .border(5)
+							  .build());
 		//animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
+	}
+
+	@Override
+	public int x()
+	{
+		int x = MalisisGui.MOUSE_POSITION.x() + xOffset;
+		return Math.min(x, MalisisGui.current()
+									 .size()
+									 .width() - size().width());
+	}
+
+	@Override
+	public int y()
+	{
+		int y = MalisisGui.MOUSE_POSITION.y() + yOffset;
+		if (y < 0)
+			y = MalisisGui.MOUSE_POSITION.y() - yOffset;
+		return y;
 	}
 
 	public UITooltip(String text)
