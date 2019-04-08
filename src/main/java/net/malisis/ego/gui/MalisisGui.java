@@ -69,7 +69,7 @@ import java.util.function.Supplier;
  *
  * @author Ordinastie
  */
-public abstract class MalisisGui extends GuiScreen implements Size.ISized
+public abstract class MalisisGui extends GuiScreen implements ISize
 {
 	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(new ResourceLocation("ego", "textures/gui/gui.png"), 300, 100);
@@ -88,8 +88,6 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 
 	/** Renderer drawing the components. */
 	protected GuiRenderer renderer;
-	/** Size of the gui (with scale factor). */
-	protected ISize size = Size.of(() -> width, () -> height);
 	/** Width of the window. */
 	protected int displayWidth;
 	/** Height of the window. */
@@ -140,7 +138,7 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		renderer = new GuiRenderer();
 		screen = UIContainer.builder()
 							.name("Screen")
-							.size(size)
+							.size(this) //.size(this::width, this::height)
 							.noClipContent()
 							.build();
 		Keyboard.enableRepeatEvents(true);
@@ -189,9 +187,16 @@ public abstract class MalisisGui extends GuiScreen implements Size.ISized
 		return renderer;
 	}
 
-	public ISize getSize()
+	@Override
+	public int width()
 	{
-		return size;
+		return width;
+	}
+
+	@Override
+	public int height()
+	{
+		return height;
 	}
 
 	//	/**

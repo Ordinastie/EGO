@@ -78,7 +78,6 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 	{
 		int x = MalisisGui.MOUSE_POSITION.x() + xOffset;
 		return Math.min(x, MalisisGui.current()
-									 .size()
 									 .width() - size().width());
 	}
 
