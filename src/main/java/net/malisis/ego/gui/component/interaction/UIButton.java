@@ -162,7 +162,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	 */
 	public void onClick(Runnable onClick)
 	{
-		register(MouseLeftClick.class, e -> {
+		onLeftClick(e -> {
 			onClick.run();
 			return true;
 		});
