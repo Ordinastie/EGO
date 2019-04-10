@@ -121,6 +121,10 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	protected boolean constructed = false;
 	/** List of {@link IKeyListener} registered. */
 	protected Set<IKeyListener> keyListeners = new HashSet<>();
+
+	protected GuiScreen parent = null;
+	protected boolean showParentOnClose = false;
+
 	/** Debug **/
 	private DebugComponent debugComponent;
 
@@ -622,6 +626,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 			return;
 
 		MalisisGui.cancelClose = cancelClose;
+		parent = Minecraft.getMinecraft().currentScreen;
 		Minecraft.getMinecraft()
 				 .displayGuiScreen(this);
 	}
@@ -636,8 +641,14 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		Keyboard.enableRepeatEvents(false);
 		if (mc.player != null)
 			mc.player.closeScreen();
-		mc.displayGuiScreen(null);
-		mc.setIngameFocus();
+
+		if (parent != null && showParentOnClose)
+			mc.displayGuiScreen(parent);
+		else
+		{
+			mc.displayGuiScreen(null);
+			mc.setIngameFocus();
+		}
 	}
 
 	public void displayOverlay()
