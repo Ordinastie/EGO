@@ -39,6 +39,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * UITooltip
@@ -49,15 +50,11 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 {
 	protected Padding padding = Padding.of(4);
 	protected IContent content;
-	protected int delay = 0;
 	/** The default {@link FontOptions} to use for this {@link UITooltip} when using text. */
 	protected FontOptions fontOptions = FontOptions.builder()
 												   .color(0xFFFFFF)
 												   .shadow()
 												   .build();
-
-	private int xOffset = 8;
-	private int yOffset = -16;
 
 	public UITooltip()
 	{
@@ -70,24 +67,6 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 							  .icon(GuiIcon.TOOLTIP)
 							  .border(5)
 							  .build());
-		//animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
-	}
-
-	@Override
-	public int x()
-	{
-		int x = MalisisGui.MOUSE_POSITION.x() + xOffset;
-		return Math.min(x, MalisisGui.current()
-									 .width() - size().width());
-	}
-
-	@Override
-	public int y()
-	{
-		int y = MalisisGui.MOUSE_POSITION.y() + yOffset;
-		if (y < 0)
-			y = MalisisGui.MOUSE_POSITION.y() - yOffset;
-		return y;
 	}
 
 	public UITooltip(String text)
@@ -96,17 +75,23 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 		setText(text);
 	}
 
-	public UITooltip(int delay)
+	@Override
+	public int x()
 	{
-		this();
-		setDelay(delay);
+		int xOffset = 8;
+		int x = MalisisGui.MOUSE_POSITION.x() + xOffset;
+		return Math.min(x, MalisisGui.current()
+									 .width() - size().width());
 	}
 
-	public UITooltip(String text, int delay)
+	@Override
+	public int y()
 	{
-		this();
-		setText(text);
-		setDelay(delay);
+		int yOffset = -16;
+		int y = MalisisGui.MOUSE_POSITION.y() + yOffset;
+		if (y < 0)
+			y = MalisisGui.MOUSE_POSITION.y() - yOffset;
+		return y;
 	}
 
 	//#region Getters/Setters
@@ -139,34 +124,11 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 		setContent(gt);
 	}
 
-	public UITooltip setDelay(int delay)
+	@Override
+	public String getPropertyString()
 	{
-		this.delay = delay;
-		return this;
-	}
-
-	public int getDelay()
-	{
-		return delay;
-	}
-
-	protected int getOffsetX()
-	{
-		return 8;
-	}
-
-	protected int getOffsetY()
-	{
-		return -16;
-	}
-
-	//#end Getters/Setters
-	public void animate()
-	{
-		if (delay == 0)
-			return;
-
-		setAlpha(0);
-		//getGui().animate(animation, delay);
+		//call x() and y() directly to prevent infinite recursion from parent because position() == this
+		return "[" + TextFormatting.DARK_AQUA + content + TextFormatting.RESET + "] " + x() + "x" + y() + "@" + size() + " | Screen="
+				+ screenPosition();
 	}
 }

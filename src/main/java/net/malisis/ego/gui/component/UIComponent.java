@@ -245,9 +245,6 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 
 		this.hovered = hovered;
 		fireEvent(isHovered() ? new MouseOver<>(this) : new MouseOut<>(this));
-
-		if (tooltip != null && hovered)
-			tooltip.animate();
 	}
 
 	/**

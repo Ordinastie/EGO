@@ -91,7 +91,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	{
 		if (text == null)
 			return tooltip((UITooltip) null);
-		return tooltip(new UITooltip(text, 15));
+		return tooltip(new UITooltip(text));
 	}
 
 	public BUILDER tooltip(UITooltip tooltip)
