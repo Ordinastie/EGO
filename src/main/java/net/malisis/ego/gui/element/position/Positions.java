@@ -100,7 +100,8 @@ public class Positions
 			return (parent.size()
 						  .width() - Padding.of(parent)
 											.horizontal() - owner.size()
-																 .width()) / 2 + offset;
+																 .width()) / 2 + offset + Padding.of(parent)
+																								 .left();
 		};
 	}
 
@@ -161,7 +162,8 @@ public class Positions
 			return (int) (Math.ceil(((float) parent.size()
 												   .height() - Padding.of(parent)
 																	  .vertical() - owner.size()
-																						 .height()) / 2) + offset);
+																						 .height()) / 2) + offset + Padding.of(parent)
+																														   .top());
 		};
 	}
 
