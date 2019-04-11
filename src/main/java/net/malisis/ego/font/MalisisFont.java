@@ -171,10 +171,11 @@ public class MalisisFont
 		else
 			renderer.draw();
 
-		Minecraft.getMinecraft()
-				 .getTextureManager()
-				 .bindTexture(renderer.getDefaultTexture()
-									  .getResourceLocation());
+		//		Minecraft.getMinecraft()
+		//				 .getTextureManager()
+		//				 .bindTexture(renderer.getDefaultTexture()
+		//									  .getResourceLocation());
+		renderer.forceRebind();
 		GL11.glPopMatrix();
 
 		zIndex = 0;
