@@ -52,10 +52,12 @@ import org.lwjgl.opengl.GL11;
 public class GuiRenderer
 {
 	/** Currently used buffer. */
-	public static final BufferBuilder BUFFER = Tessellator.getInstance().getBuffer();
+	public static final BufferBuilder BUFFER = Tessellator.getInstance()
+														  .getBuffer();
 
 	/** RenderItem used to draw itemStacks. */
-	public static RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
+	public static RenderItem itemRenderer = Minecraft.getMinecraft()
+													 .getRenderItem();
 	/** Current component being drawn. */
 	public UIComponent currentComponent;
 	/** Multiplying factor between GUI size and pixel size. */
@@ -69,6 +71,8 @@ public class GuiRenderer
 
 	/** Progression of current tick. */
 	private float partialTick = 0;
+	public int lastDrawCount = 0;
+	private int currentDrawCount = 0;
 
 	//	private static GuiShape rectangle = new SimpleGuiShape();
 
@@ -160,6 +164,7 @@ public class GuiRenderer
 	public void setup(float partialTick)
 	{
 		this.partialTick = partialTick;
+		currentDrawCount = 0;
 
 		currentTexture = null;
 		bindDefaultTexture();
@@ -191,6 +196,8 @@ public class GuiRenderer
 
 		GlStateManager.popMatrix();
 		GlStateManager.enableDepth();
+
+		lastDrawCount = currentDrawCount;
 	}
 
 	/**
@@ -251,7 +258,11 @@ public class GuiRenderer
 	public void draw()
 	{
 		if (!isBatched() && isDrawing())
-			Tessellator.getInstance().draw();
+		{
+			Tessellator.getInstance()
+					   .draw();
+			currentDrawCount++;
+		}
 	}
 
 	/**
@@ -278,7 +289,9 @@ public class GuiRenderer
 			return;
 
 		next();
-		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getResourceLocation());
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .bindTexture(texture.getResourceLocation());
 		//System.out.println(currentComponent + " // Bound " + texture.getResourceLocation());
 
 		currentTexture = texture;
@@ -294,7 +307,9 @@ public class GuiRenderer
 
 	public void forceRebind()
 	{
-		Minecraft.getMinecraft().getTextureManager().bindTexture(currentTexture.getResourceLocation());
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .bindTexture(currentTexture.getResourceLocation());
 	}
 
 	/**
@@ -419,12 +434,15 @@ public class GuiRenderer
 		float z = itemRenderer.zLevel;
 		if (relative && currentComponent != null)
 		{
-			x += currentComponent.screenPosition().x();
-			y += currentComponent.screenPosition().y();
+			x += currentComponent.screenPosition()
+								 .x();
+			y += currentComponent.screenPosition()
+								 .y();
 			itemRenderer.zLevel = currentComponent.zIndex();
 		}
 
-		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
+		FontRenderer fontRenderer = itemStack.getItem()
+											 .getFontRenderer(itemStack);
 		if (fontRenderer == null)
 			fontRenderer = Minecraft.getMinecraft().fontRenderer;
 
@@ -436,7 +454,8 @@ public class GuiRenderer
 		if (!Strings.isEmpty(formatStr))
 			label = formatStr + label;
 
-		Tessellator.getInstance().draw();
+		Tessellator.getInstance()
+				   .draw();
 
 		//RenderHelper.disableStandardItemLighting();
 		RenderHelper.enableGUIStandardItemLighting();
@@ -468,7 +487,7 @@ public class GuiRenderer
 		String label = null;
 		if (size == 0)
 		{
-			itemStack.setCount(size != 0 ? size : 1);
+			itemStack.setCount(1);
 			label = TextFormatting.YELLOW + "0";
 		}
 
@@ -488,6 +507,7 @@ public class GuiRenderer
 		if (area.noClip())
 			return;
 
+		next();
 		GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
