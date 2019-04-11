@@ -66,6 +66,7 @@ import net.malisis.ego.gui.event.StateChangeEvent.UnfocusEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.VisibleEvent;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
+import org.apache.logging.log4j.util.Strings;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -426,7 +427,10 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public void setTooltip(String text)
 	{
-		setTooltip(new UITooltip(text));
+		if (Strings.isEmpty(text))
+			setTooltip((UITooltip) null);
+		else
+			setTooltip(new UITooltip(text));
 	}
 
 	//@Override
@@ -773,7 +777,6 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		{
 			renderer.currentComponent = this;
 			backgroundRenderer.render(renderer);
-			renderer.next();
 		}
 
 		//draw foreground
@@ -795,7 +798,6 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		if (controlComponents.size() != 0)
 		{
 			controlComponents.forEach(c -> c.render(renderer));
-			renderer.next();//required to not clip foreground of IControlComponents. Still not sure why...
 		}
 
 		renderer.currentComponent = oldComponent;
