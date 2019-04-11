@@ -35,6 +35,7 @@ import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Position.IPositioned;
 import net.malisis.ego.gui.element.position.Position.ScreenPosition;
+import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.ISizeBuilder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
@@ -67,10 +68,13 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 	private final Supplier<GuiIcon> icon;
 	private final int border;
 
-	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
+	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, Function<GuiShape, IntSupplier> x, Function<GuiShape, IntSupplier> y, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
-		this.position = position.apply(this);
+		if (position != null)
+			this.position = position.apply(this);
+		else
+			this.position = Position.of(x.apply(this), y.apply(this));
 		screenPosition = new ScreenPosition(this, fixed);
 		this.zIndex = zIndex;
 		this.size = size.apply(this);
@@ -238,6 +242,8 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		private UIComponent component;
 		private boolean fixed = true;
 		private Function<GuiShape, IPosition> position = s -> Position.ZERO;
+		private Function<GuiShape, IntSupplier> x = o -> Positions.leftAligned(o, 0);
+		private Function<GuiShape, IntSupplier> y = o -> Positions.topAligned(o, 0);
 		private Function<GuiShape, ISize> size = Size::relativeTo;
 		private IntSupplier zIndex;
 		private ToIntBiFunction<FacePosition, VertexPosition> color = (fp, vp) -> 0xFFFFFF;
@@ -263,6 +269,22 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		public Builder position(Function<GuiShape, IPosition> func)
 		{
 			position = checkNotNull(func);
+			return this;
+		}
+
+		@Override
+		public Builder x(Function<GuiShape, IntSupplier> x)
+		{
+			this.x = checkNotNull(x);
+			position = null;
+			return this;
+		}
+
+		@Override
+		public Builder y(Function<GuiShape, IntSupplier> y)
+		{
+			this.y = checkNotNull(y);
+			position = null;
 			return this;
 		}
 
@@ -474,7 +496,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 
 		public GuiShape build()
 		{
-			return new GuiShape(component, position, zIndex, size, color, alpha, icon, borderSize, fixed);
+			return new GuiShape(component, position, x, y, zIndex, size, color, alpha, icon, borderSize, fixed);
 		}
 	}
 }

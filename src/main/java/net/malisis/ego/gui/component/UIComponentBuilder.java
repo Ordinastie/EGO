@@ -7,7 +7,9 @@ import com.google.common.collect.Multimap;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.decoration.UITooltip;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
+import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
+import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.ISizeBuilder;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.event.GuiEvent;
@@ -16,6 +18,7 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
 public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent>
@@ -26,6 +29,8 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected String name;
 	protected UIComponent parent;
 	protected Function<COMPONENT, IPosition> position = null;
+	protected Function<COMPONENT, IntSupplier> x = o -> Positions.leftAligned(o, 0);
+	protected Function<COMPONENT, IntSupplier> y = o -> Positions.topAligned(o, 0);
 	protected Function<COMPONENT, ISize> size = null;
 	protected int zIndex;
 	protected int alpha = 255;
@@ -65,6 +70,22 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER position(Function<COMPONENT, IPosition> func)
 	{
 		position = checkNotNull(func);
+		return self();
+	}
+
+	@Override
+	public BUILDER x(Function<COMPONENT, IntSupplier> x)
+	{
+		this.x = checkNotNull(x);
+		position = null;
+		return self();
+	}
+
+	@Override
+	public BUILDER y(Function<COMPONENT, IntSupplier> y)
+	{
+		this.y = checkNotNull(y);
+		position = null;
 		return self();
 	}
 
@@ -149,6 +170,9 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		component.setName(name);
 		if (position != null)
 			component.setPosition(position.apply(component));
+		else
+			component.setPosition(Position.of(x.apply(component), y.apply(component)));
+
 		if (size != null)
 			component.setSize(size.apply(component));
 		component.setEnabled(enabled);

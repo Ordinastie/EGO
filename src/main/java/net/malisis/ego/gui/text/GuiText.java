@@ -42,6 +42,7 @@ import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
+import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiRenderer;
@@ -75,7 +76,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private static final Pattern pattern = Pattern.compile("\\{(?<key>.*?)}");
 
 	/** Base text to be translated and parameterized. */
-	private Supplier<String> base;
+	private CachedData<String> base;
 	/** Lines composing the text. */
 	private final List<LineInfo> lines = Lists.newArrayList();
 	/** Parameters. */
@@ -107,11 +108,14 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private UIComponent parent;
 
-	private GuiText(Supplier<String> base, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex, IntSupplier alpha, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(Supplier<String> base, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, Function<GuiText, IntSupplier> x, Function<GuiText, IntSupplier> y, IntSupplier zIndex, IntSupplier alpha, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
 	{
-		this.base = base;
+		this.base = new CachedData<>(base);
 		this.parameters = parameters;
-		this.position = position.apply(this);
+		if (position != null)
+			this.position = position.apply(this);
+		else
+			this.position = Position.of(x.apply(this), y.apply(this));
 		this.zIndex = zIndex;
 		this.alpha = alpha;
 		this.parent = parent;
@@ -194,7 +198,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	public void setText(Supplier<String> supplier)
 	{
-		base = checkNotNull(supplier);
+		base = new CachedData<>(checkNotNull(supplier));
 		buildCache = true;
 	}
 
@@ -349,13 +353,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private void update()
 	{
-		String str = base.get();
-		if (StringUtils.isEmpty(str))
-		{
-			cache = "";
-			return;
-		}
-
 		generateCache();
 		buildLines();
 	}
@@ -382,6 +379,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	private void generateCache()
 	{
+		base.update();
+		buildCache |= base.hasChanged();
 		buildCache |= hasParametersChanged();
 		if (!buildCache && CACHED)
 			return;
@@ -391,7 +390,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		cache = str;
 		buildCache = false;
 		buildLines = true;
-
 	}
 
 	/**
@@ -521,7 +519,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		fontOptions.getFont()
 				   .render(renderer, this, x, y, z, alpha, fontOptions, area);
-		renderer.forceRebind();
+
 	}
 
 	/**
@@ -571,6 +569,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
 		private Function<GuiText, IPosition> position = Position::topLeft;
+		protected Function<GuiText, IntSupplier> x = o -> Positions.leftAligned(o, 0);
+		protected Function<GuiText, IntSupplier> y = o -> Positions.topAligned(o, 0);
 		private IntSupplier zIndex = () -> 0;
 		private IntSupplier alpha = () -> 255;
 		private UIComponent parent;
@@ -598,6 +598,22 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		public Builder position(Function<GuiText, IPosition> func)
 		{
 			position = checkNotNull(func);
+			return this;
+		}
+
+		@Override
+		public Builder x(Function<GuiText, IntSupplier> x)
+		{
+			this.x = checkNotNull(x);
+			position = null;
+			return this;
+		}
+
+		@Override
+		public Builder y(Function<GuiText, IntSupplier> y)
+		{
+			this.y = checkNotNull(y);
+			position = null;
 			return this;
 		}
 
@@ -726,7 +742,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public GuiText build()
 		{
-			return new GuiText(base, parameters, position, zIndex, alpha, parent, fontOptions, multiLine, translated, literal, wrapSize);
+			return new GuiText(base, parameters, position, x, y, zIndex, alpha, parent, fontOptions, multiLine, translated, literal,
+							   wrapSize);
 		}
 
 	}

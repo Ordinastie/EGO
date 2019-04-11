@@ -8,9 +8,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public interface UIConstants
 {
-
-	FontOptions DEFAULT_TEXTBOX_FO = FontOptions.builder().color(0xFFFFFF).shadow(false).build();
-	FontOptions READ_ONLY_TEXTBOX_FO = FontOptions.builder().color(0xC5C5C5).shadow(false).build();
+	FontOptions DEFAULT_TEXTBOX_FO = FontOptions.builder()
+												.color(0xFFFFFF)
+												.shadow(false)
+												.build();
+	FontOptions READ_ONLY_TEXTBOX_FO = FontOptions.builder()
+												  .color(0xC5C5C5)
+												  .shadow(false)
+												  .build();
 
 	interface Button
 	{
