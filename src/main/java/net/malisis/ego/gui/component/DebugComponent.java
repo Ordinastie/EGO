@@ -82,8 +82,12 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private GuiText cachedText = GuiText.builder()
 										.parent(this)
-										.text("FPS: {FPS}\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size\n{TEXT}Text")
+										.text("FPS: {FPS} ({DRAWCOUNT})\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size\n{TEXT}Text")
 										.bind("FPS", Minecraft::getDebugFPS)
+										.bind("DRAWCOUNT", () -> MalisisGui.current() != null ?
+																 MalisisGui.current()
+																		   .getRenderer().lastDrawCount :
+																 0)
 										.bind("POS", new PredicatedData<>(() -> Position.CACHED, ChatFormatting.DARK_GREEN,
 																		  ChatFormatting.DARK_RED))
 										.bind("SIZE",
