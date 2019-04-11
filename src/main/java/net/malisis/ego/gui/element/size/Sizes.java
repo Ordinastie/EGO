@@ -45,7 +45,9 @@ public class Sizes
 	{
 		checkNotNull(owner);
 		return () -> {
-			return owner.size().width() - Padding.of(owner).horizontal() - UIScrollBar.scrollbarWidth(owner);
+			return owner.size()
+						.width() - Padding.of(owner)
+										  .horizontal() - UIScrollBar.scrollbarWidth(owner);
 		};
 	}
 
@@ -53,7 +55,9 @@ public class Sizes
 	{
 		checkNotNull(owner);
 		return () -> {
-			return owner.size().height() - Padding.of(owner).vertical() - UIScrollBar.scrollbarHeight(owner);
+			return owner.size()
+						.height() - Padding.of(owner)
+										   .vertical() - UIScrollBar.scrollbarHeight(owner);
 		};
 	}
 
@@ -64,7 +68,8 @@ public class Sizes
 			UIComponent parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (int) (parent.innerSize().width() * width) + offset;
+			return (int) (parent.innerSize()
+								.width() * width) + offset;
 		};
 	}
 
@@ -75,11 +80,12 @@ public class Sizes
 			UIComponent parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (int) (parent.innerSize().height() * height) + offset;
+			return (int) (parent.innerSize()
+								.height() * height) + offset;
 		};
 	}
 
-	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillWidth(T owner, int offset)
+	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillWidth(T owner, int spacing)
 	{
 		checkNotNull(owner);
 		return () -> {
@@ -87,11 +93,14 @@ public class Sizes
 			if (parent == null)
 				return 0;
 			//remove left padding as it's counted both in parent.innerSize and owner.position
-			return parent.innerSize().width() + offset - owner.position().x() + Padding.of(parent).left();
+			return parent.innerSize()
+						 .width() - owner.position()
+										 .x() - spacing + Padding.of(parent)
+																 .left();
 		};
 	}
 
-	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillHeight(T owner, int offset)
+	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillHeight(T owner, int spacing)
 	{
 		checkNotNull(owner);
 		return () -> {
@@ -99,7 +108,10 @@ public class Sizes
 			if (parent == null)
 				return 0;
 			//remove top padding as it's counted both in parent.innerSize and owner.position
-			return parent.innerSize().height() + offset - owner.position().y() + Padding.of(parent).top();
+			return parent.innerSize()
+						 .height() - owner.position()
+										  .y() - spacing + Padding.of(parent)
+																  .top();
 		};
 	}
 
@@ -107,7 +119,8 @@ public class Sizes
 	{
 		checkNotNull(other);
 		return () -> {
-			return (int) (other.size().width() * width) + offset;
+			return (int) (other.size()
+							   .width() * width) + offset;
 		};
 	}
 
@@ -115,7 +128,8 @@ public class Sizes
 	{
 		checkNotNull(other);
 		return () -> {
-			return (int) (other.size().height() * height) + offset;
+			return (int) (other.size()
+							   .height() * height) + offset;
 		};
 	}
 
@@ -123,7 +137,9 @@ public class Sizes
 	{
 		checkNotNull(owner);
 		return () -> {
-			return owner.contentSize().width() + Padding.of(owner).horizontal() + offset;
+			return owner.contentSize()
+						.width() + Padding.of(owner)
+										  .horizontal() + offset;
 		};
 	}
 
@@ -131,7 +147,9 @@ public class Sizes
 	{
 		checkNotNull(owner);
 		return () -> {
-			return owner.contentSize().height() + Padding.of(owner).vertical() + offset;
+			return owner.contentSize()
+						.height() + Padding.of(owner)
+										   .vertical() + offset;
 		};
 	}
 }
