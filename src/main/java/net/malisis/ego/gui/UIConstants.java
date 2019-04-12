@@ -19,17 +19,17 @@ public interface UIConstants
 
 	interface Button
 	{
-		int WIDTH_TINY = 64;
+		int WIDTH = 200;
+		int WIDTH_HALF = 98;
+		int WIDTH_THIRD = 64;
 		int WIDTH_ICON = 24;
-		int WIDTH_SHORT = 98;
-		int WIDTH_LONG = 200;
 
 		int HEIGHT = 20;
-		int HEIGHT_TINY = 15;
 		int HEIGHT_ICON = 24;
 
-		Size.ISize LONG = Size.of(WIDTH_LONG, HEIGHT);
-		Size.ISize SHORT = Size.of(WIDTH_TINY, HEIGHT);
+		Size.ISize DEFAULT = Size.of(WIDTH, HEIGHT);
+		Size.ISize HALF = Size.of(WIDTH_HALF, HEIGHT);
+		Size.ISize THIRD = Size.of(WIDTH_THIRD, HEIGHT);
 		Size.ISize ICON = Size.of(WIDTH_ICON, HEIGHT_ICON);
 	}
 }
