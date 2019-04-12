@@ -12,7 +12,10 @@ public class BoxBackground implements IGuiRenderer
 
 	public BoxBackground(UIComponent component)
 	{
-		shape = GuiShape.builder(component).icon(GuiIcon.WINDOW).border(5).build();
+		shape = GuiShape.builder(component)
+						.icon(GuiIcon.BOX)
+						.border(1)
+						.build();
 	}
 
 	@Override
