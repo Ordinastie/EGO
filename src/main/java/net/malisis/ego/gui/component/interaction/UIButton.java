@@ -245,6 +245,11 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 			return this;
 		}
 
+		public UIButtonBuilder link(String url)
+		{
+			return onClick(() -> MalisisGui.openLink(url));
+		}
+
 		@Override
 		public UIButton build()
 		{
