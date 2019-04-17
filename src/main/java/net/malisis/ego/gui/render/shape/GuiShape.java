@@ -43,7 +43,6 @@ import net.malisis.ego.gui.element.size.Size.ISized;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.EnumMap;
 import java.util.function.Function;
@@ -123,9 +122,9 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 
 	public GuiIcon getIcon()
 	{
-		if (icon == null)
+		if (icon == null || icon.get() == null)
 			return GuiIcon.NONE;
-		return ObjectUtils.firstNonNull(icon.get(), GuiIcon.NONE);
+		return icon.get();
 	}
 
 	@Override
@@ -141,8 +140,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 
 	public void render(GuiRenderer renderer, IPosition position, ISize size)
 	{
-		icon.get()
-			.bind(renderer);
+		getIcon().bind(renderer);
 		for (FacePosition fp : FacePosition.VALUES)
 			for (VertexPosition vp : VertexPosition.VALUES)
 				addVertexData(fp, vp, position, size);
