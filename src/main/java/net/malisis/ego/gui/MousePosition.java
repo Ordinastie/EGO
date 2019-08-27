@@ -24,14 +24,12 @@
 
 package net.malisis.ego.gui;
 
-import org.lwjgl.input.Mouse;
-
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
+import org.lwjgl.input.Mouse;
 
 /**
  * @author Ordinastie
- *
  */
 public class MousePosition implements IPosition
 {
@@ -43,6 +41,8 @@ public class MousePosition implements IPosition
 	public void udpate(MalisisGui gui)
 	{
 		//if we ignore scaling, use real mouse position on screen
+		xPrevious = x;
+		yPrevious = y;
 		if (gui.renderer.isIgnoreScale())
 		{
 			x = Mouse.getX();
@@ -77,7 +77,7 @@ public class MousePosition implements IPosition
 		return Position.of(x, y);
 	}
 
-	public IPosition dragged()
+	public IPosition moved()
 	{
 		return Position.of(x - xPrevious, y - yPrevious);
 	}
