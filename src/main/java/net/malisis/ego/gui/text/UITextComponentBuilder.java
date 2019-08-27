@@ -171,13 +171,13 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 		return self();
 	}
 
-	public BUILDER color(int color)
+	public BUILDER textColor(int color)
 	{
 		fob().color(color);
 		return self();
 	}
 
-	public BUILDER color(TextFormatting color)
+	public BUILDER textColor(TextFormatting color)
 	{
 		fob().color(color);
 		return self();
@@ -255,13 +255,13 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 		return self();
 	}
 
-	public BUILDER rightAligned()
+	public BUILDER textRightAligned()
 	{
 		fob().rightAligned();
 		return self();
 	}
 
-	public BUILDER leftAligned()
+	public BUILDER TextLeftAligned()
 	{
 		fob().leftAligned();
 		return self();
