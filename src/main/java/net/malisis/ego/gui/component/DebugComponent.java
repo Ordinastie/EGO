@@ -218,18 +218,19 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		if (!isHovered())
 			return;
 
-		FontOptions fontOptions = text.getFontOptions();
 		if (GuiScreen.isCtrlKeyDown())
 		{
 			scale += 1 / 3F * delta;
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
-			text.setFontOptions(fontOptions.toBuilder()
-										   .scale(scale)
-										   .build());
-			cachedText.setFontOptions(fontOptions.toBuilder()
-												 .scale(scale)
-												 .build());
+			text.setFontOptions(text.getFontOptions()
+									.toBuilder()
+									.scale(scale)
+									.build());
+			cachedText.setFontOptions(cachedText.getFontOptions()
+												.toBuilder()
+												.scale(scale)
+												.build());
 		}
 		else if (GuiScreen.isShiftKeyDown())
 		{
@@ -242,15 +243,20 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	@Override
 	public boolean keyTyped(char keyChar, int keyCode)
 	{
-
 		if (!GuiScreen.isCtrlKeyDown())
+			return false;
+
+		if (keyCode == Keyboard.KEY_D)
+		{
+			setEnabled(!isEnabled());
+			return true;
+		}
+
+		if (!isEnabled())
 			return false;
 
 		switch (keyCode)
 		{
-			case Keyboard.KEY_D:
-				setEnabled(!isEnabled());
-				break;
 			case Keyboard.KEY_P:
 				Position.CACHED = !Position.CACHED;
 				break;
