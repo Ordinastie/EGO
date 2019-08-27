@@ -22,9 +22,11 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.ego;
+package net.malisis.ego.command;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
+import net.malisis.ego.EGO;
+import net.malisis.ego.GuiDemo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -32,8 +34,8 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Commands handler for {@link EGO} mod.
@@ -42,35 +44,25 @@ import java.util.Set;
  */
 public class EGOCommand extends CommandBase
 {
-	/** List of parameters available for this {@link EGOCommand}. */
-	private Set<String> parameters = Sets.newHashSet();
+	public static final EGOCommand INSTANCE = new EGOCommand();
+
+	private LayeredCommand layeredCommand = new LayeredCommand("EGO", "ego.commands.usage");
 
 	/**
 	 * Instantiates the command
 	 */
 	public EGOCommand()
 	{
-		parameters.add("demo");
-		parameters.add("version");
+		layeredCommand.registerCommand("demo", () -> new GuiDemo().display(true));
+		layeredCommand.registerCommand("version", () -> EGO.message("ego.commands.modversion", EGO.version));
 	}
 
-	/**
-	 * Gets the command name.
-	 *
-	 * @return the command name
-	 */
 	@Override
 	public String getName()
 	{
 		return "EGO";
 	}
 
-	/**
-	 * Gets the command usage.
-	 *
-	 * @param sender the sender
-	 * @return the command usage
-	 */
 	@Override
 	public String getUsage(ICommandSender sender)
 	{
@@ -89,23 +81,10 @@ public class EGOCommand extends CommandBase
 		if (params.length == 0)
 			throw new WrongUsageException("ego.commands.usage");
 
-		if (!parameters.contains(params[0]))
-			throw new WrongUsageException("ego.commands.usage");
-
-		switch (params[0])
-		{
-			case "demo":
-				new GuiDemo().display(true);
-				break;
-			case "version":
-				EGO.message("ego.commands.modversion", EGO.version);
-				break;
-
-			default:
-				EGO.message("EGO command unknown.");
-				break;
-		}
-
+		ArrayList<String> args = Lists.newArrayList(params);
+		String err = layeredCommand.execute(server, sender, args);
+		if (err != null)
+			throw new WrongUsageException(err);
 	}
 
 	@Override
@@ -117,19 +96,28 @@ public class EGOCommand extends CommandBase
 	@Override
 	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] params, BlockPos pos)
 	{
-		//		if (params.length == 1)
-		//			return getListOfStringsMatchingLastWord(params, parameters);
-		//		else if (params.length == 2 && params[0].equals("debug"))
-		//			return getListOfStringsMatchingLastWord(params, debugs.keySet());
-		//		else if (params.length == 2)
-		//			return getListOfStringsMatchingLastWord(params, MalisisCore.listModId());
-		//		else
-		return null;
+		ArrayList<String> args = Lists.newArrayList(params);
+		return layeredCommand.getTabCompletions(server, sender, args, pos);
 	}
 
 	@Override
 	public boolean isUsernameIndex(String[] astring, int i)
 	{
 		return false;
+	}
+
+	public static void registerCommand(String name, Runnable runnable)
+	{
+		INSTANCE.layeredCommand.registerCommand(name, runnable);
+	}
+
+	public static void registerCommand(LayeredCommand command)
+	{
+		INSTANCE.layeredCommand.registerCommand(command.name(), command);
+	}
+
+	public static void registerCommand(String name, ISubCommand command)
+	{
+		INSTANCE.layeredCommand.registerCommand(name, command);
 	}
 }
