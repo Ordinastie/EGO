@@ -34,6 +34,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Supplier;
 
@@ -110,11 +111,17 @@ public class GuiIcon
 	public static final GuiIcon TAB_PANEL_LEFT = new GuiIcon(VANILLAGUI_TEXTURE, 238, 81, 15, 15);
 	public static final GuiIcon TAB_PANEL_BOTTOM = new GuiIcon(VANILLAGUI_TEXTURE, 251, 81, 15, 15);
 
-	private GuiTexture texture = VANILLAGUI_TEXTURE;
-	private float u = 0;
-	private float v = 0;
-	private float U = 1;
-	private float V = 1;
+	protected GuiTexture texture = VANILLAGUI_TEXTURE;
+	protected ResourceLocation location;
+	protected float u = 0;
+	protected float v = 0;
+	protected float U = 1;
+	protected float V = 1;
+
+	public GuiIcon(ResourceLocation location)
+	{
+		this.location = location;
+	}
 
 	public GuiIcon(float u, float v, float U, float V)
 	{
@@ -150,6 +157,11 @@ public class GuiIcon
 		this(texture, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
 	}
 
+	public ResourceLocation location()
+	{
+		return location;
+	}
+
 	public float u()
 	{
 		return u;
@@ -170,6 +182,36 @@ public class GuiIcon
 		return V;
 	}
 
+	public int x()
+	{
+		return pixelFromU(u());
+	}
+
+	public int y()
+	{
+		return pixelFromV(v());
+	}
+
+	public int X()
+	{
+		return pixelFromU(U());
+	}
+
+	public int Y()
+	{
+		return pixelFromV(V());
+	}
+
+	public int width()
+	{
+		return X() - x();
+	}
+
+	public int height()
+	{
+		return Y() - y();
+	}
+
 	public float interpolatedU(float i)
 	{
 		return u() + i * (U() - u());
@@ -180,16 +222,46 @@ public class GuiIcon
 		return v() + i * (V() - v());
 	}
 
-	public float pixelU(int px)
+	/**
+	 * Gets the horizontal texture coordinate relative to this {@link GuiIcon}.<br>
+	 * A negative value return a coordinate relative to the right bound of this icon.
+	 *
+	 * @param px
+	 * @return the horizontal coordinate
+	 */
+	public float pixelToU(int px)
 	{
 		float offset = texture != null ? texture.pixelToU(px) : 0;
 		return px >= 0 ? u() + offset : U() + offset;
 	}
 
-	public float pixelV(int px)
+	/**
+	 * Gets the vertical texture coordinate relative to this {@link GuiIcon}.<br>
+	 * A negative value return a coordinate relative to the lower bound of this icon.
+	 *
+	 * @param px
+	 * @return the vertical coordinate
+	 */
+	public float pixelToV(int px)
 	{
 		float offset = texture != null ? texture.pixelToV(px) : 0;
 		return px >= 0 ? v() + offset : V() + offset;
+	}
+
+	public int pixelFromU(float u)
+	{
+		if (texture == null)
+			return 0;
+
+		return (int) (u * texture.width());
+	}
+
+	public int pixelFromV(float v)
+	{
+		if (texture == null)
+			return 0;
+
+		return (int) (v * texture.height());
 	}
 
 	public GuiIcon flip(boolean horizontal, boolean vertical)
@@ -209,6 +281,15 @@ public class GuiIcon
 	public GuiIcon copy()
 	{
 		return new GuiIcon(texture, u(), v(), U(), v());
+	}
+
+	public void stitch(GuiTexture texture, float u, float v, float U, float V)
+	{
+		this.texture = texture;
+		this.u = u;
+		this.v = v;
+		this.U = U;
+		this.V = V;
 	}
 
 	public void bind(GuiRenderer renderer)
@@ -233,8 +314,6 @@ public class GuiIcon
 
 	public static GuiIcon from(ItemStack itemStack)
 	{
-		if (Minecraft.getMinecraft().getRenderItem() == null)
-			return FULL;
 		TextureAtlasSprite icon = Minecraft.getMinecraft()
 										   .getRenderItem()
 										   .getItemModelMesher()
@@ -250,7 +329,10 @@ public class GuiIcon
 
 	public static GuiIcon from(IBlockState state)
 	{
-		TextureAtlasSprite icon = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state);
+		TextureAtlasSprite icon = Minecraft.getMinecraft()
+										   .getBlockRendererDispatcher()
+										   .getBlockModelShapes()
+										   .getTexture(state);
 
 		return new GuiIcon(MalisisGui.BLOCK_TEXTURE, icon);
 	}
