@@ -50,6 +50,7 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private final Map<String, ICachedData<?>> parameters;
 
 	/** The base font options to use to render. */
-	private FontOptions fontOptions = null;
+	private FontOptions fontOptions;
 	/** Translated text with resolved parameters. */
 	private String cache = null;
 
@@ -400,6 +401,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public String applyParameters(String str)
 	{
+		if (Strings.isEmpty(str))
+			return "";
 		Matcher matcher = pattern.matcher(str);
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find())
