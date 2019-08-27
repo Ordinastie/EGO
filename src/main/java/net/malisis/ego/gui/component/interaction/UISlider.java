@@ -25,7 +25,6 @@
 package net.malisis.ego.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
-import static net.malisis.ego.gui.element.position.Positions.middleAligned;
 
 import com.google.common.base.Converter;
 import net.malisis.ego.font.FontOptions;
@@ -72,13 +71,14 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 
 		builder.tb()
 			   .bind("value", this::getValue)
-			   .position(this::textPosition, t -> middleAligned(t, 0));
+			   .x(this::textPosition)
+			   .middleAligned();
 
 		text = builder.buildText(this);
 		value = converter.convert(0F);
 
 		GuiShape sliderShape = GuiShape.builder(this)
-									   .position(this::scrollPosition, 0)
+									   .x(this::scrollPosition)
 									   .size(Size.of(SLIDER_WIDTH, () -> size().height()))
 									   .icon(GuiIcon.SLIDER)
 									   .border(5)

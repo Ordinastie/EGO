@@ -117,9 +117,9 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 	{
 		GuiText gt = GuiText.builder()
 							.parent(this)
+							.middleCenter(0, 2)
 							.text(text)
 							.fontOptions(fontOptions)
-							.position(o -> centered(o, 0), o -> middleAligned(o, 2))
 							.build();
 		setContent(gt);
 	}

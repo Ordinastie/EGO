@@ -161,6 +161,14 @@ public class UIImage extends UIComponent
 
 		protected UIImageBuilder()
 		{
+			width = o -> () -> o.getIcon() != null ?
+							   o.getIcon()
+								.width() :
+							   0;
+			height = o -> () -> o.getIcon() != null ?
+								o.getIcon()
+								 .height() :
+								0;
 		}
 
 		public UIImageBuilder icon(GuiIcon icon)
@@ -199,6 +207,11 @@ public class UIImage extends UIComponent
 				image.setIcon(icon);
 			if (itemStack != null)
 				image.setItemStack(itemStack);
+
+			image.size()
+				 .width();
+			image.size()
+				 .height();
 
 			return image;
 		}

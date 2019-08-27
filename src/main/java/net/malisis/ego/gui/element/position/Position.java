@@ -33,6 +33,7 @@ import static net.malisis.ego.gui.element.position.Positions.middleAlignedTo;
 import static net.malisis.ego.gui.element.position.Positions.rightAligned;
 import static net.malisis.ego.gui.element.position.Positions.topAligned;
 
+import net.malisis.ego.EGO;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.control.IScrollable;
@@ -93,16 +94,13 @@ public class Position
 
 	public static class DynamicPosition implements IPosition
 	{
-		private int cachedX;
-		private int cachedY;
-
-		private int lastFrameX = -1;
-		private int lastFrameY = -1;
-
-		private final int x;
-		private final int y;
-		private final IntSupplier xFunction;
-		private final IntSupplier yFunction;
+		protected int counterX = -1;
+		protected int counterY = -1;
+		protected int lock = 0;
+		protected int x;
+		protected int y;
+		protected final IntSupplier xFunction;
+		protected final IntSupplier yFunction;
 
 		DynamicPosition(int x, int y, IntSupplier xFunction, IntSupplier yFunction)
 		{
@@ -112,38 +110,40 @@ public class Position
 			this.yFunction = yFunction;
 		}
 
-		private void updateX()
-		{
-			if (lastFrameX == MalisisGui.counter && Position.CACHED)
-				return;
-			cachedX = xFunction.getAsInt();
-			lastFrameX = MalisisGui.counter;
-		}
-
-		private void updateY()
-		{
-			if (lastFrameY == MalisisGui.counter && Position.CACHED)
-				return;
-			cachedY = yFunction.getAsInt();
-			lastFrameY = MalisisGui.counter;
-		}
-
 		@Override
 		public int x()
 		{
-			if (xFunction == null)
-				return x;
-			updateX();
-			return cachedX;
+			if (xFunction != null && (!Position.CACHED || MalisisGui.needsUpdate(counterX)))
+			{
+				if (lock++ >= 5)
+				{
+					EGO.log.error("Possible infinite recursion detected for x. (" + lock + ")");
+					return x;
+				}
+				counterX = MalisisGui.counter;
+				x = xFunction.getAsInt();
+			}
+
+			lock = 0;
+			return x;
 		}
 
 		@Override
 		public int y()
 		{
-			if (yFunction == null)
-				return y;
-			updateY();
-			return cachedY;
+			if (yFunction != null && (!Position.CACHED || MalisisGui.needsUpdate(counterY)))
+			{
+				if (lock++ >= 5)
+				{
+					EGO.log.error("Possible infinite recursion detected for width. (" + lock + ")");
+					return y;
+				}
+				counterY = MalisisGui.counter;
+				y = yFunction.getAsInt();
+			}
+
+			lock = 0;
+			return y;
 		}
 
 		@Override
@@ -159,11 +159,9 @@ public class Position
 		/* Determines whether the position with be relative to the offset ot the owner (if owner is IOffset). */
 		private final boolean fixed;
 
-		private int cachedX;
-		private int cachedY;
-
-		private int lastFrameX = -1;
-		private int lastFrameY = -1;
+		private int x;
+		private int y;
+		private int counter = -1;
 
 		public ScreenPosition(IPositioned owner)
 		{
@@ -176,46 +174,62 @@ public class Position
 			this.fixed = fixed;
 		}
 
+		public int updateX()
+		{
+			int x = owner.position()
+						 .x();
+			if (owner instanceof IChild<?>)
+			{
+				Object parent = ((IChild<?>) owner).getParent();
+				if (parent instanceof UIComponent)
+					x += ((UIComponent) parent).screenPosition()
+											   .x();
+				if (!fixed && parent instanceof IOffset)
+					x += ((IOffset) parent).offset()
+										   .x();
+			}
+
+			return x;
+		}
+
+		public int updateY()
+		{
+			int y = owner.position()
+						 .y();
+			if (owner instanceof IChild<?>)
+			{
+				Object parent = ((IChild<?>) owner).getParent();
+				if (parent instanceof UIComponent)
+					y += ((UIComponent) parent).screenPosition()
+											   .y();
+				if (!fixed && parent instanceof IScrollable)
+					y += ((IScrollable) parent).offset()
+											   .y();
+			}
+			return y;
+		}
+
+		private void update()
+		{
+			x = updateX();
+			y = updateY();
+			counter = MalisisGui.counter;
+		}
+
 		@Override
 		public int x()
 		{
-			if (lastFrameX != MalisisGui.counter || !Position.CACHED)
-				updateX();
-			return cachedX;
+			if (!Position.CACHED || MalisisGui.needsUpdate(counter))
+				update();
+			return x;
 		}
 
 		@Override
 		public int y()
 		{
-			if (lastFrameY != MalisisGui.counter || !Position.CACHED)
-				updateY();
-			return cachedY;
-		}
-
-		public void updateX()
-		{
-			cachedX = owner.position().x();
-			if (owner instanceof IChild<?>)
-			{
-				Object parent = ((IChild<?>) owner).getParent();
-				if (parent instanceof UIComponent)
-					cachedX += ((UIComponent) parent).screenPosition().x();
-				if (!fixed && parent instanceof IOffset)
-					cachedX += ((IOffset) parent).offset().x();
-			}
-		}
-
-		public void updateY()
-		{
-			cachedY = owner.position().y();
-			if (owner instanceof IChild<?>)
-			{
-				Object parent = ((IChild<?>) owner).getParent();
-				if (parent instanceof UIComponent)
-					cachedY += ((UIComponent) parent).screenPosition().y();
-				if (!fixed && parent instanceof IScrollable)
-					cachedY += ((IScrollable) parent).offset().y();
-			}
+			if (!Position.CACHED || MalisisGui.needsUpdate(counter))
+				update();
+			return y;
 		}
 
 		@Override
@@ -316,7 +330,7 @@ public class Position
 	}
 
 	//position relative to other
-	public static <T extends IPositioned & ISized, U extends IPositioned & ISized> IPosition leftOf(ISized owner, U other, int spacing)
+	public static <T extends IPositioned & ISized> IPosition leftOf(ISized owner, T other, int spacing)
 	{
 		return of(Positions.leftOf(owner, other, spacing), middleAlignedTo(owner, other, 0));
 	}
@@ -335,4 +349,5 @@ public class Position
 	{
 		return of(leftAlignedTo(other, 0), Positions.below(other, spacing));
 	}
+
 }

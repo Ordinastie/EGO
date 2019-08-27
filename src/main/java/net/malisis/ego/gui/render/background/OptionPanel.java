@@ -21,19 +21,22 @@ public class OptionPanel implements IGuiRenderer
 	{
 		IntSupplier width = Sizes.widthRelativeTo(component, 1, 0);
 		top = GuiShape.builder(component)
-					  .size(width, BORDER_HEIGHT)
+					  .widthRelativeTo(component)
+					  .height(BORDER_HEIGHT)
 					  .color(0x000000)
 					  .bottomAlpha(120)
 					  .build();
 		middle = GuiShape.builder(component)
 						 .position(s -> Position.below(s, top, 0))
-						 .size(width, Sizes.heightRelativeTo(component, 1, BORDER_HEIGHT * -2))
+						 .widthRelativeTo(component)
+						 .heightRelativeTo(component, 1F, BORDER_HEIGHT * -2)
 						 .color(0x000000)
 						 .alpha(120)
 						 .build();
 		bottom = GuiShape.builder(component)
 						 .position(s -> Position.below(s, middle, 0))
-						 .size(width, BORDER_HEIGHT)
+						 .widthRelativeTo(component)
+						 .height(BORDER_HEIGHT)
 						 .color(0x000000)
 						 .topAlpha(120)
 						 .build();

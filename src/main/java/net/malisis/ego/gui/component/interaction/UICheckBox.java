@@ -231,12 +231,14 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 
 		protected UICheckBoxBuilder()
 		{
-			fontOptionsBuilder.color(0x444444)
-							  .when(UICheckBox::isHovered)
-							  .color(0x777777)
-							  .when(UICheckBox::isDisabled)
-							  .color(0xCCCCCC)
-							  .base();
+			widthOfContent(15);
+			heightOfContent(4);
+			fob().color(0x444444)
+				 .when(UICheckBox::isHovered)
+				 .color(0x777777)
+				 .when(UICheckBox::isDisabled)
+				 .color(0xCCCCCC)
+				 .base();
 		}
 
 		public UICheckBoxBuilder checked(boolean checked)

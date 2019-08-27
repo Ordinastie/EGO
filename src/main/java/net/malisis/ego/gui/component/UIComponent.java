@@ -171,11 +171,21 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		return position;
 	}
 
+	/**
+	 * Gets the position of this {@link UIComponent} on the screen
+	 *
+	 * @return the component position
+	 */
 	public IPosition screenPosition()
 	{
 		return screenPosition;
 	}
 
+	/**
+	 * Gets the position of the mouse inside this {@link UIComponent}
+	 *
+	 * @return mouse position
+	 */
 	public IPosition mousePosition()
 	{
 		if (this instanceof IOffset)
@@ -333,6 +343,8 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 		this.visible = visible;
 		fireEvent(isVisible() ? new VisibleEvent<>(this) : new HiddenEvent<>(this));
 
+		if (getParent() instanceof UIContainer)
+			((UIContainer) getParent()).onContentUpdate();
 		if (!isVisible())
 		{
 			setHovered(false);
@@ -602,7 +614,8 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	}
 
 	/**
-	 * Called from the GUI when the mouse is dragged with a button pressed.
+	 * Called from the GUI when the mouse is dragged with a button pressed.<br>
+	 * To get the distance dragged, use {@code MalisisGui.MOUSE_POSITION.moved()}
 	 *
 	 * @param button the button
 	 */

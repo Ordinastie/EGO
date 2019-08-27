@@ -70,7 +70,8 @@ public class UIProgressBar extends UIComponent
 							  .icon(backgroundIcon)
 							  .build());
 		setForeground(GuiShape.builder(this)
-							  .position(xSupplier, ySupplier)
+							  .x(xSupplier)
+							  .y(ySupplier)
 							  .size(fillSize)
 							  .icon(fillIcon)
 							  .build());

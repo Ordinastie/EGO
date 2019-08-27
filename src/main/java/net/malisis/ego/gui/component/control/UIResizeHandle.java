@@ -76,9 +76,9 @@ public class UIResizeHandle extends UIComponent implements IControlComponent
 //		int w = getParent().size().width();
 //		int h = getParent().size().height();
 //		if (type == Type.BOTH || type == Type.HORIZONTAL)
-//			w += MalisisGui.MOUSE_POSITION.dragged().x();
+//			w += MalisisGui.MOUSE_POSITION.moved().x();
 //		if (type == Type.BOTH || type == Type.VERTICAL)
-//			h += MalisisGui.MOUSE_POSITION.dragged().y();
+//			h += MalisisGui.MOUSE_POSITION.moved().y();
 //		if (w < 10)
 //			w = 10;
 //		if (h < 10)

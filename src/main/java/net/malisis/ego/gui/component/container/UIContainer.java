@@ -40,6 +40,7 @@ import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
+import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
@@ -224,7 +225,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public void onContentUpdate()
 	{
-		content.updateSize();
+		//content.updateSize();
 		//fireEvent(new ContentUpdateEvent<>(this));
 	}
 
@@ -364,12 +365,11 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 						.padding(1);
 	}
 
-	public class ContainerContent implements IContent, IGuiRenderer, ISize
+	public class ContainerContent implements IContent, IGuiRenderer
 	{
 		/** List of {@link UIComponent} inside this {@link UIContainer}. */
 		protected final List<UIComponent> components = Lists.newArrayList();
-		protected int width;
-		protected int height;
+		protected ISize size = Size.of(this::updateWidth, this::updateHeight);
 
 		public void add(UIComponent component)
 		{
@@ -409,37 +409,29 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		@Override
 		public ISize size()
 		{
-			return this;
+			return size;
 		}
 
-		private void updateSize()
+		private int updateWidth()
 		{
-			width = components.stream()
-							  .filter(UIComponent::isVisible)
-							  .mapToInt(c -> c.position()
-											  .x() + c.size()
-													  .width())
-							  .max()
-							  .orElse(0) - padding().left();
-			height = components.stream()
-							   .filter(UIComponent::isVisible)
-							   .mapToInt(c -> c.position()
-											   .y() + c.size()
-													   .height())
-							   .max()
-							   .orElse(0) - padding().top();
+			return components.stream()
+							 .filter(UIComponent::isVisible)
+							 .mapToInt(c -> c.position()
+											 .x() + c.size()
+													 .width())
+							 .max()
+							 .orElse(0) - padding().left();
 		}
 
-		@Override
-		public int width()
+		private int updateHeight()
 		{
-			return width;
-		}
-
-		@Override
-		public int height()
-		{
-			return height;
+			return components.stream()
+							 .filter(UIComponent::isVisible)
+							 .mapToInt(c -> c.position()
+											 .y() + c.size()
+													 .height())
+							 .max()
+							 .orElse(0) - padding().top();
 		}
 
 		public void setVisible(boolean visible)
@@ -484,6 +476,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		protected UIContainerBuilder()
 		{
+			size(Size::sizeOfContent);
 		}
 
 		public UIContainerBuilder padding(Padding padding)

@@ -60,6 +60,11 @@ public interface IPositionBuilder<BUILDER, OWNER extends IPositioned & ISized & 
 		return position(o -> position);
 	}
 
+	public default BUILDER position(int x, int y)
+	{
+		return position(o -> Position.of(x, y));
+	}
+
 	public default BUILDER x(int x)
 	{
 		return x(o -> () -> x);
@@ -68,6 +73,16 @@ public interface IPositionBuilder<BUILDER, OWNER extends IPositioned & ISized & 
 	public default BUILDER y(int y)
 	{
 		return y(o -> () -> y);
+	}
+
+	public default BUILDER x(IntSupplier func)
+	{
+		return x(s -> func);
+	}
+
+	public default BUILDER y(IntSupplier func)
+	{
+		return y(s -> func);
 	}
 
 	public default BUILDER topLeft()
@@ -355,62 +370,4 @@ public interface IPositionBuilder<BUILDER, OWNER extends IPositioned & ISized & 
 	{
 		return x(o -> Positions.rightOfCenter(o, offset));
 	}
-
-	public default BUILDER position(Function<OWNER, IntSupplier> x, Function<OWNER, IntSupplier> y)
-	{
-		checkNotNull(x);
-		checkNotNull(y);
-		return position(o -> Position.of(x.apply(o), y.apply(o)));
-	}
-
-	public default BUILDER position(int x, Function<OWNER, IntSupplier> y)
-	{
-		checkNotNull(y);
-		return position(o -> Position.of(x, y.apply(o)));
-	}
-
-	public default BUILDER position(Function<OWNER, IntSupplier> x, int y)
-	{
-		checkNotNull(x);
-		return position(o -> Position.of(x.apply(o), y));
-	}
-
-	public default BUILDER position(Function<OWNER, IntSupplier> x, IntSupplier y)
-	{
-		checkNotNull(x);
-		checkNotNull(y);
-		return position(o -> Position.of(x.apply(o), y));
-	}
-
-	public default BUILDER position(IntSupplier x, Function<OWNER, IntSupplier> y)
-	{
-		checkNotNull(x);
-		checkNotNull(y);
-		return position(o -> Position.of(x, y.apply(o)));
-	}
-
-	public default BUILDER position(IntSupplier x, IntSupplier y)
-	{
-		checkNotNull(x);
-		checkNotNull(y);
-		return position(o -> Position.of(x, y));
-	}
-
-	public default BUILDER position(int x, IntSupplier y)
-	{
-		checkNotNull(y);
-		return position(o -> Position.of(x, y));
-	}
-
-	public default BUILDER position(IntSupplier x, int y)
-	{
-		checkNotNull(x);
-		return position(o -> Position.of(x, y));
-	}
-
-	public default BUILDER position(int x, int y)
-	{
-		return position(o -> Position.of(x, y));
-	}
-
 }

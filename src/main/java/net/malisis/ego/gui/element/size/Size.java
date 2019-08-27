@@ -24,6 +24,7 @@
 
 package net.malisis.ego.gui.element.size;
 
+import net.malisis.ego.EGO;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
@@ -83,14 +84,11 @@ public class Size
 
 	public static class DynamicSize implements ISize
 	{
-		private int cachedWidth;
-		private int cachedHeight;
-
-		private int lastFrameWidth = -1;
-		private int lastFrameHeight = -1;
-
-		private final int width;
-		private final int height;
+		private int counterW = -1;
+		private int counterH = -1;
+		private int lock = 0;
+		private int width;
+		private int height;
 		private final IntSupplier widthFunction;
 		private final IntSupplier heightFunction;
 
@@ -102,39 +100,40 @@ public class Size
 			this.heightFunction = heightFunction;
 		}
 
-		private void updateWidth()
-		{
-			if (lastFrameWidth == MalisisGui.counter && Size.CACHED)
-				return;
-			lastFrameWidth = MalisisGui.counter;
-			cachedWidth = widthFunction.getAsInt();
-
-		}
-
-		private void updateHeight()
-		{
-			if (lastFrameHeight == MalisisGui.counter && Size.CACHED)
-				return;
-			lastFrameHeight = MalisisGui.counter;
-			cachedHeight = heightFunction.getAsInt();
-		}
-
 		@Override
 		public int width()
 		{
-			if (widthFunction == null)
-				return width;
-			updateWidth();
-			return cachedWidth;
+			if (widthFunction != null && (!Size.CACHED || MalisisGui.needsUpdate(counterW)))
+			{
+				if (lock++ >= 5)
+				{
+					EGO.log.error("Possible infinite recursion detected for width. (" + lock + ")");
+					return width;
+				}
+				counterW = MalisisGui.counter;
+				width = widthFunction.getAsInt();
+			}
+
+			lock = 0;
+			return width;
 		}
 
 		@Override
 		public int height()
 		{
-			if (heightFunction == null)
-				return height;
-			updateHeight();
-			return cachedHeight;
+			if (heightFunction != null && (!Size.CACHED || MalisisGui.needsUpdate(counterH)))
+			{
+				if (lock++ >= 5)
+				{
+					EGO.log.error("Possible infinite recursion detected for height. (" + lock + ")");
+					return height;
+				}
+				counterH = MalisisGui.counter;
+				height = heightFunction.getAsInt();
+			}
+
+			lock = 0;
+			return height;
 		}
 
 		@Override

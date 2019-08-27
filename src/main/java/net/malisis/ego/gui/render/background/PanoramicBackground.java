@@ -34,8 +34,16 @@ public class PanoramicBackground implements IGuiRenderer
 		for (int i = 0; i < 6; i++)
 			resLocs[i] = new ResourceLocation(base + "_" + i + ".png");
 
-		whiteGradient = GuiShape.builder(screen).color(0xFFFFFF).topAlpha(0x80).bottomAlpha(0x00).build();
-		blackGradient = GuiShape.builder(screen).color(0x000000).topAlpha(0x00).bottomAlpha(0x80).build();
+		whiteGradient = GuiShape.builder(screen)
+								.color(0xFFFFFF)
+								.topAlpha(0x80)
+								.bottomAlpha(0x00)
+								.build();
+		blackGradient = GuiShape.builder(screen)
+								.color(0x000000)
+								.topAlpha(0x00)
+								.bottomAlpha(0x80)
+								.build();
 	}
 
 	public PanoramicBackground(UIComponent screen)
@@ -52,19 +60,26 @@ public class PanoramicBackground implements IGuiRenderer
 		renderer.startDrawing();
 		GlStateManager.enableAlpha();
 
-		whiteGradient.and(blackGradient).render(renderer);
+		whiteGradient.and(blackGradient)
+					 .render(renderer);
 	}
 
 	private void renderSkybox(GuiRenderer renderer)
 	{
-		int x = screen.position().x();
-		int y = screen.position().y();
-		int width = screen.size().width();
-		int height = screen.size().height();
+		int x = screen.position()
+					  .x();
+		int y = screen.position()
+					  .y();
+		int width = screen.size()
+						  .width();
+		int height = screen.size()
+						   .height();
 		float partialTicks = renderer.getPartialTick();
 		timer++;
 
-		Minecraft.getMinecraft().getFramebuffer().unbindFramebuffer();
+		Minecraft.getMinecraft()
+				 .getFramebuffer()
+				 .unbindFramebuffer();
 		GlStateManager.viewport(0, 0, 256, 256);
 
 		Tessellator tessellator = Tessellator.getInstance();
@@ -78,35 +93,53 @@ public class PanoramicBackground implements IGuiRenderer
 		rotateAndBlurSkybox(tessellator, buffer);
 		rotateAndBlurSkybox(tessellator, buffer);
 		rotateAndBlurSkybox(tessellator, buffer);
-		Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
+		Minecraft.getMinecraft()
+				 .getFramebuffer()
+				 .bindFramebuffer(true);
 		GlStateManager.viewport(0, 0, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
-		float ratio = 120.0F / (width > height ? width : height);
+		float ratio = 120.0F / Math.max(width, height);
 		float w = height * ratio / 256.0F;
 		float h = width * ratio / 256.0F;
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		buffer.pos(x, y + height, 0).tex((0.5F - w), (0.5F + h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
-		buffer.pos(x + width, y + height, 0).tex((0.5F - w), (0.5F - h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
-		buffer.pos(x + width, y, 0).tex((0.5F + w), (0.5F - h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
-		buffer.pos(x, y, 0).tex((0.5F + w), (0.5F + h)).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
+		buffer.pos(x, y + height, 0)
+			  .tex((0.5F - w), (0.5F + h))
+			  .color(1.0F, 1.0F, 1.0F, 1.0F)
+			  .endVertex();
+		buffer.pos(x + width, y + height, 0)
+			  .tex((0.5F - w), (0.5F - h))
+			  .color(1.0F, 1.0F, 1.0F, 1.0F)
+			  .endVertex();
+		buffer.pos(x + width, y, 0)
+			  .tex((0.5F + w), (0.5F - h))
+			  .color(1.0F, 1.0F, 1.0F, 1.0F)
+			  .endVertex();
+		buffer.pos(x, y, 0)
+			  .tex((0.5F + w), (0.5F + h))
+			  .color(1.0F, 1.0F, 1.0F, 1.0F)
+			  .endVertex();
 		tessellator.draw();
 	}
 
 	private void rotateAndBlurSkybox(Tessellator tessellator, BufferBuilder buffer)
 	{
-		int x = screen.position().x();
-		int y = screen.position().y();
-		int width = screen.size().width();
-		int height = screen.size().height();
+		int x = screen.position()
+					  .x();
+		int y = screen.position()
+					  .y();
+		int width = screen.size()
+						  .width();
+		int height = screen.size()
+						   .height();
 
-		Minecraft.getMinecraft().getTextureManager().bindTexture(backgroundTexture);
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .bindTexture(backgroundTexture);
 		GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GlStateManager.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, 256, 256);
 		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-											GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-											GlStateManager.SourceFactor.ONE,
-											GlStateManager.DestFactor.ZERO);
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+											GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.colorMask(true, true, true, false);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 		GlStateManager.disableAlpha();
@@ -115,10 +148,22 @@ public class PanoramicBackground implements IGuiRenderer
 		{
 			int blurIntensity = (int) ((1.0F / (i + 1)) * 255.0F);
 			float rotation = (i - 1) / 256.0F;
-			buffer.pos(x + width, y + height, 0).tex((0.0F + rotation), 1.0D).color(255, 255, 255, blurIntensity).endVertex();
-			buffer.pos(x + width, y, 0).tex((1.0F + rotation), 1.0D).color(255, 255, 255, blurIntensity).endVertex();
-			buffer.pos(x, y, 0).tex((1.0F + rotation), 0.0D).color(255, 255, 255, blurIntensity).endVertex();
-			buffer.pos(x, y + height, 0).tex((0.0F + rotation), 0.0D).color(255, 255, 255, blurIntensity).endVertex();
+			buffer.pos(x + width, y + height, 0)
+				  .tex((0.0F + rotation), 1.0D)
+				  .color(255, 255, 255, blurIntensity)
+				  .endVertex();
+			buffer.pos(x + width, y, 0)
+				  .tex((1.0F + rotation), 1.0D)
+				  .color(255, 255, 255, blurIntensity)
+				  .endVertex();
+			buffer.pos(x, y, 0)
+				  .tex((1.0F + rotation), 0.0D)
+				  .color(255, 255, 255, blurIntensity)
+				  .endVertex();
+			buffer.pos(x, y + height, 0)
+				  .tex((0.0F + rotation), 0.0D)
+				  .color(255, 255, 255, blurIntensity)
+				  .endVertex();
 		}
 
 		tessellator.draw();
@@ -142,10 +187,8 @@ public class PanoramicBackground implements IGuiRenderer
 		GlStateManager.disableAlpha();
 		GlStateManager.disableCull();
 		GlStateManager.depthMask(false);
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-											GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-											GlStateManager.SourceFactor.ONE,
-											GlStateManager.DestFactor.ZERO);
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+											GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
 		for (int i = 0; i < 64; ++i)
 		{
@@ -179,13 +222,27 @@ public class PanoramicBackground implements IGuiRenderer
 						break;
 				}
 
-				Minecraft.getMinecraft().getTextureManager().bindTexture(resLocs[j]);
+				Minecraft.getMinecraft()
+						 .getTextureManager()
+						 .bindTexture(resLocs[j]);
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 				int alpha = 255 / (i + 1);
-				buffer.pos(-1.0D, -1.0D, 1.0D).tex(0.0D, 0.0D).color(255, 255, 255, alpha).endVertex();
-				buffer.pos(1.0D, -1.0D, 1.0D).tex(1.0D, 0.0D).color(255, 255, 255, alpha).endVertex();
-				buffer.pos(1.0D, 1.0D, 1.0D).tex(1.0D, 1.0D).color(255, 255, 255, alpha).endVertex();
-				buffer.pos(-1.0D, 1.0D, 1.0D).tex(0.0D, 1.0D).color(255, 255, 255, alpha).endVertex();
+				buffer.pos(-1.0D, -1.0D, 1.0D)
+					  .tex(0.0D, 0.0D)
+					  .color(255, 255, 255, alpha)
+					  .endVertex();
+				buffer.pos(1.0D, -1.0D, 1.0D)
+					  .tex(1.0D, 0.0D)
+					  .color(255, 255, 255, alpha)
+					  .endVertex();
+				buffer.pos(1.0D, 1.0D, 1.0D)
+					  .tex(1.0D, 1.0D)
+					  .color(255, 255, 255, alpha)
+					  .endVertex();
+				buffer.pos(-1.0D, 1.0D, 1.0D)
+					  .tex(0.0D, 1.0D)
+					  .color(255, 255, 255, alpha)
+					  .endVertex();
 				tessellator.draw();
 				GlStateManager.popMatrix();
 			}

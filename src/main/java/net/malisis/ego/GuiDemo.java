@@ -1,9 +1,6 @@
 package net.malisis.ego;
 
-import static net.malisis.ego.gui.element.position.Positions.middleAlignedTo;
-import static net.malisis.ego.gui.element.position.Positions.rightOf;
 import static net.malisis.ego.gui.element.size.Sizes.heightRelativeTo;
-import static net.malisis.ego.gui.element.size.Sizes.parentHeight;
 import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
 import static net.malisis.ego.gui.element.size.Sizes.widthRelativeTo;
 
@@ -105,7 +102,8 @@ public class GuiDemo extends MalisisGui
 
 		//create a panel to hold the containers
 		panel = UIContainer.panel()
-						   .size(p -> parentWidth(p, 1.0F, 0), 140)
+						   .parentWidth()
+						   .height(140)
 						   .build();
 
 		//create the tabs for the containers
@@ -168,7 +166,7 @@ public class GuiDemo extends MalisisGui
 		UILabel label1 = UILabel.builder()
 								.parent(tabCont1)
 								.text("Colored label!")
-								.color(TextFormatting.YELLOW)
+								.textColor(TextFormatting.YELLOW)
 								.underline()
 								.position(l -> Position.rightOf(l, img, 4))
 								.build();
@@ -182,7 +180,7 @@ public class GuiDemo extends MalisisGui
 			   .parent(tabCont1)
 			   .text("Smaller label!")
 			   .position(l -> Position.rightOf(l, bar, 4))
-			   .color(0x660066)
+			   .textColor(0x660066)
 			   .scale(2F / 3F)
 			   .tooltip("Testing label tooltip.")
 			   .build();
@@ -219,14 +217,8 @@ public class GuiDemo extends MalisisGui
 
 		//Select
 		select = new UISelect<>(100,
-								Arrays.asList("Option 1",
-											  "Option 2",
-											  "Very ultra longer option 3",
-											  "Shorty",
-											  "Moar options",
-											  "Even more",
-											  "Even Steven",
-											  "And a potato too"));
+								Arrays.asList("Option 1", "Option 2", "Very ultra longer option 3", "Shorty", "Moar options", "Even more",
+											  "Even Steven", "And a potato too"));
 		select.setPosition(Position.below(select, rbMC, 5));
 		//select.setOptionsWidth(UISelect.SELECT_WIDTH);
 		//select.maxDisplayedOptions(5);
@@ -293,7 +285,7 @@ public class GuiDemo extends MalisisGui
 				   .parent(cont)
 				   .text(item.getTranslationKey() + ".name")
 				   .position(l -> Position.rightOf(l, i, 2))
-				   .color(0xFFFFFF)
+				   .textColor(0xFFFFFF)
 				   .shadow()
 				   .scale(2 / 3F)
 				   .build();
@@ -389,7 +381,8 @@ public class GuiDemo extends MalisisGui
 		UILabel ipsum = UILabel.builder()
 							   .parent(textTabCont)
 							   .position(Position::topRight)
-							   .size(l -> parentWidth(l, .5f, -5), l -> parentHeight(l, 1.0f, 0))
+							   .parentWidth(0.5F, -5)
+							   .parentHeight()
 							   .text(TextFormatting.UNDERLINE + "Contrairement à une opinion répandue, " + TextFormatting.BOLD
 											 + "le Lorem Ipsum n'est pas simplement du texte aléatoire" + TextFormatting.RESET
 											 + ". Il trouve ses racines dans une oeuvre de la littérature latine classique"
@@ -409,7 +402,7 @@ public class GuiDemo extends MalisisGui
 											 + "lignes du Lorem Ipsum, \"Lorem ipsum dolor sit amet...\", proviennent de la section 1.10"
 											 + ".32")
 							   .scale(2F / 3F)
-							   .color(0x338899)
+							   .textColor(0x338899)
 							   .build();
 		new UISlimScrollbar(ipsum, UIScrollBar.Type.VERTICAL);
 
@@ -493,15 +486,8 @@ public class GuiDemo extends MalisisGui
 
 	private UIContainer listPanel()
 	{
-		List<Item> items = ImmutableList.of(Items.APPLE,
-											Items.BED,
-											Items.LEAD,
-											Items.SNOWBALL,
-											Items.ARROW,
-											Items.WHEAT,
-											Items.TNT_MINECART,
-											Items.WATER_BUCKET,
-											Items.COOKED_MUTTON);
+		List<Item> items = ImmutableList.of(Items.APPLE, Items.BED, Items.LEAD, Items.SNOWBALL, Items.ARROW, Items.WHEAT,
+											Items.TNT_MINECART, Items.WATER_BUCKET, Items.COOKED_MUTTON);
 
 		UIListContainer<Item> itemList = new UIListContainer<>();
 		itemList.setSize(Size.of(parentWidth(itemList, 1.0F, 0), 150));
@@ -524,7 +510,8 @@ public class GuiDemo extends MalisisGui
 					UILabel.builder()
 						   .parent(this)
 						   .text(is.getDisplayName() + ".name")
-						   .position(rightOf(img, 4), l -> middleAlignedTo(l, img, 0))
+						   .rightOf(img, 4)
+						   .middleAlignedTo(img)
 						   .build();
 
 					UIButton.builder()

@@ -103,7 +103,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 									  .build();
 		/* Shape used to draw the arrow. */
 		GuiShape arrowShape = GuiShape.builder(this)
-									  .position(o -> rightAligned(o, 2), o -> middleAligned(o, 0))
+									  .middleRight(2, 0)
 									  .size(7, 4)
 									  .color(() -> (isHovered() || expanded ? 0xBEC8FF : 0xFFFFFF))
 									  .icon(GuiIcon.SELECT_ARROW)
@@ -433,7 +433,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 				int offset = UISelect.this.optionsContainer.optionOffset;
 				height = 2;
 				for (int i = offset; i < Math.min(offset + maxDisplayedOptions, options.size()); i++)
-					height += options.get(i).getHeight(UISelect.this);
+					height += options.get(i).height(UISelect.this);
 	
 				//calculate width
 				width = UISelect.this.size().width();

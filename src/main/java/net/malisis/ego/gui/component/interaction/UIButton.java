@@ -65,7 +65,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	 */
 	public UIButton()
 	{
-		setAutoSize();
+		//setAutoSize();
 		setBackground(GuiShape.builder(this)
 							  .border(5)
 							  .icon(() -> {
@@ -226,10 +226,12 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 	public static class UIButtonBuilder extends UIContentHolderBuilder<UIButtonBuilder, UIButton>
 	{
+		private int defaultOffset = 6;
 		protected Runnable onClick;
 
 		protected UIButtonBuilder()
 		{
+			sizeOfContent(defaultOffset);
 			fob().color(0xFFFFFF)
 				 .shadow()
 				 .when(UIButton::isHovered)

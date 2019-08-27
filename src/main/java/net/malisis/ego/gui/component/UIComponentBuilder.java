@@ -11,7 +11,9 @@ import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.ISizeBuilder;
+import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
+import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.GuiEvent;
 import net.malisis.ego.gui.event.MouseEvent.IMouseEventBuilder;
 import net.malisis.ego.gui.render.IGuiRenderer;
@@ -32,6 +34,8 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected Function<COMPONENT, IntSupplier> x = o -> Positions.leftAligned(o, 0);
 	protected Function<COMPONENT, IntSupplier> y = o -> Positions.topAligned(o, 0);
 	protected Function<COMPONENT, ISize> size = null;
+	protected Function<COMPONENT, IntSupplier> width = o -> Sizes.parentWidth(o, 1F, 0);
+	protected Function<COMPONENT, IntSupplier> height = o -> Sizes.parentHeight(o, 1F, 0);
 	protected int zIndex;
 	protected int alpha = 255;
 	protected UITooltip tooltip;
@@ -93,6 +97,20 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER size(Function<COMPONENT, ISize> func)
 	{
 		size = checkNotNull(func);
+		return self();
+	}
+
+	public BUILDER width(Function<COMPONENT, IntSupplier> width)
+	{
+		this.width = checkNotNull(width);
+		size = null;
+		return self();
+	}
+
+	public BUILDER height(Function<COMPONENT, IntSupplier> height)
+	{
+		this.height = checkNotNull(height);
+		size = null;
 		return self();
 	}
 
@@ -167,14 +185,14 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	{
 		checkNotNull(component);
 
-		component.setName(name);
-		if (position != null)
-			component.setPosition(position.apply(component));
-		else
-			component.setPosition(Position.of(x.apply(component), y.apply(component)));
+		if (position == null)
+			position = o -> Position.of(x.apply(component), y.apply(component));
+		if (size == null)
+			size = o -> Size.of(width.apply(component), height.apply(component));
 
-		if (size != null)
-			component.setSize(size.apply(component));
+		component.setName(name);
+		component.setPosition(position.apply(component));
+		component.setSize(size.apply(component));
 		component.setEnabled(enabled);
 		component.setVisible(visible);
 		component.setZIndex(zIndex);

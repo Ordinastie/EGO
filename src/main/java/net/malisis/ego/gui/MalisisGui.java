@@ -25,6 +25,7 @@
 package net.malisis.ego.gui;
 
 import net.malisis.ego.EGO;
+import net.malisis.ego.atlas.Atlas;
 import net.malisis.ego.gui.component.DebugComponent;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
@@ -73,11 +74,13 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 {
 	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(new ResourceLocation("ego", "textures/gui/gui.png"), 300, 100);
+	public static GuiTexture DEFAULT_TEXTURE = new GuiTexture(Atlas.ATLAS_LOCATION, 1, 1);
 
 	public static final MousePosition MOUSE_POSITION = new MousePosition();
 
 	public static IGuiRenderer GRADIENT_BG = GuiShape.builder()
-													 .size(() -> current().width, () -> current().height)
+													 .width(() -> current().width())
+													 .height(() -> current().height())
 													 .color(0x101010)
 													 .topAlpha(0xC0)
 													 .bottomAlpha(0xD0)
@@ -203,6 +206,13 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		return height;
 	}
 
+	public static boolean needsUpdate(int c)
+	{
+		if (c >= counter)
+			return false;
+		return true;
+	}
+
 	//	/**
 	//	 * Sets the {@link MalisisInventoryContainer} for this {@link MalisisGui}.
 	//	 *
@@ -307,6 +317,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	 */
 	public void clearScreen()
 	{
+		screen.setBackground(null);
 		screen.removeAll();
 	}
 
