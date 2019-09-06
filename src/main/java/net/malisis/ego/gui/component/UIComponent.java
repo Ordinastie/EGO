@@ -618,6 +618,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 * To get the distance dragged, use {@code MalisisGui.MOUSE_POSITION.moved()}
 	 *
 	 * @param button the button
+	 * @return if true, prevents {@link UIComponent#click(MouseButton)} to be called when button is released
 	 */
 	public void mouseDrag(MouseButton button)
 	{
@@ -627,6 +628,11 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 			return;
 		if (parent != null)
 			parent.mouseDrag(button);
+	}
+
+	public boolean dragPreventsClick()
+	{
+		return false;
 	}
 
 	/**

@@ -74,7 +74,6 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 {
 	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(new ResourceLocation("ego", "textures/gui/gui.png"), 300, 100);
-	public static GuiTexture DEFAULT_TEXTURE = new GuiTexture(Atlas.ATLAS_LOCATION, 1, 1);
 
 	public static final MousePosition MOUSE_POSITION = new MousePosition();
 
@@ -118,6 +117,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	protected UIComponent focusedComponent;
 	/** Currently dragged child component. */
 	protected UIComponent draggedComponent;
+	/** Whether the mouse did move while button was pressed. */
+	protected boolean dragging;
 	/** Component for which to display the tooltip (can be disabled and not receive events). */
 	protected UIComponent tooltip;
 	/** Whether this GUI has been constructed. */
@@ -204,6 +205,11 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	public int height()
 	{
 		return height;
+	}
+
+	public int scaleFactor()
+	{
+		return resolution.getScaleFactor();
 	}
 
 	public static boolean needsUpdate(int c)
@@ -382,9 +388,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 
 				eventButton = -1;
 				mouseReleased(component, button);
-				draggedComponent = null;
 			}
-			else if (eventButton != -1 && lastMouseEvent > 0L)
+			else if (eventButton != -1 && lastMouseEvent > 0)
 			{
 				mouseDragged(eventButton);
 			}
@@ -474,7 +479,11 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		try
 		{
 			if (draggedComponent != null)
+			{
 				draggedComponent.mouseDrag(MouseButton.getButton(button));
+				dragging = draggedComponent.dragPreventsClick();
+			}
+
 		}
 		catch (Exception e)
 		{
@@ -498,8 +507,12 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 			MouseButton mb = MouseButton.getButton(button);
 			if (draggedComponent != null)
 				draggedComponent.mouseUp(mb);
-			if (component == focusedComponent)
+
+			if (!dragging && component == focusedComponent)
 				component.click(mb);
+
+			draggedComponent = null;
+			dragging = false;
 		}
 		catch (Exception e)
 		{
