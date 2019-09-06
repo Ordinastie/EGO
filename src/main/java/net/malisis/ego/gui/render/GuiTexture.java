@@ -66,6 +66,11 @@ public class GuiTexture implements ISize
 		this.height = height;
 	}
 
+	public GuiTexture(ResourceLocation rl)
+	{
+		resourceLocation = rl;
+	}
+
 	/**
 	 * Instantiates a new {@link GuiTexture}. <br>
 	 * Automatically determines the width and height for the {@link File}.
@@ -90,7 +95,15 @@ public class GuiTexture implements ISize
 		DynamicTexture dynTex = new DynamicTexture(image);
 		width = image.getWidth();
 		height = image.getHeight();
-		resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(name, dynTex);
+		resourceLocation = Minecraft.getMinecraft()
+									.getTextureManager()
+									.getDynamicTextureLocation(name, dynTex);
+	}
+
+	public void setSize(int width, int height)
+	{
+		this.width = width;
+		this.height = height;
 	}
 
 	/**
@@ -174,7 +187,9 @@ public class GuiTexture implements ISize
 	 */
 	public void delete()
 	{
-		Minecraft.getMinecraft().getTextureManager().deleteTexture(resourceLocation);
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .deleteTexture(resourceLocation);
 	}
 
 	@Override

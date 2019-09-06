@@ -285,7 +285,7 @@ public class GuiRenderer
 	public void bindTexture(GuiTexture texture)
 	{
 		//no change needed
-		if (texture == currentTexture)
+		if (texture == currentTexture || texture == null)
 			return;
 
 		next();

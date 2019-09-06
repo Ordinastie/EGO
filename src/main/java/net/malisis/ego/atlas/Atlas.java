@@ -27,9 +27,6 @@ package net.malisis.ego.atlas;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.malisis.ego.EGO;
-import net.malisis.ego.command.EGOCommand;
-import net.malisis.ego.command.LayeredCommand;
-import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
 import net.minecraft.client.Minecraft;
@@ -54,31 +51,39 @@ import java.util.stream.Collectors;
  */
 public class Atlas implements ITextureObject
 {
-	public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(EGO.modid, "textures/atlas.png");
-	private static Atlas ATLAS = new Atlas();
+	private static final List<Atlas> registeredAtlas = Lists.newArrayList();
 
-	static
-	{
-		LayeredCommand atlasCommand = new LayeredCommand("atlas");
-		atlasCommand.registerCommand("register", Atlas::reloadRegisters);
-		atlasCommand.registerCommand("reload", Atlas::reloadAtlas);
-		atlasCommand.registerCommand("show", Atlas::showAtlas);
-		EGOCommand.registerCommand("atlas", atlasCommand);
-	}
-
-	private List<Consumer<Atlas>> registers = Lists.newArrayList();
+	private final GuiTexture texture;
+	private final Consumer<Atlas> iconRegisters;
 	private final Map<ResourceLocation, Holder> holders = Maps.newHashMap();
 	private int glTextureId = -1;
 
-	public void registerIcons()
+	private Atlas(GuiTexture texture, Consumer<Atlas> iconRegisters)
 	{
-		System.out.println("Registering icons");
-		holders.clear();
-
-		registers.forEach(r -> r.accept(this));
+		this.texture = texture;
+		this.iconRegisters = iconRegisters;
 	}
 
-	public GuiIcon registerIcon(ResourceLocation resourceLocation, ResourceLocation from, int x, int y, int w, int h)
+	public GuiTexture texture()
+	{
+		return texture;
+	}
+
+	public void init()
+	{
+		holders.clear();
+		iconRegisters.accept(this);
+		Minecraft.getMinecraft()
+				 .getTextureManager()
+				 .loadTexture(texture.getResourceLocation(), this);
+	}
+
+	public GuiIcon register(ResourceLocation resourceLocation)
+	{
+		return register(resourceLocation, null, 0, 0, 0, 0);
+	}
+
+	public GuiIcon register(ResourceLocation resourceLocation, ResourceLocation from, int x, int y, int w, int h)
 	{
 		if (holders.get(resourceLocation) != null)
 			return holders.get(resourceLocation)
@@ -108,7 +113,7 @@ public class Atlas implements ITextureObject
 		stitcher.stitch(holders);
 		EGO.log.info("Created: {}x{} atlas for GUIs", stitcher.width(), stitcher.height());
 		TextureUtil.allocateTexture(this.getGlTextureId(), stitcher.width(), stitcher.height());
-		MalisisGui.DEFAULT_TEXTURE = new GuiTexture(ATLAS_LOCATION, stitcher.width(), stitcher.height());
+		texture.setSize(stitcher.width(), stitcher.height());
 
 		//upload texture data to the texture
 		holders.values()
@@ -146,56 +151,28 @@ public class Atlas implements ITextureObject
 		}
 	}
 
-	public static List<GuiIcon> registeredIcons()
+	public List<GuiIcon> registeredIcons()
 	{
-		return ATLAS.holders.values()
-							.stream()
-							.map(Holder::icon)
-							.collect(Collectors.toList());
+		return holders.values()
+					  .stream()
+					  .map(Holder::icon)
+					  .collect(Collectors.toList());
 	}
 
-	public static GuiIcon register(ResourceLocation resourceLocation)
+	public static Atlas register(GuiTexture texture, Consumer<Atlas> iconRegister)
 	{
-		return ATLAS.registerIcon(resourceLocation, null, 0, 0, 0, 0);
+		Atlas atlas = new Atlas(texture, iconRegister);
+		registeredAtlas.add(atlas);
+		return atlas;
 	}
 
-	public static GuiIcon register(ResourceLocation resourceLocation, ResourceLocation from, int x, int y, int w, int h)
+	public static void loadAtlas()
 	{
-		return ATLAS.registerIcon(resourceLocation, from, x, y, w, h);
-	}
-
-	public static void addRegister(Consumer<Atlas> consumer)
-	{
-		ATLAS.registers.add(consumer);
-	}
-
-	public static void init()
-	{
-		ATLAS.registerIcons();
-		Minecraft.getMinecraft()
-				 .getTextureManager()
-				 .loadTexture(ATLAS_LOCATION, ATLAS);
-	}
-
-	public static void reloadRegisters()
-	{
-		ATLAS.registerIcons();
-		reloadAtlas();
-	}
-
-	public static void reloadAtlas()
-	{
-		ATLAS.loadTexture(Minecraft.getMinecraft()
-								   .getResourceManager());
-	}
-
-	public static void showAtlas()
-	{
-		new GuiAtlas().display(true);
+		registeredAtlas.forEach(Atlas::init);
 	}
 
 	@SideOnly(Side.CLIENT)
-	public static class Holder implements Comparable<Holder>
+	public class Holder implements Comparable<Holder>
 	{
 		private int[] textureData;
 		private final GuiIcon icon;
@@ -293,14 +270,16 @@ public class Atlas implements ITextureObject
 		public void upload(int atlasWidth, int atlasHeight)
 		{
 			if (textureData == null)
+			{
+				icon.stitch(null, 0, 0, 0, 0);
 				return;
+			}
 			//upload icon texture data at the correct place on the atlas texture
 			int[][] data = new int[1][];
 			data[0] = textureData;
 			TextureUtil.uploadTextureMipmap(data, width, height, x, y, false, false);
 
-			icon.stitch(MalisisGui.DEFAULT_TEXTURE, (float) x / atlasWidth, (float) y / atlasHeight, (float) (x + width) / atlasWidth,
-						(float) (y + height) / atlasHeight);
+			icon.stitch(texture, x, y, width, height);
 		}
 
 		public String toString()

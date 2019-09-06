@@ -61,7 +61,7 @@ public class Stitcher
 			   .forEach(holder -> {
 				   bar.step(holder.toString());
 
-				   EGO.log.info("Processing {}", holder);
+				   //   EGO.log.info("Processing {}", holder);
 
 				   Node node = findNode(root, holder.width(), holder.height());
 				   if (node != null)
@@ -72,7 +72,7 @@ public class Stitcher
 				   if (node != null)
 				   {
 					   holder.setPosition(node.x, node.y);
-					   EGO.log.info("Added {},{} ({}x{})", node.x, node.y, node.width, node.height);
+					   //	   EGO.log.info("Added {},{} ({}x{})", node.x, node.y, node.width, node.height);
 				   }
 				   else
 					   EGO.log.error("No place to fit {}.", holder);
@@ -130,7 +130,7 @@ public class Stitcher
 		newRoot.setNodes(new Node(root.width, 0, width, root.height), root);
 		this.root = newRoot;
 		this.width = newRoot.width;
-		EGO.log.info("Atlas new width : " + this.width);
+		//		EGO.log.info("Atlas new width : " + this.width);
 
 		Node node = findNode(newRoot, width, height);
 		if (node != null)
@@ -144,7 +144,7 @@ public class Stitcher
 		newRoot.setNodes(root, new Node(0, root.height, root.width, height));
 		this.root = newRoot;
 		this.height = newRoot.height;
-		EGO.log.info("Atlas new height : " + this.height);
+		//		EGO.log.info("Atlas new height : " + this.height);
 
 		Node node = findNode(newRoot, width, height);
 		if (node != null)

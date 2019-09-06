@@ -24,11 +24,17 @@
 
 package net.malisis.ego;
 
+import net.malisis.ego.atlas.Atlas;
+import net.malisis.ego.atlas.GuiAtlas;
+import net.malisis.ego.command.EGOCommand;
 import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.render.GuiIcon;
+import net.malisis.ego.gui.render.GuiTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -38,6 +44,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -63,17 +70,24 @@ public class EGO
 	/** Whether the mod is currently running in obfuscated environment or not. */
 	public static boolean isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
-	/**
-	 * Post-initialization event
-	 *
-	 * @param event the event
-	 */
+	public static final GuiTexture GUI = new GuiTexture(new ResourceLocation(EGO.modid, "textures/atlas.png"));
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
-		ClientCommandHandler.instance.registerCommand(new EGOCommand());
+		ClientCommandHandler.instance.registerCommand(EGOCommand.INSTANCE);
 		//register this to the EVENT_BUS for onGuiClose()
 		MinecraftForge.EVENT_BUS.register(this);
+
+		Atlas atlas = Atlas.register(GUI, GuiIcon::registerIcons);
+		EGOCommand.registerCommand("atlas", () -> new GuiAtlas(atlas).display(true));
+	}
+
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event)
+	{
+		Atlas.loadAtlas();
+
 	}
 
 	/**

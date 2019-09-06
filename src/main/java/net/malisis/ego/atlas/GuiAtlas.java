@@ -12,43 +12,57 @@ import net.malisis.ego.gui.element.size.Size;
 
 public class GuiAtlas extends MalisisGui
 {
-	UITextField search;
-	AtlasComponent ac;
+	protected Atlas atlas;
+	protected UITextField search;
+	protected AtlasComponent ac;
 
-	public GuiAtlas()
+	public GuiAtlas(Atlas atlas)
 	{
-
+		this.atlas = atlas;
 	}
 
 	@Override
 	public void construct()
 	{
-		ac = new AtlasComponent();
+		ac = new AtlasComponent(atlas);
 
 		FontOptions labelOptions = FontOptions.builder()
 											  .color(0xFFFFFF)
 											  .shadow()
 											  .build();
 		FontOptions valueOptions = FontOptions.builder()
-											  .color(0x6677AA)
-											  //.shadow()
+											  .color(0x223399)
+											  .when(ac::hasSelectedIcon)
+											  .color(0x336622)
 											  .build();
 
 		UIContainer leftPanel = UIContainer.panel()
 										   .size(c -> Size.of(120, 300))
 										   .build();
 		//label for size
-		UILabel sizeLabel = UILabel.builder()
+		UILabel atlasLabel = UILabel.builder()
+									.parent(leftPanel)
+									.text("Atlas")
+									.fontOptions(labelOptions)
+									.build();
+		UILabel atlasName = UILabel.builder()
 								   .parent(leftPanel)
-								   .text("Size")
-								   .fontOptions(labelOptions)
+								   .rightAligned()
+								   .below(atlasLabel)
+								   .text(atlas.texture()
+											  .getResourceLocation()
+											  .toString())
+								   .fontOptions(valueOptions)
+								   .fitSize(() -> leftPanel.innerSize()
+														   .width())
 								   .build();
 		UILabel sizeValue = UILabel.builder()
 								   .parent(leftPanel)
-								   .rightAligned(0)
 								   .rightAligned()
-								   .below(sizeLabel)
-								   .text(MalisisGui.DEFAULT_TEXTURE.width() + "x" + MalisisGui.DEFAULT_TEXTURE.height())
+								   .below(atlasName)
+								   .text(atlas.texture()
+											  .width() + "x" + atlas.texture()
+																	.height())
 								   .fontOptions(valueOptions)
 								   .build();
 
@@ -88,8 +102,11 @@ public class GuiAtlas extends MalisisGui
 								  .parent(leftPanel)
 								  .rightAligned()
 								  .below(iconLabel)
+								  .height(9)
 								  .text(ac::iconName)
 								  .fontOptions(valueOptions)
+								  .fitSize(() -> leftPanel.innerSize()
+														  .width())
 								  .build();
 
 		UILabel iconSize = UILabel.builder()
@@ -137,22 +154,13 @@ public class GuiAtlas extends MalisisGui
 		search.setSize(Size.of(100, 12));
 		leftPanel.add(search);
 
-		UIButton register = UIButton.builder()
-									.parent(leftPanel)
-									.below(search, 20)
-									.centered()
-									.size(Size.of(100, 20))
-									.text("Register icons")
-									.onClick(Atlas::reloadRegisters)
-									.build();
-
 		UIButton reload = UIButton.builder()
 								  .parent(leftPanel)
-								  .below(register, 5)
+								  .below(search, 20)
 								  .centered()
 								  .size(Size.of(100, 20))
-								  .text("Reload icons")
-								  .onClick(Atlas::reloadAtlas)
+								  .text("Reload atlas")
+								  .onClick(atlas::init)
 								  .build();
 
 		ac.setPosition(Position.rightOf(ac, leftPanel, 5));

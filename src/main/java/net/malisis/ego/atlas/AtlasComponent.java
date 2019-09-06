@@ -32,27 +32,26 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiIcon;
-import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * @author Ordinastie
  */
-@SuppressWarnings("unchecked")
 public class AtlasComponent extends UIComponent
 {
+	private Atlas atlas;
 	private float factor = 1;
 	private int offsetX = 0;
 	private int offsetY = 0;
-	private IPosition atlasPosition = Position.of(() -> offsetX, () -> offsetY);
-	private ISize atlasSize = Size.of(() -> (int) (MalisisGui.DEFAULT_TEXTURE.width() * factor),
-									  () -> (int) (MalisisGui.DEFAULT_TEXTURE.height() * factor));
 
 	private float u;
 	private float v;
 
 	private String hoveredPosition;
 	private String hoveredUV;
+
+	private GuiIcon selected;
 	//icon data
 	private GuiIcon icon;
 	private String iconName;
@@ -61,36 +60,71 @@ public class AtlasComponent extends UIComponent
 	private String iconVs;
 	private String iconPixels;
 
-	private String filter = "";
-
-	public AtlasComponent()
+	public AtlasComponent(Atlas atlas)
 	{
-		GuiIcon icon = GuiIcon.full(MalisisGui.DEFAULT_TEXTURE);
+		this.atlas = atlas;
+
 		setBackground(GuiShape.builder(this)
 							  .color(0x666666)
 							  .alpha(100)
 							  .build());
-		setForeground(this::renderAtlas);
+
+		IPosition atlasPosition = Position.of(() -> offsetX, () -> offsetY);
+		ISize atlasSize = Size.of(() -> (int) (atlas.texture()
+													.width() * factor), () -> (int) (atlas.texture()
+																						  .height() * factor));
+		GuiShape atlasIcon = GuiShape.builder(this)
+									 .position(atlasPosition)
+									 .size(atlasSize)
+									 .icon(GuiIcon.full(atlas.texture()))
+									 .build();
+
+		GuiShape atlasOutline = GuiShape.builder(this)
+										.position(atlasPosition.offset(-1, -1))
+										.size(atlasSize.offset(2, 2))
+										.alpha(0)
+										.border(1, 0xCC6699)
+										.build();
+
+		GuiShape iconOutline = GuiShape.builder(this)
+									   .x(() -> MathHelper.floor(selected.x() * factor) + offsetX - 1)
+									   .y(() -> MathHelper.floor(selected.y() * factor) + offsetY - 1)
+									   .width(() -> MathHelper.floor(selected.width() * factor) + 2)
+									   .height(() -> MathHelper.floor(selected.height() * factor) + 2)
+									   .alpha(0)
+									   .border(1, 0xFF6666)
+									   .build();
+
+		setForeground(r -> {
+			atlasIcon.render(r);
+			atlasOutline.render(r);
+			if (selected == null)
+				return;
+			iconOutline.render(r);
+		});
 	}
 
 	private void updateHoveredData()
 	{
-		float rw = MalisisGui.DEFAULT_TEXTURE.width() * factor;
-		float rh = MalisisGui.DEFAULT_TEXTURE.height() * factor;
+		float rw = atlas.texture()
+						.width() * factor;
+		float rh = atlas.texture()
+						.height() * factor;
 		u = (mousePosition().x() - offsetX) / rw;
 		v = (mousePosition().y() - offsetY) / rh;
 		hoveredPosition = (mousePosition().x() - offsetX) + ", " + (mousePosition().y() - offsetX);
-		hoveredUV = u + " / " + v;
-		updateHoveredIcon();
-	}
-
-	private void updateHoveredIcon()
-	{
-		this.icon = Atlas.registeredIcons()
+		hoveredUV = String.format("%.4f -> %.4f", u, v);
+		this.icon = atlas.registeredIcons()
 						 .stream()
-						 .filter(i -> i.u() < u && i.U() > u && i.v() < v && i.V() > v)
+						 .filter(i -> i.u() <= u && i.U() > u && i.v() <= v && i.V() > v)
 						 .findAny()
 						 .orElse(null);
+		if (selected == null)
+			updateIconData(icon);
+	}
+
+	private void updateIconData(GuiIcon icon)
+	{
 		if (icon == null)
 		{
 			iconName = "None";
@@ -105,8 +139,8 @@ public class AtlasComponent extends UIComponent
 							  .toString();
 			iconName = name.substring(name.lastIndexOf("/") + 1);
 			iconSize = icon.width() + "x" + icon.height();
-			iconUs = String.format("%.3f -> %.3f", icon.u(), icon.U());
-			iconVs = String.format("%.3f -> %.3f", icon.v(), icon.V());
+			iconUs = String.format("%.4f -> %.4f", icon.u(), icon.U());
+			iconVs = String.format("%.4f -> %.4f", icon.v(), icon.V());
 			iconPixels = icon.x() + "," + icon.y() + " -> " + icon.X() + "," + icon.Y();
 		}
 	}
@@ -119,6 +153,11 @@ public class AtlasComponent extends UIComponent
 	public String getHoveredUV()
 	{
 		return hoveredUV;
+	}
+
+	public boolean hasSelectedIcon()
+	{
+		return selected != null;
 	}
 
 	public String iconName()
@@ -146,103 +185,6 @@ public class AtlasComponent extends UIComponent
 		return iconPixels;
 	}
 
-	public void setFilter(String filter)
-	{
-		this.filter = filter;
-	}
-
-	public void renderAtlas(GuiRenderer renderer)
-	{
-		GuiIcon icon = new GuiIcon(MalisisGui.DEFAULT_TEXTURE, 0f, 0f, 1f, 1f);
-		GuiShape.builder(this)
-				.position(atlasPosition)
-				.size(atlasSize)
-				.icon(icon)
-				.build()
-				.render(renderer);
-
-		GuiShape.builder(this)
-				.position(atlasPosition)
-				.size(atlasSize)
-				.alpha(0)
-				.border(1, 0xCC6699)
-				.build()
-				.render(renderer);
-
-	}
-
-	/*	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-		{
-			int w = Icon.BLOCK_TEXTURE_WIDTH;
-			int h = Icon.BLOCK_TEXTURE_HEIGHT;
-			if (factor == -1)
-			{
-				//set factor to fit the altas in the component
-				factor = h > w ? height() / (float) h : width() / (float) w;
-			}
-
-			w *= factor;
-			h *= factor;
-
-			drawAtlas(renderer, w, h);
-			drawHoveredIcon(renderer, w, h);
-			drawFilter(renderer, w, h);
-		}
-
-		private void drawAtlas(GuiRenderer renderer, int w, int h)
-		{
-			renderer.drawRectangle(offsetX, offsetY, 0, w, h, 0xFFFFFF, 0xFF);
-
-			renderer.bindTexture(MalisisGui.BLOCK_TEXTURE);
-			shape.resetState();
-			shape.setSize(w, h);
-			shape.setPosition(offsetX, offsetY);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-		}
-
-		private void drawHoveredIcon(GuiRenderer renderer, int w, int h)
-		{
-			if (icon == null)
-				return;
-			renderer.next(GL11.GL_LINE_LOOP);
-			renderer.disableTextures();
-			GL11.glLineWidth(2);
-			rp.colorMultiplier.set(0x33AA33);
-
-			setupShape(icon, w, h);
-			renderer.drawShape(shape, rp);
-
-			renderer.next();
-			renderer.enableTextures();
-			renderer.next(GL11.GL_QUADS);
-		}
-
-		private void drawFilter(GuiRenderer renderer, int w, int h)
-		{
-			if (ICONS == null)
-				return;
-			if (Strings.isNullOrEmpty(filter))
-				return;
-
-			renderer.next();
-			renderer.disableTextures();
-			rp.colorMultiplier.set(0xFFFFFF);
-			rp.alpha.set(200);
-			for (TextureAtlasSprite icon : ICONS.values())
-			{
-				if (!icon.getIconName()
-						 .contains(filter))
-				{
-					setupShape(icon, w, h);
-					renderer.drawShape(shape, rp);
-				}
-			}
-
-			renderer.next();
-			renderer.enableTextures();
-		}
-		*/
 	@Override
 	public void scrollWheel(int delta)
 	{
@@ -270,13 +212,32 @@ public class AtlasComponent extends UIComponent
 	}
 
 	@Override
+	public boolean dragPreventsClick()
+	{
+		return true;
+	}
+
+	@Override
 	public void click(MouseButton button)
 	{
-		if (button != MouseButton.MIDDLE)
-			return;
-
-		factor = 1;
-		offsetX = 0;
-		offsetY = 0;
+		if (button == MouseButton.MIDDLE)
+		{
+			factor = 1;
+			offsetX = 0;
+			offsetY = 0;
+		}
+		if (button == MouseButton.LEFT)
+		{
+			if (icon != selected)
+			{
+				selected = icon;
+				updateIconData(selected);
+			}
+			else
+			{
+				selected = null;
+				updateIconData(icon);
+			}
+		}
 	}
 }
