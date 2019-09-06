@@ -150,7 +150,6 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	{
 		Builder tb = GuiText.builder()
 							.parent(this)
-							.multiLine()
 							.translated(false)
 							.fontOptions(fontOptions)
 							.alpha(255);//do not respect the component alpha

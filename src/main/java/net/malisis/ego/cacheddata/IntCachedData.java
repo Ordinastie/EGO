@@ -24,13 +24,10 @@
 
 package net.malisis.ego.cacheddata;
 
-import static com.google.common.base.Preconditions.*;
-
 import java.util.function.IntSupplier;
 
 /**
  * @author Ordinastie
- *
  */
 public class IntCachedData
 {
@@ -48,9 +45,13 @@ public class IntCachedData
 	 */
 	public IntCachedData(IntSupplier getter)
 	{
-		this.getter = checkNotNull(getter);
-		currentValue = getter.getAsInt();
-		update();
+		this.getter = getter != null ? getter : () -> 0;
+		currentValue = Integer.MIN_VALUE;
+	}
+
+	public IntCachedData(int value)
+	{
+		this(() -> value);
 	}
 
 	/**
@@ -80,18 +81,5 @@ public class IntCachedData
 	public boolean hasChanged()
 	{
 		return lastValue != currentValue;
-	}
-
-	public static class IntFixedData extends IntCachedData
-	{
-		public IntFixedData(int value)
-		{
-			super(() -> 0);
-			currentValue = value;
-		}
-
-		@Override
-		public void update()
-		{}
 	}
 }

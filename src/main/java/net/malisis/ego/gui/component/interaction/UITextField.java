@@ -39,7 +39,6 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
-import net.malisis.ego.gui.event.ValueChange.Pre;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
@@ -52,15 +51,14 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * UITextField.
  *
  * @author Ordinastie
  */
-public class UITextField extends UIComponent implements IContentHolder, IClipable, IOffset, IPadded,
-		IValueChangeEventRegister<UITextField, String>
+public class UITextField extends UIComponent
+		implements IContentHolder, IClipable, IOffset, IPadded, IValueChangeEventRegister<UITextField, String>
 {
 	protected final GuiText guiText;
 	/** Current text of this {@link UITextField}. */
@@ -112,11 +110,13 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		guiText = GuiText.builder()
 						 .parent(this)
 						 .text(this::getText)
-						 .multiLine(multiLine)
 						 .translated(false)
 						 .literal(true)
 						 .position(3, 3)
-						 .fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build())
+						 .fontOptions(FontOptions.builder()
+												 .color(0xFFFFFF)
+												 .shadow()
+												 .build())
 						 .build();
 		setSize(Size.of(100, 14));
 
@@ -125,7 +125,8 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 									  .border(1)
 									  .build();
 		setBackground(background);
-		setForeground(guiText.and(this::drawCursor).and(this::drawSelectionBox));
+		setForeground(guiText.and(this::drawCursor)
+							 .and(this::drawSelectionBox));
 	}
 
 	/**
@@ -400,7 +401,8 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 
 		StringBuilder oldText = text;
 		String oldValue = text.toString();
-		String newValue = oldText.insert(cursor.index, str).toString();
+		String newValue = oldText.insert(cursor.index, str)
+								 .toString();
 
 		if (filterFunction != null)
 			newValue = filterFunction.apply(newValue);
@@ -428,7 +430,8 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		int end = Math.max(selectionCursor.index, cursor.index);
 
 		String oldValue = text.toString();
-		String newValue = new StringBuilder(oldValue).delete(start, end).toString();
+		String newValue = new StringBuilder(oldValue).delete(start, end)
+													 .toString();
 
 		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
 			return;
@@ -520,8 +523,10 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 			xOffset = -cursor.x;
 		else if (cursor.x >= innerSize().width() - xOffset)
 			xOffset = Math.min(innerSize().width() - cursor.x - 4, 0);
-		else if (guiText.size().width() <= innerSize().width() - xOffset - 5)
-			xOffset = Math.min(innerSize().width() - guiText.size().width() - 4, 0);
+		else if (guiText.size()
+						.width() <= innerSize().width() - xOffset - 5)
+			xOffset = Math.min(innerSize().width() - guiText.size()
+															.width() - 4, 0);
 	}
 
 	/**
@@ -846,7 +851,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 				height = 9;
 
 			//if cursor after a \n, virtually set its position at the beginning of the next line.
-			if (guiText.isMultiLine() && walker.getChar() == '\n')
+			if (walker.getChar() == '\n')
 			{
 				x = 0;
 				y += height;

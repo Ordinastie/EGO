@@ -34,8 +34,8 @@ import java.util.function.Supplier;
  * This class allows custom handling for data that needs to be cached and checked for changes.<br>
  * {@link #update()} must be called to refresh the data before calling {@link #hasChanged()}.
  *
- * @author Ordinastie
  * @param <T> the generic type
+ * @author Ordinastie
  */
 public class CachedData<T> implements ICachedData<T>
 {
@@ -58,8 +58,7 @@ public class CachedData<T> implements ICachedData<T>
 	{
 		this.getter = checkNotNull(getter);
 		this.predicate = checkNotNull(predicate);
-		currentData = getter.get();
-		update();
+		currentData = (T) new Object();
 	}
 
 	/**

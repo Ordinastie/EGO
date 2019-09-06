@@ -31,9 +31,9 @@ import net.malisis.ego.cacheddata.CachedData;
 import net.malisis.ego.cacheddata.FixedData;
 import net.malisis.ego.cacheddata.ICachedData;
 import net.malisis.ego.cacheddata.IntCachedData;
-import net.malisis.ego.cacheddata.IntCachedData.IntFixedData;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.StringWalker;
+import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.element.IChild;
@@ -83,13 +83,14 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	/** Parameters. */
 	private final Map<String, ICachedData<?>> parameters;
 
-	/** The base font options to use to render. */
-	private FontOptions fontOptions;
-	/** Translated text with resolved parameters. */
-	private String cache = null;
+	/** The base font options. */
+	private FontOptions defaultOptions;
+	/** The current font options. Only different from defaultOptions if fit size is set and require changing the text scale to fit */
+	private FontOptions fitOptions;
 
-	/** Whether this text is multiLine. */
-	private final boolean multiLine;
+	/** Translated text with resolved parameters. */
+	private String cache = "";
+
 	/** Whether the text should be translated. */
 	private final boolean translated;
 	/** Whether the text should handle styles. */
@@ -97,6 +98,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	/** Text wrap size. 0 means do not wrap. */
 	private IntCachedData wrapSize;
+	private IntCachedData fitSize;
 
 	private IPosition position;
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
@@ -104,27 +106,28 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private IntSupplier zIndex;
 	private IntSupplier alpha;
 
-	private boolean buildLines = true;
-	private boolean buildCache = true;
+	//private boolean buildLines = true;
+	//private boolean buildCache = true;
 
 	private UIComponent parent;
 
-	private GuiText(Supplier<String> base, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, Function<GuiText, IntSupplier> x, Function<GuiText, IntSupplier> y, IntSupplier zIndex, IntSupplier alpha, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(Builder builder)
 	{
-		this.base = new CachedData<>(base);
-		this.parameters = parameters;
-		if (position != null)
-			this.position = position.apply(this);
-		else
-			this.position = Position.of(x.apply(this), y.apply(this));
-		this.zIndex = zIndex;
-		this.alpha = alpha;
-		this.parent = parent;
-		this.fontOptions = fontOptions;
-		this.multiLine = multiLine;
-		this.translated = translated;
-		this.literal = literal;
-		this.wrapSize = wrapSize != null ? new IntCachedData(wrapSize) : new IntFixedData(0);
+		base = new CachedData<>(builder.base);
+		parameters = Maps.newHashMap(builder.parameters);
+		position = builder.position.apply(this);
+
+		zIndex = builder.zIndex;
+		alpha = builder.alpha;
+		parent = builder.parent;
+		defaultOptions = builder.fontOptions;
+		fitOptions = builder.fontOptions;
+		translated = builder.translated;
+		literal = builder.literal;
+		wrapSize = new IntCachedData(builder.wrapSize);
+		fitSize = new IntCachedData(builder.fitSize);
+
+		//	update(true);
 	}
 
 	@Override
@@ -200,7 +203,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	public void setText(Supplier<String> supplier)
 	{
 		base = new CachedData<>(checkNotNull(supplier));
-		buildCache = true;
 	}
 
 	public void setParameters(Map<String, ICachedData<?>> params)
@@ -211,14 +213,12 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	public void setWrapSize(int size)
 	{
-		wrapSize = new IntFixedData(size);
-		buildLines = true;
+		wrapSize = new IntCachedData(size);
 	}
 
 	public void setWrapSize(IntSupplier supplier)
 	{
 		wrapSize = new IntCachedData(checkNotNull(supplier));
-		buildLines = true;
 	}
 
 	/**
@@ -246,16 +246,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	public int lineCount()
 	{
 		return lines.size();
-	}
-
-	/**
-	 * Checks if the text is multiLine.
-	 *
-	 * @return true, if is multiLine
-	 */
-	public boolean isMultiLine()
-	{
-		return true;//multiLine;
 	}
 
 	/**
@@ -295,7 +285,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public FontOptions getFontOptions()
 	{
-		return fontOptions;
+		return defaultOptions;
 	}
 
 	/**
@@ -306,8 +296,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	public void setFontOptions(FontOptions fontOptions)
 	{
 		checkNotNull(fontOptions);
-		buildLines = this.fontOptions.isBold() != fontOptions.isBold() || this.fontOptions.getFontScale() != fontOptions.getFontScale();
-		this.fontOptions = fontOptions;
+		//TODO: should be checked in update directly and all the time because bold/scale could change with PredicatedFontOptions
+		update(defaultOptions.isBold() != fontOptions.isBold() || defaultOptions.getFontScale() != fontOptions.getFontScale());
+		this.defaultOptions = fontOptions;
 	}
 
 	/**
@@ -342,20 +333,33 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		return changed;
 	}
 
-	/**
-	 * Forces the cache to be update and the lines to be rebuilt.<br>
-	 * Cache and lines are updated when queried.
-	 */
-	public void forceUpdate()
-	{
-		buildCache = true;
-		buildLines = true;
-	}
-
 	private void update()
 	{
-		generateCache();
-		buildLines();
+		update(false);
+	}
+
+	/**
+	 * Update the cache and the lines if necessary.
+	 *
+	 * @return
+	 */
+	private void update(boolean force)
+	{
+		base.update();
+		wrapSize.update();
+		fitSize.update();
+
+		boolean buildCache = base.hasChanged() || hasParametersChanged();
+		boolean buildLines = buildCache || wrapSize.hasChanged() || fitSize.hasChanged();
+		if (buildCache || force || !CACHED)
+			generateCache();
+
+		if (buildLines || force || !CACHED)
+		{
+			buildLines(defaultOptions);
+			if (checkFitSize())
+				buildLines(fitOptions);
+		}
 	}
 
 	private void updateSize()
@@ -364,7 +368,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		for (LineInfo info : lines)
 		{
 			w = Math.max(info.width(), w);
-			h += info.height() + fontOptions.lineSpacing();
+			h += info.height() + defaultOptions.lineSpacing();
 		}
 		size = Size.of(w, h);
 
@@ -380,17 +384,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	private void generateCache()
 	{
-		base.update();
-		buildCache |= base.hasChanged();
-		buildCache |= hasParametersChanged();
-		if (!buildCache && CACHED)
-			return;
-
 		String str = base.get();
 		str = applyParameters(str);
 		cache = str;
-		buildCache = false;
-		buildLines = true;
 	}
 
 	/**
@@ -416,14 +412,10 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	/**
 	 * Splits the cache in multiple lines to fit in the {@link #wrapSize}.
+	 * Is called once with the default scale, and once again if fitSize requires new scale
 	 */
-	private void buildLines()
+	private void buildLines(FontOptions fontOptions)
 	{
-		wrapSize.update();
-		buildLines |= wrapSize.hasChanged();
-		if (!buildLines && CACHED)
-			return;
-
 		lines.clear();
 
 		String str = cache.replace("\r?(?<=\n)", "\n");
@@ -432,7 +424,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		StringBuilder word = new StringBuilder();
 		//FontRenderOptions fro = new FontRenderOptions();
 
-		int wrapWidth = isMultiLine() ? getWrapSize() : -1;
+		int wrapWidth = getWrapSize();
 		float lineWidth = 0;
 		float wordWidth = 0;
 		float lineHeight = 0;
@@ -456,7 +448,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 				word.setLength(0);
 				wordWidth = 0;
 			}
-			if (isMultiLine() && ((wrapWidth > 0 && lineWidth >= wrapWidth) || c == '\n'))
+			if ((wrapWidth > 0 && lineWidth >= wrapWidth) || c == '\n')
 			{
 				//the first word on the line is too large, split anyway
 				if (line.length() == 0)
@@ -480,8 +472,35 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		line.append(word);
 		lines.add(new LineInfo(line.toString(), MathHelper.ceil(lineWidth), MathHelper.ceil(lineHeight), 0));
 
-		buildLines = false;
 		updateSize();
+	}
+
+	private boolean checkFitSize()
+	{
+		fitOptions = defaultOptions;
+		int fitWidth = fitSize.get();
+		if (fitWidth <= 0)
+			return false;
+
+		float factor = MalisisGui.current()
+								 .scaleFactor();
+
+		//text already fits
+		if (size.width() <= fitWidth) //don't call size() (size->update->checkFitSize)
+			return false;
+
+		float scale = (float) fitWidth / size.width();
+		//adapt the scaling to the GUI resolution factor to prevent squished letters
+		scale = (float) Math.floor(scale * factor) / factor;
+
+		if (scale == defaultOptions.getFontScale()) //should never happen ?
+			return false;
+
+		fitOptions = defaultOptions.toBuilder()
+								   .scale(scale)
+								   .build();
+		return true;
+
 	}
 
 	/**
@@ -520,8 +539,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		if (StringUtils.isEmpty(cache))
 			return;
 
-		fontOptions.getFont()
-				   .render(renderer, this, x, y, z, alpha, fontOptions, area);
+		fitOptions.getFont()
+				  .render(renderer, this, x, y, z, alpha, fitOptions, area);
 
 	}
 
@@ -532,7 +551,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public StringWalker walker()
 	{
-		return new StringWalker(this, fontOptions);
+		return new StringWalker(this, defaultOptions);
 	}
 
 	@Override
@@ -542,7 +561,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 											 .text()
 											 .replace("\n", "") : "";
 		str += position + "@" + size;
-		if (isMultiLine())
+		if (getWrapSize() != 0)
 			str += " (wrap: " + getWrapSize() + ")";
 		return str;
 		//return lines().stream().map(LineInfo::getText).collect(Collectors.joining());
@@ -572,15 +591,15 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
 		private Function<GuiText, IPosition> position = Position::topLeft;
-		protected Function<GuiText, IntSupplier> x = o -> Positions.leftAligned(o, 0);
-		protected Function<GuiText, IntSupplier> y = o -> Positions.topAligned(o, 0);
+		protected Function<GuiText, IntSupplier> x = gt -> Positions.leftAligned(gt, 0);
+		protected Function<GuiText, IntSupplier> y = gt -> Positions.topAligned(gt, 0);
 		private IntSupplier zIndex = () -> 0;
 		private IntSupplier alpha = () -> 255;
 		private UIComponent parent;
-		private boolean multiLine = false;
 		private boolean translated = true;
 		private boolean literal = false;
 		private IntSupplier wrapSize;
+		private IntSupplier fitSize;
 
 		protected Builder()
 		{
@@ -645,8 +664,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		public Builder parent(UIComponent parent)
 		{
 			this.parent = parent;
-			//Assume default position to be top left in parent
-			//position(Position::topLeft);
 			alpha(parent::getAlpha);
 			zIndex(parent::zIndex);
 			return this;
@@ -695,18 +712,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			return this;
 		}
 
-		public Builder multiLine(boolean multiLine)
-		{
-			this.multiLine = multiLine;
-			return this;
-		}
-
-		public Builder multiLine()
-		{
-			multiLine = true;
-			return this;
-		}
-
 		public Builder translated(boolean translated)
 		{
 			this.translated = translated;
@@ -743,10 +748,24 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			return this;
 		}
 
+		public Builder fitSize(int size)
+		{
+			fitSize = () -> size;
+			return this;
+		}
+
+		public Builder fitSize(IntSupplier supplier)
+		{
+			fitSize = checkNotNull(supplier);
+			return this;
+		}
+
 		public GuiText build()
 		{
-			return new GuiText(base, parameters, position, x, y, zIndex, alpha, parent, fontOptions, multiLine, translated, literal,
-							   wrapSize);
+			if (position == null)
+				position = gt -> Position.of(x.apply(gt), y.apply(gt));
+
+			return new GuiText(this);
 		}
 
 	}

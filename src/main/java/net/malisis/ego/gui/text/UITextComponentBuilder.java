@@ -2,6 +2,7 @@ package net.malisis.ego.gui.text;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.collect.Maps;
 import net.malisis.ego.cacheddata.CachedData;
 import net.malisis.ego.cacheddata.FixedData;
 import net.malisis.ego.cacheddata.ICachedData;
@@ -13,6 +14,7 @@ import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.text.GuiText.Builder;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -32,6 +34,8 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	protected GuiText.Builder guiTextBuilder = GuiText.builder();
 	protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
 	protected Function<COMPONENT, IntSupplier> wrapSize;
+	protected Function<COMPONENT, IntSupplier> fitSize;
+	protected Map<String, Function<COMPONENT, ICachedData<?>>> parameterFuncs = Maps.newHashMap();
 
 	public Builder tb()
 	{
@@ -70,49 +74,32 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	/**
 	 * Binds a fixed value to the specified parameter.
 	 *
-	 * @param <T> the generic type
 	 * @param key the key
 	 * @param value the value
 	 */
-	public <T> BUILDER bind(String key, T value)
+	public BUILDER bind(String key, Object value)
 	{
-		return bind(key, new FixedData<>(value));
+		return bindData(key, c -> new FixedData<>(value));
 	}
 
-	/**
-	 * Binds supplier to the specified parameter.
-	 *
-	 * @param <T> the generic type
-	 * @param key the key
-	 * @param supplier the supplier
-	 */
-	public <T> BUILDER bind(String key, Supplier<T> supplier)
+	public BUILDER bind(String key, Supplier<?> supplier)
 	{
-		return bind(key, new CachedData<>(supplier));
+		return bindData(key, c -> new CachedData<>(supplier));
 	}
 
-	/**
-	 * Binds {@link ICachedData} to the specified parameter.
-	 *
-	 * @param <T> the generic type
-	 * @param key the key
-	 * @param data the data
-	 */
-	public <T> BUILDER bind(String key, ICachedData<T> data)
+	public BUILDER bind(String key, Function<COMPONENT, Supplier<?>> func)
 	{
-		tb().bind(key, data);
-		return self();
+		return bindData(key, c -> new CachedData<>(func.apply(c)));
 	}
 
-	public BUILDER multiLine(boolean multiLine)
+	public BUILDER bindData(String key, ICachedData<?> data)
 	{
-		tb().multiLine(multiLine);
-		return self();
+		return bindData(key, c -> data);
 	}
 
-	public BUILDER multiLine()
+	public BUILDER bindData(String key, Function<COMPONENT, ICachedData<?>> data)
 	{
-		tb().multiLine();
+		parameterFuncs.put(key, data);
 		return self();
 	}
 
@@ -148,13 +135,31 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public BUILDER wrapSize(IntSupplier supplier)
 	{
-		tb().wrapSize(supplier);
+		tb().wrapSize(checkNotNull(supplier));
 		return self();
 	}
 
 	public BUILDER wrapSize(Function<COMPONENT, IntSupplier> func)
 	{
-		wrapSize = func;
+		wrapSize = checkNotNull(func);
+		return self();
+	}
+
+	public BUILDER fitSize(int size)
+	{
+		tb().fitSize(size);
+		return self();
+	}
+
+	public BUILDER fitSize(IntSupplier supplier)
+	{
+		tb().fitSize(checkNotNull(supplier));
+		return self();
+	}
+
+	public BUILDER fitSize(Function<COMPONENT, IntSupplier> func)
+	{
+		fitSize = checkNotNull(func);
 		return self();
 	}
 
@@ -292,10 +297,13 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 
 	public GuiText buildText(COMPONENT component)
 	{
-		guiTextBuilder.parent(component)
-					  .fontOptions(fontOptionsBuilder.build(component));
+		tb().parent(component)
+			.fontOptions(fontOptionsBuilder.build(component));
+		parameterFuncs.forEach((s, f) -> tb().bind(s, f.apply(component)));
 		if (wrapSize != null)
-			guiTextBuilder.wrapSize(wrapSize.apply(component));
+			tb().wrapSize(wrapSize.apply(component));
+		if (fitSize != null)
+			tb().fitSize(fitSize.apply(component));
 
 		return guiTextBuilder.build();
 	}

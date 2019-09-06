@@ -27,7 +27,6 @@ package net.malisis.ego.gui.component.interaction;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
-import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.minecraft.client.gui.GuiScreen;
@@ -105,7 +104,7 @@ public class UITextArea extends UITextField implements IScrollable
 				cursor.jumpLine(false);
 				break;
 			case Keyboard.KEY_RETURN:
-				if (guiText.isMultiLine() && isEditable())
+				if (isEditable())
 					addText("\n");
 				break;
 			default:
@@ -193,7 +192,9 @@ public class UITextArea extends UITextField implements IScrollable
 		s.render(renderer);
 
 		//drawLastLine :
-		s = builder.position(padding().left(), last.y()).size(last.x(), last.height).build();
+		s = builder.position(padding().left(), last.y())
+				   .size(last.x(), last.height)
+				   .build();
 		s.render(renderer);
 
 		renderer.next();
