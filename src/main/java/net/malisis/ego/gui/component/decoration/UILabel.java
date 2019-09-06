@@ -32,6 +32,7 @@ import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
+import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.text.GuiText;
 import net.malisis.ego.gui.text.UITextComponentBuilder;
 import net.minecraft.util.text.TextFormatting;
@@ -137,7 +138,8 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 		{
 			//by default, label size spans to fit the text
 			guiTextBuilder.wrapSize(0);
-			contentSize();
+			width = l -> Sizes.widthOfContent(l, 0);
+			height = l -> Sizes.heightOfContent(l, 0);
 		}
 
 		public UILabelBuilder contentSize()
@@ -152,6 +154,7 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 		public UILabelBuilder size(Function<UILabel, ISize> func)
 		{
 			super.size(func);
+			//automatically wrap to the resulting size of the UILabel
 			wrapSize(l -> l.innerSize()::width);
 			return this;
 		}
