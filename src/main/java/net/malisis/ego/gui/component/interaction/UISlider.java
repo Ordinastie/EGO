@@ -68,12 +68,8 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 	protected UISlider(UISliderBuilder<T> builder, Converter<Float, T> converter)
 	{
 		this.converter = checkNotNull(converter);
-
 		builder.tb()
-			   .bind("value", this::getValue)
-			   .x(this::textPosition)
-			   .middleAligned();
-
+			   .x(this::textPosition);
 		text = builder.buildText(this);
 		value = converter.convert(0F);
 
@@ -255,6 +251,9 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 		protected UISliderBuilder(Converter<Float, T> converter)
 		{
 			this.converter = converter;
+			tb().text("{value}")
+				.middleAligned();
+			bind("value", s -> s::getValue);
 			fob().color(0xFFFFFF)
 				 .shadow()
 				 .when((Predicate<UISlider<T>>) UISlider::isHovered)
