@@ -26,7 +26,6 @@ package net.malisis.ego.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
 import static net.malisis.ego.gui.element.position.Positions.middleAligned;
-import static net.malisis.ego.gui.element.position.Positions.rightAligned;
 import static net.malisis.ego.gui.element.size.Sizes.heightOfContent;
 import static net.malisis.ego.gui.element.size.Sizes.heightRelativeTo;
 import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
@@ -98,7 +97,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 		/* Shape used for the background of the select. */
 		GuiShape background = GuiShape.builder(this)
-									  .icon(GuiIcon.forComponent(this, GuiIcon.SELECT, null, GuiIcon.SELECT_DISABLED))
+									  .icon(this, GuiIcon.SELECT_BG, GuiIcon.SELECT_BG_HOVER, GuiIcon.SELECT_BG_DISABLED)
 									  .border(1)
 									  .build();
 		/* Shape used to draw the arrow. */
@@ -337,10 +336,9 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		{
 			//TODO: place it above if room below is too small
 			setPosition(Position.of(() -> UISelect.this.screenPosition()
-													   .x(),
-									() -> UISelect.this.screenPosition()
-													   .y() + UISelect.this.size()
-																		   .height()));
+													   .x(), () -> UISelect.this.screenPosition()
+																				.y() + UISelect.this.size()
+																									.height()));
 			setSize(Size.of(widthRelativeTo(UISelect.this, 1.0F, 0), heightOfContent(this, 0)));
 			setZIndex(300);
 			setBackground(GuiShape.builder(this)

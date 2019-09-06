@@ -70,7 +70,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 		setBackground(GuiShape.builder(this)
 							  .position(1, 0)
 							  .size(12, 12)
-							  .icon(GuiIcon.CHECKBOX_BG)
+							  .icon(this, GuiIcon.CHECKBOX_BG, GuiIcon.CHECKBOX_BG_HOVER, GuiIcon.CHECKBOX_BG_DISABLED)
 							  .build());
 
 		//Foreground
@@ -84,7 +84,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 								 .position(1, 1)
 								 .size(12, 10)
 								 .zIndex(10)
-								 .icon(GuiIcon.forComponent(this, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED))
+								 .icon(this, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED)
 								 .build();
 
 		setForeground(r -> {

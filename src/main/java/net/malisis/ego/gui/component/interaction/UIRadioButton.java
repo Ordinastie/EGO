@@ -73,14 +73,14 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IConte
 		setBackground(GuiShape.builder(this)
 							  .position(1, 1)
 							  .size(8, 8)
-							  .icon(GuiIcon.forComponent(this, GuiIcon.RADIO_BG, null, GuiIcon.RADIO_DISABLED_BG))
+							  .icon(this, GuiIcon.RADIO_BG, GuiIcon.RADIO_BG_HOVER, GuiIcon.RADIO_BG_DISABLED)
 							  .build());
 
 		//Foreground
 		GuiShape radio = GuiShape.builder(this)
 								 .position(2, 2)
 								 .size(6, 6)
-								 .icon(GuiIcon.forComponent(this, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED))
+								 .icon(this, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED)
 								 .build();
 		//Overlay
 		GuiShape overlay = GuiShape.builder(this)
