@@ -97,25 +97,24 @@ public class FontOptions
 	/** Right aligned. */
 	protected final boolean rightAligned;
 
-	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned)
+	protected FontOptions(FontOptionsBuilder builder)
 	{
-		this.font = font;
-		this.fontScale = fontScale;
-		this.color = color;
-		this.shadow = shadow;
-		this.bold = bold;
-		this.italic = italic;
-		this.underline = underline;
-		this.strikethrough = strikethrough;
-		this.obfuscated = obfuscated;
-		this.lineSpacing = lineSpacing;
-		this.rightAligned = rightAligned;
+		font = builder.font;
+		fontScale = builder.fontScale;
+		color = builder.color;
+		shadow = builder.shadow;
+		bold = builder.bold;
+		italic = builder.italic;
+		underline = builder.underline;
+		strikethrough = builder.strikethrough;
+		obfuscated = builder.obfuscated;
+		lineSpacing = builder.lineSpacing;
+		rightAligned = builder.rightAligned;
 	}
 
 	public MalisisFont getFont()
 	{
-		MalisisFont font = this.font != null && this.font.isLoaded() ? this.font : MalisisFont.minecraftFont;
-		return font;
+		return font != null && font.isLoaded() ? font : MalisisFont.minecraftFont;
 	}
 
 	/**
@@ -363,6 +362,7 @@ public class FontOptions
 		protected FontOptions base;
 		protected Predicate<Object> currentPredicate;
 		private final List<Pair<Predicate<Object>, FontOptions>> suppliers = Lists.newArrayList();
+		private Object predicateParameter = null;
 
 		protected MalisisFont font = MalisisFont.minecraftFont;
 		protected float fontScale = 1;
@@ -566,14 +566,25 @@ public class FontOptions
 			else
 				addSupplier();
 
-			currentPredicate = (Predicate<Object>) predicate;
+			currentPredicate = (Predicate<java.lang.Object>) predicate;
+			return this;
+		}
+
+		public FontOptionsBuilder when(Predicate<Object> predicate, FontOptions predicatedOptions)
+		{
+			suppliers.add(Pair.of(predicate, predicatedOptions));
+			return this;
+		}
+
+		public FontOptionsBuilder withPredicateParameter(Object parameter)
+		{
+			predicateParameter = parameter;
 			return this;
 		}
 
 		private FontOptions buildBase()
 		{
-			return new FontOptions(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing,
-								   rightAligned);
+			return new FontOptions(this);
 		}
 
 		private void addSupplier()
@@ -592,13 +603,12 @@ public class FontOptions
 			if (suppliers.size() == 0)
 				return buildBase();
 
-			return new PredicatedFontOptions(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated,
-											 lineSpacing, rightAligned, suppliers, predicateParameter);
+			return new PredicatedFontOptions(this, suppliers, predicateParameter);
 		}
 
 		public FontOptions build()
 		{
-			return build(null);
+			return build(predicateParameter);
 		}
 
 	}

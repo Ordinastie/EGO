@@ -40,9 +40,9 @@ public class PredicatedFontOptions extends FontOptions
 	private final List<Pair<Predicate<Object>, FontOptions>> suppliers;
 	private final Object param;
 
-	public PredicatedFontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned, List<Pair<Predicate<Object>, FontOptions>> suppliers, Object param)
+	public PredicatedFontOptions(FontOptionsBuilder builder, List<Pair<Predicate<Object>, FontOptions>> suppliers, Object param)
 	{
-		super(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing, rightAligned);
+		super(builder);
 		this.suppliers = suppliers;
 		this.param = param;
 	}
@@ -156,5 +156,14 @@ public class PredicatedFontOptions extends FontOptions
 	public boolean isRightAligned()
 	{
 		return get(FontOptions::isRightAligned, super.isRightAligned());
+	}
+
+	@Override
+	public FontOptionsBuilder toBuilder()
+	{
+		FontOptionsBuilder builder = super.toBuilder()
+										  .withPredicateParameter(param);
+		suppliers.forEach(p -> builder.when(p.getLeft(), p.getRight()));
+		return builder;
 	}
 }
