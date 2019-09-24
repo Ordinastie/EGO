@@ -31,6 +31,8 @@ import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.launchwrapper.Launch;
@@ -71,6 +73,7 @@ public class EGO
 	public static boolean isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
 	public static final GuiTexture GUI = new GuiTexture(new ResourceLocation(EGO.modid, "textures/atlas.png"));
+	public static final GuiTexture BLOCKS = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
@@ -87,6 +90,15 @@ public class EGO
 	public void postInit(FMLPostInitializationEvent event)
 	{
 		Atlas.loadAtlas();
+
+		TextureAtlasSprite tas = Minecraft.getMinecraft()
+										  .getTextureMapBlocks()
+										  .getMissingSprite();
+
+		int width = (int) (tas.getIconWidth() / (tas.getMaxU() - tas.getMinU()));
+		int height = (int) (tas.getIconHeight() / (tas.getMaxV() - tas.getMinV()));
+		EGO.log.info("Calculted " + width + "x" + height + " blocks map atlas size.");
+		BLOCKS.setSize(width, height);
 
 	}
 
