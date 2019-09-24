@@ -121,7 +121,7 @@ public class UITextField extends UIComponent
 		setSize(Size.of(100, 14));
 
 		GuiShape background = GuiShape.builder(this)
-									  .icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD, null, GuiIcon.TEXTFIELD_DISABLED))
+									  .icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD_BG, null, GuiIcon.TEXTFIELD_BG_DISABLED))
 									  .border(1)
 									  .build();
 		setBackground(background);
