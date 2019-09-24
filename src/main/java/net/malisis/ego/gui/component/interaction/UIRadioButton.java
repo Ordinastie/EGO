@@ -31,7 +31,6 @@ import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
 import net.malisis.ego.gui.element.position.Position;
-import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
@@ -67,7 +66,6 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IConte
 	{
 		this.name = name;
 		setText(text);
-		setSize(Size.sizeOfContent(this, 14, 0));
 
 		//Background
 		setBackground(GuiShape.builder(this)
@@ -82,19 +80,9 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IConte
 								 .size(6, 6)
 								 .icon(this, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED)
 								 .build();
-		//Overlay
-		GuiShape overlay = GuiShape.builder(this)
-								   .position(2, 2)
-								   .size(6, 6)
-								   .alpha(80)
-								   .build();
-
 		setForeground(r -> {
 			if (isSelected())
 				radio.render(r);
-			if (isHovered())
-				overlay.render(r);
-			r.next();
 			if (content() != null)
 				content().render(r);
 		});
@@ -231,6 +219,9 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IConte
 
 		protected UIRadioButtonBuilder()
 		{
+			widthOfContent(14);
+			heightOfContent();
+
 			fontOptionsBuilder.color(0x444444)
 							  .when(UIRadioButton::isHovered)
 							  .color(0x777777)

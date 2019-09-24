@@ -74,12 +74,6 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 							  .build());
 
 		//Foreground
-		GuiShape overlay = GuiShape.builder(this)
-								   .position(2, 1)
-								   .size(10, 10)
-								   .color(0xFFFFFF)
-								   .alpha(80)
-								   .build();
 		GuiShape check = GuiShape.builder(this)
 								 .position(1, 1)
 								 .size(12, 10)
@@ -88,11 +82,8 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 								 .build();
 
 		setForeground(r -> {
-			if (isHovered())
-				overlay.render(r);
 			if (isChecked())
 				check.render(r);
-			r.next();
 			if (content() != null)
 				content().render(r);
 		});
