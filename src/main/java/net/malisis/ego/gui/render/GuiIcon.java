@@ -40,6 +40,8 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 /**
  * @author Ordinastie
  */
@@ -84,6 +86,13 @@ public class GuiIcon
 	public static GuiIcon RADIO;
 	public static GuiIcon RADIO_HOVER;
 	public static GuiIcon RADIO_DISABLED;
+	//UIScrollbar
+	public static GuiIcon SCROLLBAR_BG;
+	public static GuiIcon SCROLLBAR_DISABLED_BG;
+	public static GuiIcon SCROLLBAR_HORIZONTAL;
+	public static GuiIcon SCROLLBAR_HORIZONTAL_DISABLED;
+	public static GuiIcon SCROLLBAR_VERTICAL;
+	public static GuiIcon SCROLLBAR_VERTICAL_DISABLED;
 	//UISelect
 	public static GuiIcon SELECT_BG;
 	public static GuiIcon SELECT_BG_HOVER;
@@ -93,20 +102,6 @@ public class GuiIcon
 	//UISlider
 	public static GuiIcon SLIDER;
 	public static GuiIcon SLIDER_BG;
-	//UITextfield
-	public static GuiIcon TEXTFIELD;
-	public static GuiIcon TEXTFIELD_DISABLED;
-	//ControlComponents
-	public static GuiIcon CLOSE;
-	public static GuiIcon MOVE;
-	public static GuiIcon RESIZE;
-	//UIScrollbar
-	public static GuiIcon SCROLLBAR_BG;
-	public static GuiIcon SCROLLBAR_DISABLED_BG;
-	public static GuiIcon SCROLLBAR_HORIZONTAL;
-	public static GuiIcon SCROLLBAR_HORIZONTAL_DISABLED;
-	public static GuiIcon SCROLLBAR_VERTICAL;
-	public static GuiIcon SCROLLBAR_VERTICAL_DISABLED;
 	//UITab window
 	public static GuiIcon TAB_WINDOW_TOP;
 	public static GuiIcon TAB_WINDOW_RIGHT;
@@ -117,6 +112,14 @@ public class GuiIcon
 	public static GuiIcon TAB_PANEL_RIGHT;
 	public static GuiIcon TAB_PANEL_LEFT;
 	public static GuiIcon TAB_PANEL_BOTTOM;
+	//UITextfield
+	public static GuiIcon TEXTFIELD_BG;
+	public static GuiIcon TEXTFIELD_BG_DISABLED;
+
+	//ControlComponents
+	public static GuiIcon CLOSE;
+	public static GuiIcon MOVE;
+	public static GuiIcon RESIZE;
 
 	//VANILLA
 	public static GuiIcon CROSSHAIR;
@@ -155,59 +158,55 @@ public class GuiIcon
 		PANEL = register(atlas, "panel");
 		TOOLTIP = register(atlas, "tooltip");
 		WINDOW = register(atlas, "window");
+
 		ARROW_EMPTY = register(atlas, "arrow_bg");
 		ARROW_FILLED = register(atlas, "arrow");
 		BUTTON = register(atlas, "button");
 		BUTTON_HOVER = register(atlas, "button_hovered");
 		BUTTON_HOVER_PRESSED = register(atlas, "button_pressed");
 		BUTTON_DISABLED = register(atlas, "button_disabled");
-		//UICheckbox
 		CHECKBOX_BG = register(atlas, "checkbox_bg");
 		CHECKBOX_BG_HOVER = register(atlas, "checkbox_bg_hovered");
 		CHECKBOX_BG_DISABLED = register(atlas, "checkbox_bg_disabled");
 		CHECKBOX = register(atlas, "checkbox");
 		CHECKBOX_HOVER = register(atlas, "checkbox_hovered");
 		CHECKBOX_DISABLED = register(atlas, "checkbox_disabled");
-		//UIRadioButton
 		RADIO_BG = register(atlas, "radiobutton_bg");
 		RADIO_BG_HOVER = register(atlas, "radiobutton_bg_hovered");
 		RADIO_BG_DISABLED = register(atlas, "radiobutton_bg_disabled");
 		RADIO = register(atlas, "radiobutton");
 		RADIO_HOVER = register(atlas, "radiobutton_hovered");
 		RADIO_DISABLED = register(atlas, "radiobutton_disabled");
-		//UISelect
+		SCROLLBAR_BG = register(atlas, "scrollbar_bg");
+		SCROLLBAR_DISABLED_BG = register(atlas, "scrollbar_bg_disabled");
+		SCROLLBAR_HORIZONTAL = register(atlas, "scrollbar_horizontal");
+		SCROLLBAR_HORIZONTAL_DISABLED = register(atlas, "scrollbar_horizontal");
+		SCROLLBAR_VERTICAL = register(atlas, "scrollbar_vertical");
+		SCROLLBAR_VERTICAL_DISABLED = register(atlas, "scrollbar_vertical_disabled");
 		SELECT_BG = register(atlas, "select_bg");
 		SELECT_BG_HOVER = register(atlas, "select_bg_hovered");
 		SELECT_BG_DISABLED = register(atlas, "select_bg_disabled");
 		SELECT_BOX = register(atlas, "select_box");
 		SELECT_ARROW = register(atlas, "select_arrow");
-		//UISlider
-		SLIDER = new GuiIcon(VANILLAGUI_TEXTURE, 227, 46, 8, 20);
-		SLIDER_BG = new GuiIcon(VANILLAGUI_TEXTURE, 0, 0, 200, 20);
-		//UITextfield
-		TEXTFIELD = new GuiIcon(VANILLAGUI_TEXTURE, 200, 30, 9, 12);
-		TEXTFIELD_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 200, 42, 9, 12);
-		//ControlComponents
+		SLIDER = register(atlas, "slider");
+		SLIDER_BG = register(atlas, "slider_bg");
+		TEXTFIELD_BG = register(atlas, "textfield_bg");
+		TEXTFIELD_BG_DISABLED = register(atlas, "textfield_disabled");
+
 		CLOSE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 30, 15, 15);
 		MOVE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 15, 15, 15);
 		RESIZE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 0, 15, 15);
-		//UIScrollbar
-		SCROLLBAR_BG = new GuiIcon(VANILLAGUI_TEXTURE, 215, 0, 15, 15);
-		SCROLLBAR_DISABLED_BG = new GuiIcon(VANILLAGUI_TEXTURE, 215, 15, 15, 15);
-		SCROLLBAR_HORIZONTAL = new GuiIcon(VANILLAGUI_TEXTURE, 230, 15, 15, 8);
-		SCROLLBAR_HORIZONTAL_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 230, 23, 15, 8);
-		SCROLLBAR_VERTICAL = new GuiIcon(VANILLAGUI_TEXTURE, 230, 0, 8, 15);
-		SCROLLBAR_VERTICAL_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 238, 0, 8, 15);
+
 		//UITab window
-		TAB_WINDOW_TOP = new GuiIcon(VANILLAGUI_TEXTURE, 208, 66, 15, 15);
-		TAB_WINDOW_RIGHT = new GuiIcon(VANILLAGUI_TEXTURE, 223, 66, 15, 15);
-		TAB_WINDOW_LEFT = new GuiIcon(VANILLAGUI_TEXTURE, 208, 81, 15, 15);
-		TAB_WINDOW_BOTTOM = new GuiIcon(VANILLAGUI_TEXTURE, 223, 81, 15, 15);
+		TAB_WINDOW_TOP = register(atlas, "tab_window_top");
+		TAB_WINDOW_RIGHT = register(atlas, "tab_window_right");
+		TAB_WINDOW_LEFT = register(atlas, "tab_window_left");
+		TAB_WINDOW_BOTTOM = register(atlas, "tab_window_bottom");
 		//UITab panel
-		TAB_PANEL_TOP = new GuiIcon(VANILLAGUI_TEXTURE, 238, 66, 15, 15);
-		TAB_PANEL_RIGHT = new GuiIcon(VANILLAGUI_TEXTURE, 251, 66, 15, 15);
-		TAB_PANEL_LEFT = new GuiIcon(VANILLAGUI_TEXTURE, 238, 81, 15, 15);
-		TAB_PANEL_BOTTOM = new GuiIcon(VANILLAGUI_TEXTURE, 251, 81, 15, 15);
+		TAB_PANEL_TOP = register(atlas, "tab_panel_top");
+		TAB_PANEL_RIGHT = register(atlas, "tab_panel_right");
+		TAB_PANEL_LEFT = register(atlas, "tab_panel_left");
+		TAB_PANEL_BOTTOM = register(atlas, "tab_panel_bottom");
 
 		//VANILLA
 		CROSSHAIR = registerVanilla(atlas, "CROSSHAIR", "gui/icons.png", 0, 0, 16, 16);
@@ -428,13 +427,15 @@ public class GuiIcon
 		return new GuiIcon(texture, u(), v(), U(), v());
 	}
 
-	public void stitch(GuiTexture texture, int x, int y, int width, int height)
+	public void stitch(@Nullable GuiTexture texture, int x, int y, int width, int height)
 	{
 		this.texture = texture;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		if (texture == null) //TODO: missing texture ?
+			return;
 		u = texture.pixelToU(x);
 		v = texture.pixelToV(y);
 		U = texture.pixelToU(x + width);
