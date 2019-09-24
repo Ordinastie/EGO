@@ -506,6 +506,11 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
+		public Builder icon(UIComponent component, GuiIcon icon, GuiIcon hover, GuiIcon disabled)
+		{
+			return icon(GuiIcon.forComponent(component, icon, hover, disabled));
+		}
+
 		public GuiShape build()
 		{
 			if (position == null)
