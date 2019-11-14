@@ -134,21 +134,20 @@ public class Atlas implements ITextureObject
 
 	public int getGlTextureId()
 	{
-		if (this.glTextureId == -1)
-		{
-			this.glTextureId = TextureUtil.glGenTextures();
-		}
+		if (glTextureId != -1)
+			return glTextureId;
 
-		return this.glTextureId;
+		glTextureId = TextureUtil.glGenTextures();
+		return glTextureId;
 	}
 
 	public void deleteGlTexture()
 	{
-		if (this.glTextureId != -1)
-		{
-			TextureUtil.deleteTexture(this.glTextureId);
-			this.glTextureId = -1;
-		}
+		if (glTextureId == -1)
+			return;
+
+		TextureUtil.deleteTexture(glTextureId);
+		glTextureId = -1;
 	}
 
 	public List<GuiIcon> registeredIcons()
