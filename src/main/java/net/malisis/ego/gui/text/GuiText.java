@@ -362,13 +362,13 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		}
 	}
 
-	private void updateSize()
+	private void updateSize(FontOptions options)
 	{
 		int w = 0, h = 0;
 		for (LineInfo info : lines)
 		{
 			w = Math.max(info.width(), w);
-			h += info.height() + defaultOptions.lineSpacing();
+			h += info.height() + options.lineSpacing();
 		}
 		size = Size.of(w, h);
 
@@ -472,7 +472,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		line.append(word);
 		lines.add(new LineInfo(line.toString(), MathHelper.ceil(lineWidth), MathHelper.ceil(lineHeight), 0));
 
-		updateSize();
+		updateSize(fontOptions);
 	}
 
 	private boolean checkFitSize()
