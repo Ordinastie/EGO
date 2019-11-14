@@ -64,6 +64,12 @@ public class EGOCommand extends CommandBase
 	}
 
 	@Override
+	public List<String> getAliases()
+	{
+		return Lists.newArrayList("ego");
+	}
+
+	@Override
 	public String getUsage(ICommandSender sender)
 	{
 		return "ego.commands.usage";
