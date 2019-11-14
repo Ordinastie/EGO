@@ -39,7 +39,7 @@ public class EcfSelect extends UISelect<TextFormatting>
 
 	public EcfSelect(MCEditor editor)
 	{
-		super(80, Arrays.asList(TextFormatting.values()));
+		super(Arrays.asList(TextFormatting.values()));
 		this.editor = editor;
 		setStringFunction(tf -> tf + tf.getFriendlyName());
 	}
@@ -47,7 +47,8 @@ public class EcfSelect extends UISelect<TextFormatting>
 	@Override
 	public void setSelected(TextFormatting option)
 	{
-		editor.getTextfield().addText(option.toString());
+		editor.getTextfield()
+			  .addText(option.toString());
 	}
 
 	@Override
@@ -55,6 +56,7 @@ public class EcfSelect extends UISelect<TextFormatting>
 	{
 		super.click(button);
 		if (!expanded)
-			editor.getTextfield().setFocused(true);
+			editor.getTextfield()
+				  .setFocused(true);
 	}
 }

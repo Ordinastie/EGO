@@ -25,29 +25,24 @@
 package net.malisis.ego.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
-import static net.malisis.ego.gui.element.position.Positions.middleAligned;
-import static net.malisis.ego.gui.element.size.Sizes.heightOfContent;
-import static net.malisis.ego.gui.element.size.Sizes.heightRelativeTo;
-import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
-import static net.malisis.ego.gui.element.size.Sizes.widthRelativeTo;
 
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.container.UIListContainer;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position;
-import net.malisis.ego.gui.element.position.Position.IPosition;
-import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.Size;
+import net.malisis.ego.gui.element.size.Size.ISize;
+import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
-import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import org.lwjgl.input.Keyboard;
@@ -57,6 +52,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -84,15 +80,15 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	/** Predicate for option disability */
 	protected Predicate<T> disablePredicate = t -> false;
 
+	protected UIComponent selectedComponent = null;
+
 	/**
 	 * Instantiates a new {@link UISelect}.
 	 *
-	 * @param width the width
 	 * @param values the values
 	 */
-	public UISelect(int width, List<T> values)
+	public UISelect(List<T> values)
 	{
-		setSize(Size.of(width, 12));
 		setOptions(values);
 
 		/* Shape used for the background of the select. */
@@ -110,29 +106,10 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 		setBackground(background);
 		setForeground(r -> {
-			UIComponent c = optionsContainer.getElementComponent(selected());
-			if (c != null)
-			{
-				IPosition old = c.position();
-				IPosition pos = Position.of(Positions.leftAligned(c, 1), middleAligned(c, 1));
-				c.setParent(this);
-				c.setPosition(pos);
-				((IOptionComponent) c).renderSelected(r);
-				c.setPosition(old);
-				c.setParent(optionsContainer);
-			}
 			arrowShape.render(r);
+			if (selectedComponent != null)
+				selectedComponent.render(r);
 		});
-	}
-
-	/**
-	 * Instantiates a new {@link UISelect}.
-	 *
-	 * @param width the width
-	 */
-	public UISelect(int width)
-	{
-		this(width, null);
 	}
 
 	@Override
@@ -158,13 +135,21 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		this.stringFunction = checkNotNull(stringFunction);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <U extends UIComponent & IOptionComponent> void setComponentFactory(Function<T, U> factory)
+	public void setComponentFactory(Function<T, UIComponent> factory)
 	{
-		//	optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
+		optionsContainer.setComponentFactory(factory);
+	}
+
+	public void setOptionsSize(ISize size)
+	{
+		optionsContainer.setSize(checkNotNull(size));
 	}
 
 	//#end Getters/Setters
+	public int optionsMaxWidth()
+	{
+		return optionsContainer.optionsMaxWidth();
+	}
 
 	/**
 	 * Set the options for this {@link UISelect}.
@@ -190,6 +175,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	public void setSelected(T option)
 	{
 		selectedIndex = options().indexOf(option);
+		selectedComponent = optionsContainer.generateComponent(selected());
 	}
 
 	/**
@@ -216,9 +202,12 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 		T old = selected();
 		if (fireEvent(new ValueChange.Pre<>(this, old, option)))
-			setSelected(option);
+			return old;
+
+		setSelected(option);
 		fireEvent(new ValueChange.Post<>(this, old, option));
-		return selected();
+
+		return option;
 	}
 
 	private T select(int index)
@@ -339,21 +328,43 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 													   .x(), () -> UISelect.this.screenPosition()
 																				.y() + UISelect.this.size()
 																									.height()));
-			setSize(Size.of(widthRelativeTo(UISelect.this, 1.0F, 0), heightOfContent(this, 0)));
 			setZIndex(300);
 			setBackground(GuiShape.builder(this)
 								  .color(UISelect.this::getColor)
 								  .icon(GuiIcon.SELECT_BOX)
 								  .border(1)
 								  .build());
+			setComponentFactory(Option::new);
 
 			hide();
-
-			setComponentFactory(Option::new);
 
 			scrollbar = new UISlimScrollbar(this, Type.VERTICAL);
 			scrollbar.setFade(false);
 			scrollbar.setAutoHide(true);
+		}
+
+		protected UIComponent generateComponent(T element)
+		{
+			if (elementComponentFactory == null || element == null)
+				return null;
+			UIComponent comp = elementComponentFactory.apply(element);
+			comp.setPosition(Position.of(1, 1));
+			comp.setParent(UISelect.this);
+			return comp;
+		}
+
+		public UISelect<T> uiSelect()
+		{
+			return UISelect.this;
+		}
+
+		public int optionsMaxWidth()
+		{
+			return components().stream()
+							   .mapToInt(c -> c.size()
+											   .width())
+							   .max()
+							   .orElse(0);
 		}
 
 		private void display()
@@ -400,12 +411,6 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		}
 
 		@Override
-		public ClipArea getClipArea()
-		{
-			return ClipArea.from(this);
-		}
-
-		@Override
 		public void setClipContent(boolean clip)
 		{
 		}
@@ -417,52 +422,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		}
 	}
 
-	/*	public class OptionContainerSize implements ISize
-		{
-			private int width;
-			private int height;
-	
-			private void update()
-			{
-				if (options == null)
-					return;
-	
-				//calculate height
-				int offset = UISelect.this.optionsContainer.optionOffset;
-				height = 2;
-				for (int i = offset; i < Math.min(offset + maxDisplayedOptions, options.size()); i++)
-					height += options.get(i).height(UISelect.this);
-	
-				//calculate width
-				width = UISelect.this.size().width();
-				if (maxOptionsWidth == SELECT_WIDTH)
-					return;
-	
-				width -= 4;
-				for (Option<?> option : UISelect.this)
-					width = Math.max(width, (int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
-				width += 4;
-				if (width == LONGEST_OPTION)
-					return;
-	
-				if (maxOptionsWidth >= UISelect.this.size().width())
-					width = Math.min(maxOptionsWidth, width);
-			}
-	
-			@Override
-			public int width()
-			{
-				return width;
-			}
-	
-			@Override
-			public int height()
-			{
-				return height;
-			}
-		}*/
-
-	public class Option extends UIComponent implements IOptionComponent
+	public class Option extends UIComponent
 	{
 		protected T element;
 		/** The default {@link FontOptions} to use for this {@link UISelect}. */
@@ -476,6 +436,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 													   .build();
 
 		protected GuiText text = GuiText.builder()
+										.parent(this)
 										.text(() -> stringFunction.apply(element))
 										.position(1, 1)
 										.fontOptions(fontOptions)
@@ -494,11 +455,37 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		public Option(T element)
 		{
 			this.element = element;
+			setName(stringFunction.apply(element));
 			attachData(element);
-			setSize(Size.of(parentWidth(this, 1.0F, 0), heightRelativeTo(text, 1.0F, 2)));
+			setSize(Size.of(this::width, () -> text.size()
+												   .height()));
+			setAlpha(301);
 
 			setBackground(background);
-			setForeground(text);
+			setForeground(r -> {
+				text.render(r);
+			});
+		}
+
+		public int width()
+		{
+			//TODO: cache ?
+			//noinspection unchecked
+			int maxTextWidth = UISelect.this.optionsContainer.components()
+															 .stream()
+															 .mapToInt(c -> ((Option) c).text()
+																						.size()
+																						.width())
+															 .max()
+															 .orElse(text.size()
+																		 .width());
+			return Math.max(maxTextWidth, UISelect.this.size()
+													   .width());
+		}
+
+		public GuiText text()
+		{
+			return text;
 		}
 
 		public boolean isSelected()
@@ -507,19 +494,112 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		}
 
 		@Override
-		public void renderSelected(GuiRenderer renderer)
+		public void click(MouseButton button)
 		{
-			text.setFontOptions(selectedfontOptions);
-			text.render(renderer);
-			text.setFontOptions(fontOptions);
+			select(element);
+			optionsContainer.hide();
+			UISelect.this.setFocused(true);
 		}
 	}
 
-	public interface IOptionComponent
+	public static <T> UISelectBuilder<T> builder(List<T> values)
 	{
-		public default void renderSelected(GuiRenderer renderer)
+		return new UISelectBuilder<>(values);
+	}
+
+	//TODO: allow "NONE" option ?
+	//TODO: maxDisplayedOptions
+	public static class UISelectBuilder<T> extends UIComponentBuilder<UISelectBuilder<T>, UISelect<T>>
+	{
+		protected List<T> values;
+		protected Function<T, UIComponent> componentFactory; // can't use Option::new because static context
+		protected Function<T, String> stringFunction = Objects::toString;
+		protected Predicate<T> disablePredicate = t -> false;
+		protected Function<UISelect.OptionsContainer, IntSupplier> optionsWidth = oc -> () -> Math.max(oc.uiSelect()
+																										 .size()
+																										 .width(), oc.optionsMaxWidth());
+		protected Function<UISelect.OptionsContainer, IntSupplier> optionsHeight = oc -> Sizes.heightOfContent(oc, 0);
+		protected Function<UISelect.OptionsContainer, ISize> optionsSize = oc -> Size.of(optionsWidth.apply(oc), optionsHeight.apply(oc));
+
+		protected T selected;
+
+		public UISelectBuilder(List<T> value)
 		{
-			((UIComponent) this).render(renderer);
+			this.values = value;
+			height(12);
+			widthOfElements();
+		}
+
+		/**
+		 * Sets the width to match the longest available element width.
+		 *
+		 * @return
+		 */
+		public UISelectBuilder<T> widthOfElements()
+		{
+			return width(s -> s::optionsMaxWidth);
+		}
+
+		/**
+		 * Sets the size of the container holding the elements.
+		 *
+		 * @return
+		 */
+		public UISelectBuilder<T> optionsSize(Function<UISelect.OptionsContainer, ISize> size)
+		{
+			optionsSize = checkNotNull(size);
+			return self();
+		}
+
+		/**
+		 * Sets the factory to create the UIComponent for each element of the UISelect.<br>
+		 * Uses {@link UISelect<T>.Option::new} by default
+		 *
+		 * @param factory
+		 * @return
+		 */
+		public UISelectBuilder<T> withOptions(Function<T, UIComponent> factory)
+		{
+			componentFactory = checkNotNull(factory);
+			return self();
+		}
+
+		/**
+		 * Sets the function to converts each element to a String.<br>
+		 * Uses {@link Objects::toString} by default.
+		 *
+		 * @param func
+		 * @return
+		 */
+		public UISelectBuilder<T> withLabel(Function<T, String> func)
+		{
+			stringFunction = checkNotNull(func);
+			return self();
+		}
+
+		public UISelectBuilder<T> disableElements(Predicate<T> predicate)
+		{
+			this.disablePredicate = checkNotNull(predicate);
+			return self();
+		}
+
+		public UISelectBuilder<T> select(T selected)
+		{
+			this.selected = selected;
+			return self();
+		}
+
+		@Override
+		public UISelect<T> build()
+		{
+			UISelect<T> component = super.build(new UISelect<>(values));
+			if (componentFactory != null)
+				component.setComponentFactory(componentFactory);
+			component.setStringFunction(stringFunction);
+			component.setDisablePredicate(disablePredicate);
+			component.setOptionsSize(optionsSize.apply(component.optionsContainer));
+			component.setSelected(selected);
+			return component;
 		}
 	}
 }
