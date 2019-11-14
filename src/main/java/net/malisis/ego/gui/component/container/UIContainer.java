@@ -26,6 +26,7 @@ package net.malisis.ego.gui.component.container;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
@@ -142,6 +143,11 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	}
 
 	// #end getters/setters
+
+	public List<UIComponent> components()
+	{
+		return ImmutableList.copyOf(content.components);
+	}
 
 	/**
 	 * Gets the {@link UIComponent} matching the specified name.
@@ -476,7 +482,8 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		protected UIContainerBuilder()
 		{
-			size(Size::sizeOfContent);
+			widthOfContent();
+			heightOfContent();
 		}
 
 		public UIContainerBuilder padding(Padding padding)
