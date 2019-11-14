@@ -30,12 +30,14 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	private Multimap<Class<?>, Predicate<?>> handlers = HashMultimap.create();
 	protected String name;
 	protected UIComponent parent;
-	protected Function<COMPONENT, IPosition> position = null;
+	//pos & size
 	protected Function<COMPONENT, IntSupplier> x = o -> Positions.leftAligned(o, 0);
 	protected Function<COMPONENT, IntSupplier> y = o -> Positions.topAligned(o, 0);
-	protected Function<COMPONENT, ISize> size = null;
+	protected Function<COMPONENT, IPosition> position = o -> Position.of(x.apply(o), y.apply(o));
 	protected Function<COMPONENT, IntSupplier> width = o -> Sizes.parentWidth(o, 1F, 0);
 	protected Function<COMPONENT, IntSupplier> height = o -> Sizes.parentHeight(o, 1F, 0);
+	protected Function<COMPONENT, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
+
 	protected int zIndex;
 	protected int alpha = 255;
 	protected UITooltip tooltip;
@@ -81,7 +83,6 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER x(Function<COMPONENT, IntSupplier> x)
 	{
 		this.x = checkNotNull(x);
-		position = null;
 		return self();
 	}
 
@@ -89,7 +90,6 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER y(Function<COMPONENT, IntSupplier> y)
 	{
 		this.y = checkNotNull(y);
-		position = null;
 		return self();
 	}
 
@@ -103,14 +103,12 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER width(Function<COMPONENT, IntSupplier> width)
 	{
 		this.width = checkNotNull(width);
-		size = null;
 		return self();
 	}
 
 	public BUILDER height(Function<COMPONENT, IntSupplier> height)
 	{
 		this.height = checkNotNull(height);
-		size = null;
 		return self();
 	}
 
@@ -184,11 +182,6 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected COMPONENT build(COMPONENT component)
 	{
 		checkNotNull(component);
-
-		if (position == null)
-			position = o -> Position.of(x.apply(component), y.apply(component));
-		if (size == null)
-			size = o -> Size.of(width.apply(component), height.apply(component));
 
 		component.setName(name);
 		component.setPosition(position.apply(component));
