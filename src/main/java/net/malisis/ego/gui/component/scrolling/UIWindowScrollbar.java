@@ -24,17 +24,16 @@
 
 package net.malisis.ego.gui.component.scrolling;
 
-import java.util.function.Supplier;
-
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 
+import java.util.function.Supplier;
+
 /**
  * @author Ordinastie
- *
  */
 public final class UIWindowScrollbar extends UIScrollBar
 {
@@ -53,10 +52,14 @@ public final class UIWindowScrollbar extends UIScrollBar
 			scrollIcon = GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_VERTICAL, null, GuiIcon.SCROLLBAR_VERTICAL_DISABLED);
 		}
 
-		setBackground(GuiShape	.builder(this)
-								.icon(GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG))
-								.border(3)
-								.build());
-		setForeground(GuiShape.builder(this).position(scrollPosition).size(scrollSize).icon(scrollIcon).build());
+		setBackground(GuiShape.builder(this)
+							  .icon(this, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG)
+							  .border(3)
+							  .build());
+		setForeground(GuiShape.builder(this)
+							  .position(scrollPosition)
+							  .size(scrollSize)
+							  .icon(scrollIcon)
+							  .build());
 	}
 }

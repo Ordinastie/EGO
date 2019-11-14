@@ -373,20 +373,20 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	{
 		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = verticalScrollbars.get(component);
-		return scrollbar != null ?
+		return scrollbar != null && scrollbar.isVisible() ?
 			   scrollbar.size()
 						.width() :
-			   0; //always count the width even if it's not visible
+			   0;  //in what case should we count the scrollbar width even if not visible ?
 	}
 
 	public static int scrollbarHeight(Object component)
 	{
 		//noinspection SuspiciousMethodCalls
 		UIScrollBar scrollbar = horizontalScrollbars.get(component);
-		return scrollbar != null ?
+		return scrollbar != null && scrollbar.isVisible() ?
 			   scrollbar.size()
 						.height() :
-			   0; //always count the height even if it's not visible
+			   0; //in what case should we count the scrollbar height even if not visible ?
 	}
 
 	private class ScrollbarPosition implements IPosition
