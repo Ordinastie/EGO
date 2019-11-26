@@ -36,6 +36,7 @@ import net.malisis.ego.gui.component.control.ICloseable;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.component.layout.ILayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
+import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
@@ -54,6 +55,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -479,6 +481,8 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		protected Padding padding = Padding.NO_PADDING;
 		protected boolean clipContent = true;
 		protected Function<UIContainer, ILayout> layout = c -> null;
+		protected BiFunction<UIContainer, UIScrollBar.Type, UIScrollBar> vertical = null;
+		protected BiFunction<UIContainer, UIScrollBar.Type, UIScrollBar> horizontal = null;
 
 		protected UIContainerBuilder()
 		{
@@ -510,6 +514,18 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			return this;
 		}
 
+		public UIContainerBuilder verticalSrollbar(BiFunction<UIContainer, Type, UIScrollBar> scrollbarFactory)
+		{
+			vertical = scrollbarFactory;
+			return self();
+		}
+
+		public UIContainerBuilder horizontalSrollbar(BiFunction<UIContainer, Type, UIScrollBar> scrollbarFactory)
+		{
+			horizontal = scrollbarFactory;
+			return self();
+		}
+
 		@Override
 		public UIContainer build()
 		{
@@ -517,6 +533,10 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			container.setPadding(padding);
 			container.setClipContent(clipContent);
 			container.setLayout(layout.apply(container));
+			if (vertical != null)
+				vertical.apply(container, Type.VERTICAL);
+			if (horizontal != null)
+				horizontal.apply(container, Type.HORIZONTAL);
 
 			return container;
 		}
