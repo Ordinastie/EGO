@@ -97,7 +97,7 @@ public class EGO
 
 		int width = (int) (tas.getIconWidth() / (tas.getMaxU() - tas.getMinU()));
 		int height = (int) (tas.getIconHeight() / (tas.getMaxV() - tas.getMinV()));
-		EGO.log.info("Calculted " + width + "x" + height + " blocks map atlas size.");
+		EGO.log.info("Calculated " + width + "x" + height + " blocks map atlas size.");
 		BLOCKS.setSize(width, height);
 
 	}
