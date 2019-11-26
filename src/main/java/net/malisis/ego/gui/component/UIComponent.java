@@ -79,7 +79,7 @@ import javax.annotation.Nonnull;
  * The drawing is separated between background and foreground.<br>
  * Most of the events are launched from UIComponent.
  *
- * @author Ordinastie, PaleoCrafter
+ * @author Ordinastie
  */
 public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister<UIComponent>
 {

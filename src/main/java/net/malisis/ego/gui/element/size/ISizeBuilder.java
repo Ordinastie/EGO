@@ -35,6 +35,34 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 
 /**
+ * Interface helper for builders generating objects implementing {@link ISized}.<br>
+ * <br>
+ * Typical implementation :
+ * <pre>{@code
+ * protected Function<COMPONENT, IntSupplier> width = o -> Sizes.parentWidth(o, 1F, 0);
+ * protected Function<COMPONENT, IntSupplier> height = o -> Sizes.parentHeight(o, 1F, 0);
+ * protected Function<COMPONENT, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
+ *
+ * public BUILDER size(Function<COMPONENT, ISize> func)
+ * {
+ * 		size = checkNotNull(func);
+ * 		return self();
+ * }
+ *
+ * public BUILDER width(Function<COMPONENT, IntSupplier> width)
+ * {
+ * 		this.width = checkNotNull(width);
+ * 		return self();
+ * }
+ *
+ * public BUILDER height(Function<COMPONENT, IntSupplier> height)
+ * {
+ * 		this.height = checkNotNull(height);
+ * 		return self();
+ * }
+ * }
+ * </pre>
+ *
  * @author Ordinastie
  */
 public interface ISizeBuilder<BUILDER, OWNER extends IPositioned & ISized & IChild<UIComponent>>
