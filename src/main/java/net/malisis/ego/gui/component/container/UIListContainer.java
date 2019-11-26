@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * @author Ordinastie
@@ -46,9 +46,9 @@ public class UIListContainer<S> extends UIContainer
 	protected Collection<S> elements = Collections.emptyList();
 	protected Map<S, UIComponent> componentElements = Maps.newHashMap();
 	protected int lastSize = 0;
-	protected Function<S, UIComponent> elementComponentFactory = e -> UILabel.builder()
-																			 .text(Objects.toString(e))
-																			 .build();
+	protected BiFunction<UIListContainer<S>, S, UIComponent> elementComponentFactory = (lc, e) -> UILabel.builder()
+																										 .text(Objects.toString(e))
+																										 .build();
 	protected int elementsSize;
 
 	public UIListContainer()
@@ -65,7 +65,7 @@ public class UIListContainer<S> extends UIContainer
 
 		for (S element : elements)
 		{
-			UIComponent comp = elementComponentFactory.apply(element);
+			UIComponent comp = createElementComponent(element);
 			comp.attachData(element);
 			componentElements.put(element, comp);
 			add(comp);
@@ -73,10 +73,15 @@ public class UIListContainer<S> extends UIContainer
 		elementsSize = elements.size();
 	}
 
+	protected UIComponent createElementComponent(S element)
+	{
+		return elementComponentFactory.apply(this, element);
+	}
+
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements != null ? elements : Collections.emptyList();
-		buildElementComponents();
+		//buildElementComponents();
 	}
 
 	public Collection<S> getElements()
@@ -89,7 +94,7 @@ public class UIListContainer<S> extends UIContainer
 		return componentElements.get(element);
 	}
 
-	public void setComponentFactory(Function<S, UIComponent> factory)
+	public void setComponentFactory(BiFunction<UIListContainer<S>, S, UIComponent> factory)
 	{
 		elementComponentFactory = factory;
 	}
