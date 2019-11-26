@@ -58,7 +58,7 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 
 	public UITooltip()
 	{
-		setZIndex(300);
+		setZIndex(500);
 
 		setPosition(this);
 		setSize(Size.sizeOfContent(this, 8, 4));

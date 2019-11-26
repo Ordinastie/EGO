@@ -298,7 +298,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 		int offset = 80;
 		hierarchyColor = 0xFF0000;
-		hierarchyZIndex = 200;
+		hierarchyZIndex = 400;
 		while (component != null)
 		{
 			hierarchyZIndex--;
