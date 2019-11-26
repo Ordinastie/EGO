@@ -65,7 +65,6 @@ import java.util.function.Predicate;
  */
 public class UISelect<T> extends UIComponent implements IValueChangeEventRegister<UISelect<T>, T>
 {
-
 	/** Make the options width match the longest option available. */
 	public static int LONGEST_OPTION = -1;
 	/** Make the options width match the {@link UISelect} width. */
@@ -459,11 +458,14 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 	public class Option extends UIComponent
 	{
+		protected UISelect<T> select;
 		protected T element;
 		/** The default {@link FontOptions} to use for this {@link UISelect}. */
 		protected FontOptions fontOptions = FontOptions.builder()
 													   .color(0xFFFFFF)
 													   .shadow()
+													   .when(this::isTop)
+													   .color(0xFFFFFF)
 													   .when(this::isHovered)
 													   .color(0xFED89F)
 													   .when(this::isSelected)
@@ -489,6 +491,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 		public Option(UISelect<T> select, T element)
 		{
+			this.select = select;
 			this.element = element;
 			setName(stringFunction.apply(element));
 			attachData(element);
@@ -516,6 +519,11 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 																		 .width());
 			return Math.max(maxTextWidth, UISelect.this.size()
 													   .width());
+		}
+
+		public boolean isTop()
+		{
+			return select.isTop(this);
 		}
 
 		public GuiText text()
