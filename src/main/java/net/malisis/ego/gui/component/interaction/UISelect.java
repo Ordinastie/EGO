@@ -32,6 +32,8 @@ import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.container.UIListContainer;
+import net.malisis.ego.gui.component.layout.ILayout;
+import net.malisis.ego.gui.component.layout.RowLayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
@@ -51,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
@@ -87,8 +90,10 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	 *
 	 * @param values the values
 	 */
-	public UISelect(List<T> values)
+	public UISelect(List<T> values, BiFunction<UISelect<T>, T, UIComponent> optionsFactory)
 	{
+		if (optionsFactory != null)
+			optionsContainer.optionsFactory = optionsFactory;
 		setOptions(values);
 
 		/* Shape used for the background of the select. */
@@ -135,14 +140,29 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		this.stringFunction = checkNotNull(stringFunction);
 	}
 
-	public void setComponentFactory(Function<T, UIComponent> factory)
+	public void setOptionsFactory(BiFunction<UISelect<T>, T, UIComponent> factory)
 	{
-		optionsContainer.setComponentFactory(factory);
+		optionsContainer.optionsFactory = checkNotNull(factory);
 	}
 
 	public void setOptionsSize(ISize size)
 	{
 		optionsContainer.setSize(checkNotNull(size));
+	}
+
+	public void setOptionsContainerLayout(ILayout layout)
+	{
+		optionsContainer.setLayout(layout);
+	}
+
+	public boolean isSelected(UIComponent component)
+	{
+		return Objects.equals(component.getData(), selected());
+	}
+
+	public boolean isTop(UIComponent component)
+	{
+		return component == selectedComponent;
 	}
 
 	//#end Getters/Setters
@@ -175,7 +195,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	public void setSelected(T option)
 	{
 		selectedIndex = options().indexOf(option);
-		selectedComponent = optionsContainer.generateComponent(selected());
+		selectedComponent = optionsContainer.createTopOption(selected());
 	}
 
 	/**
@@ -205,6 +225,10 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 			return old;
 
 		setSelected(option);
+
+		optionsContainer.hide();
+		setFocused(true);
+
 		fireEvent(new ValueChange.Post<>(this, old, option));
 
 		return option;
@@ -317,6 +341,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 	public class OptionsContainer extends UIListContainer<T>
 	{
+		public BiFunction<UISelect<T>, T, UIComponent> optionsFactory = Option::new;
 		/** The {@link UIScrollBar} used by this {@link OptionsContainer}. */
 		protected UISlimScrollbar scrollbar;
 		protected Padding padding = Padding.of(1);
@@ -334,7 +359,6 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 								  .icon(GuiIcon.SELECT_BOX)
 								  .border(1)
 								  .build());
-			setComponentFactory(Option::new);
 
 			hide();
 
@@ -343,17 +367,28 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 			scrollbar.setAutoHide(true);
 		}
 
-		protected UIComponent generateComponent(T element)
+		protected UIComponent createTopOption(T element)
 		{
 			if (elementComponentFactory == null || element == null)
 				return null;
-			UIComponent comp = elementComponentFactory.apply(element);
-			comp.setPosition(Position.of(1, 1));
+			UIComponent comp = createElementComponent(element);
+			comp.setPosition(Position.middleLeft(comp));
 			comp.setParent(UISelect.this);
 			return comp;
 		}
 
-		public UISelect<T> uiSelect()
+		@Override
+		protected UIComponent createElementComponent(T element)
+		{
+			UIComponent comp = optionsFactory.apply(parentSelect(), element);
+			comp.onLeftClick(e -> {
+				select(element);
+				return true;
+			});
+			return comp;
+		}
+
+		public UISelect<T> parentSelect()
 		{
 			return UISelect.this;
 		}
@@ -452,7 +487,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 												.alpha(() -> isHovered() ? 255 : 0)
 												.build();
 
-		public Option(T element)
+		public Option(UISelect<T> select, T element)
 		{
 			this.element = element;
 			setName(stringFunction.apply(element));
@@ -492,14 +527,6 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		{
 			return Objects.equals(selected(), getData());
 		}
-
-		@Override
-		public void click(MouseButton button)
-		{
-			select(element);
-			optionsContainer.hide();
-			UISelect.this.setFocused(true);
-		}
 	}
 
 	public static <T> UISelectBuilder<T> builder(List<T> values)
@@ -512,14 +539,16 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	public static class UISelectBuilder<T> extends UIComponentBuilder<UISelectBuilder<T>, UISelect<T>>
 	{
 		protected List<T> values;
-		protected Function<T, UIComponent> componentFactory; // can't use Option::new because static context
+		protected BiFunction<UISelect<T>, T, UIComponent> optionsFactory; // can't use Option::new because static context
 		protected Function<T, String> stringFunction = Objects::toString;
 		protected Predicate<T> disablePredicate = t -> false;
-		protected Function<UISelect.OptionsContainer, IntSupplier> optionsWidth = oc -> () -> Math.max(oc.uiSelect()
+		protected Function<UISelect.OptionsContainer, IntSupplier> optionsWidth = oc -> () -> Math.max(oc.parentSelect()
 																										 .size()
 																										 .width(), oc.optionsMaxWidth());
 		protected Function<UISelect.OptionsContainer, IntSupplier> optionsHeight = oc -> Sizes.heightOfContent(oc, 0);
 		protected Function<UISelect.OptionsContainer, ISize> optionsSize = oc -> Size.of(optionsWidth.apply(oc), optionsHeight.apply(oc));
+
+		protected Function<UISelect.OptionsContainer, ILayout> optionsContainerLayout = oc -> new RowLayout(oc, 1);
 
 		protected T selected;
 
@@ -552,20 +581,20 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		}
 
 		/**
-		 * Sets the factory to create the UIComponent for each element of the UISelect.<br>
+		 * Sets the factory to create the UIComponent for each element of the UISelect, .<br>
 		 * Uses {@link UISelect<T>.Option::new} by default
 		 *
 		 * @param factory
 		 * @return
 		 */
-		public UISelectBuilder<T> withOptions(Function<T, UIComponent> factory)
+		public UISelectBuilder<T> withOptions(BiFunction<UISelect<T>, T, UIComponent> factory)
 		{
-			componentFactory = checkNotNull(factory);
+			optionsFactory = checkNotNull(factory);
 			return self();
 		}
 
 		/**
-		 * Sets the function to converts each element to a String.<br>
+		 * Sets the function to converts each element to a String for the default UILabel option factory.<br>
 		 * Uses {@link Objects::toString} by default.
 		 *
 		 * @param func
@@ -574,6 +603,18 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		public UISelectBuilder<T> withLabel(Function<T, String> func)
 		{
 			stringFunction = checkNotNull(func);
+			return self();
+		}
+
+		/**
+		 * Sets the layout to use for the options container.
+		 *
+		 * @param layout
+		 * @return
+		 */
+		public UISelectBuilder<T> layout(Function<UISelect.OptionsContainer, ILayout> layout)
+		{
+			optionsContainerLayout = checkNotNull(layout);
 			return self();
 		}
 
@@ -592,9 +633,8 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		@Override
 		public UISelect<T> build()
 		{
-			UISelect<T> component = super.build(new UISelect<>(values));
-			if (componentFactory != null)
-				component.setComponentFactory(componentFactory);
+			UISelect<T> component = super.build(new UISelect<>(values, optionsFactory));
+			component.setOptionsContainerLayout(optionsContainerLayout.apply(component.optionsContainer));
 			component.setStringFunction(stringFunction);
 			component.setDisablePredicate(disablePredicate);
 			component.setOptionsSize(optionsSize.apply(component.optionsContainer));
