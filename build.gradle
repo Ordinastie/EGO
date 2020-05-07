@@ -53,7 +53,7 @@ ext.packaging = 'jar'
 
 // Extended project information
 ext.projectName = 'EGO'
-ext.description = 'External GuiDemo Overall'
+ext.description = 'External Gui Overall'
 ext.url = 'http://github.com/Ordinastie/EGO'
 
 
@@ -160,7 +160,7 @@ uploadArchives {
     repositories.mavenDeployer {
 
         // Sign Maven POM
-        beforeDeployment {MavenDeployment deployment -> signing.signPom(deployment)}
+        beforeDeployment {deployment -> signing.signPom(deployment)}
 
         def username = project.hasProperty('sonatypeUsername') ? project.getProperty('sonatypeUsername') :
                 System.getenv("sonatypeUsername");
