@@ -395,14 +395,14 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		//ALPHA
 		public Builder alpha(int a)
 		{
-			alpha = (fp, vp) -> a;
+			alpha = alphaFunction((fp, vp) -> a);
 			return this;
 		}
 
 		public Builder alpha(IntSupplier supplier)
 		{
 			checkNotNull(supplier);
-			alpha = (fp, vp) -> supplier.getAsInt();
+			alpha = alphaFunction((fp, vp) -> supplier.getAsInt());
 			return this;
 		}
 
