@@ -58,18 +58,15 @@ import net.malisis.ego.gui.event.MouseEvent.MouseOver;
 import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
 import net.malisis.ego.gui.event.MouseEvent.MouseUp;
 import net.malisis.ego.gui.event.MouseEvent.ScrollWheel;
-import net.malisis.ego.gui.event.StateChangeEvent.DisableEvent;
-import net.malisis.ego.gui.event.StateChangeEvent.EnableEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.FocusEvent;
-import net.malisis.ego.gui.event.StateChangeEvent.HiddenEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.UnfocusEvent;
-import net.malisis.ego.gui.event.StateChangeEvent.VisibleEvent;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import org.apache.logging.log4j.util.Strings;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -112,9 +109,9 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	/** The tooltip for this {@link UIComponent} Automatically displayed when the {@link UIComponent} is hovered. */
 	protected UITooltip tooltip;
 	/** Determines whether this {@link UIComponent} is visible. */
-	protected boolean visible = true;
+	protected BooleanSupplier visible = () -> true;
 	/** Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any {@link GuiEvent events} received. */
-	protected boolean enabled = true;
+	protected BooleanSupplier enabled = () -> true;
 	/** Hover state of this {@link UIComponent}. */
 	protected boolean hovered = false;
 	/** Focus state of this {@link UIComponent}. */
@@ -243,19 +240,19 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	}
 
 	/**
-	 * Sets the <code>hovered</code> state of this {@link UIComponent}.
-	 *
-	 * @param hovered the new state
+	 * Hovers this {@link UIComponent}.
 	 */
-	public void setHovered(boolean hovered)
+	public void hover()
 	{
-		boolean flag = isHovered() != hovered;
-		flag |= MalisisGui.setHoveredComponent(this, hovered);
-		if (!flag)
-			return;
+		fireEvent(new MouseOver<>(this));
+	}
 
-		this.hovered = hovered;
-		fireEvent(isHovered() ? new MouseOver<>(this) : new MouseOut<>(this));
+	/**
+	 * Unhovers this {@link UIComponent}.
+	 */
+	public void unhover()
+	{
+		fireEvent(new MouseOut<>(this));
 	}
 
 	/**
@@ -265,26 +262,23 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public boolean isHovered()
 	{
-		return hovered;
+		return isVisible() && MalisisGui.getHoveredComponent() == this;
 	}
 
 	/**
-	 * Sets the <code>focused</code> state of this {@link UIComponent}.
-	 *
-	 * @param focused the state
+	 * Set focus on this {@link UIComponent}.
 	 */
-	public void setFocused(boolean focused)
+	public void focus()
 	{
-		if (!isEnabled())
-			return;
+		fireEvent(new FocusEvent<>(this));
+	}
 
-		boolean flag = isFocused() != focused;
-		flag |= MalisisGui.setFocusedComponent(this, focused);
-		if (!flag)
-			return;
-
-		this.focused = focused;
-		fireEvent(isFocused() ? new FocusEvent<>(this) : new UnfocusEvent<>(this));
+	/**
+	 * Unset the focus on this {@link UIComponent}
+	 */
+	public void unfocus()
+	{
+		fireEvent(new UnfocusEvent<>(this));
 	}
 
 	/**
@@ -294,7 +288,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public boolean isFocused()
 	{
-		return focused;
+		return isVisible() && MalisisGui.getFocusedComponent() == this;
 	}
 
 	/**
@@ -327,7 +321,17 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public boolean isVisible()
 	{
-		return visible;
+		return visible.getAsBoolean();
+	}
+
+	/**
+	 * Sets the visibility rule of this {@link UIComponent}.
+	 *
+	 * @param supplier the visibility rule for this component
+	 */
+	public void setVisible(BooleanSupplier supplier)
+	{
+		visible = checkNotNull(supplier);
 	}
 
 	/**
@@ -337,19 +341,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public void setVisible(boolean visible)
 	{
-		if (isVisible() == visible)
-			return;
-
-		this.visible = visible;
-		fireEvent(isVisible() ? new VisibleEvent<>(this) : new HiddenEvent<>(this));
-
-		if (getParent() instanceof UIContainer)
-			((UIContainer) getParent()).onContentUpdate();
-		if (!isVisible())
-		{
-			setHovered(false);
-			setFocused(false);
-		}
+		setVisible(() -> visible);
 	}
 
 	/**
@@ -359,7 +351,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public boolean isEnabled()
 	{
-		return enabled && (parent == null || parent.isEnabled());
+		return enabled.getAsBoolean() && (parent == null || parent.isEnabled());
 	}
 
 	/**
@@ -375,21 +367,21 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	/**
 	 * Set the state of this {@link UIComponent}.
 	 *
+	 * @param supplier the new state
+	 */
+	public void setEnabled(BooleanSupplier supplier)
+	{
+		enabled = checkNotNull(supplier);
+	}
+
+	/**
+	 * Set the state of this {@link UIComponent}.
+	 *
 	 * @param enabled the new state
 	 */
 	public void setEnabled(boolean enabled)
 	{
-		if (isEnabled() == enabled)
-			return;
-
-		this.enabled = enabled;
-		fireEvent(isEnabled() ? new EnableEvent<>(this) : new DisableEvent<>(this));
-
-		if (isEnabled())
-		{
-			setHovered(false);
-			setFocused(false);
-		}
+		setEnabled(() -> enabled);
 	}
 
 	/**

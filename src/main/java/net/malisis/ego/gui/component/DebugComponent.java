@@ -273,7 +273,11 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 				isTop = true;
 				setPosition(Position.topLeft(this));
 				break;
-
+			case Keyboard.KEY_O:
+				if (getGui().isOverlay() && MalisisGui.current() == null)
+					getGui().display();
+				else if (getGui().isOverlay() && getGui() == MalisisGui.current())
+					getGui().close();
 		}
 
 		return false;

@@ -226,7 +226,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		setSelected(option);
 
 		optionsContainer.hide();
-		setFocused(true);
+		MalisisGui.setFocusedComponent(this);
 
 		fireEvent(new ValueChange.Post<>(this, old, option));
 
@@ -404,7 +404,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		private void display()
 		{
 			scrollbar.updateScrollbar();
-			setFocused(true);
+			MalisisGui.setFocusedComponent(this);
 			setVisible(true);
 			expanded = true;
 		}
@@ -412,7 +412,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		private void hide()
 		{
 			if (isFocused())
-				setFocused(false);
+				MalisisGui.setFocusedComponent(null);
 			setVisible(false);
 			expanded = false;
 		}
@@ -435,7 +435,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 			select((T) comp.getData());
 			hide();
-			UISelect.this.setFocused(true);
+			MalisisGui.setFocusedComponent(UISelect.this);
 		}
 
 		@Override

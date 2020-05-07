@@ -24,18 +24,15 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import javax.annotation.Nonnull;
-
 import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
-import net.malisis.ego.gui.render.GuiIcon;
-import net.malisis.ego.gui.render.shape.GuiShape;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author Ordinastie
- *
  */
 public class UISeparator extends UIComponent
 {
@@ -49,7 +46,7 @@ public class UISeparator extends UIComponent
 	public UISeparator(boolean vertical)
 	{
 		this.vertical = vertical;
-		setForeground(GuiShape.builder(this).icon(GuiIcon.SEPARATOR).color(this::getColor).build());
+		//	setForeground(GuiShape.builder(this).icon(GuiIcon.SEPARATOR).color(this::getColor).build());
 	}
 
 	public UISeparator(MalisisGui gui)

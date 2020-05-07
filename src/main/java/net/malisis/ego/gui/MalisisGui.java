@@ -25,7 +25,6 @@
 package net.malisis.ego.gui;
 
 import net.malisis.ego.EGO;
-import net.malisis.ego.atlas.Atlas;
 import net.malisis.ego.gui.component.DebugComponent;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
@@ -396,19 +395,12 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 
 			if (MOUSE_POSITION.hasChanged())
 			{
+				setHoveredComponent(component);
+				tooltip = null;
 				if (component != null)
 				{
+					component.mouseMove();
 					tooltip = component.getTooltip();
-					if (component.isEnabled())
-					{
-						component.mouseMove();
-						component.setHovered(true);
-					}
-				}
-				else
-				{
-					setHoveredComponent(null, false);
-					tooltip = null;
 				}
 			}
 
@@ -442,7 +434,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		{
 			if (component == null)
 			{
-				setFocusedComponent(null, true);
+				setFocusedComponent(null);
 				return;
 			}
 
@@ -456,7 +448,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 			}
 
 			component.mouseDown(MouseButton.getButton(button));
-			component.setFocused(true);
+			setFocusedComponent(component);
 			if (draggedComponent == null)
 				draggedComponent = component;
 
@@ -551,8 +543,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 				{
 					clearScreen();
 					setResolution();
-					setHoveredComponent(null, true);
-					setFocusedComponent(null, true);
+					setHoveredComponent(null);
+					setFocusedComponent(null);
 					constructed = false;
 					doConstruct();
 				}
@@ -561,7 +553,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		catch (Exception e)
 		{
 			EGO.message("A problem occured while handling key typed for " + e.getClass()
-																			 .getSimpleName() + ": " + e.getMessage());
+																			 .getSimpleName() + " : " + e.getMessage());
+			EGO.log.error("A problem occured while handling key typed for " + getClass().getSimpleName(), e);
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 
@@ -582,7 +575,15 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		try
 		{
 			update();
+		}
+		catch (Exception e)
+		{
+			EGO.message("A problem occured while updating screen " + getClass().getSimpleName() + " : " + e.getMessage());
+			EGO.log.error("A problem occured while updating screen " + getClass().getSimpleName(), e);
+		}
 
+		try
+		{
 			screen.render(renderer);
 
 			//don't draw tooltip if mouse has itemStack
@@ -596,8 +597,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		}
 		catch (Exception e)
 		{
-			EGO.message("A problem occured while rendering screen : " + getClass().getSimpleName() + ": " + e.getMessage());
-			EGO.log.error("A problem occured while rendering " + getClass().getSimpleName(), e);
+			EGO.message("A problem occured while rendering screen " + getClass().getSimpleName() + " : " + e.getMessage());
+			EGO.log.error("A problem occured while rendering screen " + getClass().getSimpleName(), e);
 		}
 
 		renderer.clean();
@@ -660,8 +661,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	 */
 	public void close()
 	{
-		setFocusedComponent(null, true);
-		setHoveredComponent(null, true);
+		setFocusedComponent(null);
+		setHoveredComponent(null);
 		Keyboard.enableRepeatEvents(false);
 		if (mc.player != null)
 			mc.player.closeScreen();
@@ -785,41 +786,21 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	 * Sets the hovered state for a {@link UIComponent}. If a <code>UIComponent is currently hovered, it will be "unhovered" first.
 	 *
 	 * @param component the component that gets his state changed
-	 * @param hovered the hovered state
-	 * @return true, if the state was changed
 	 */
-	public static boolean setHoveredComponent(UIComponent component, boolean hovered)
+	public static void setHoveredComponent(UIComponent component)
 	{
 		MalisisGui gui = current();
-		if (gui == null)
-			return false;
+		if (gui == null || gui.hoveredComponent == component)
+			return;
 
-		if (gui.hoveredComponent == component)
-		{
-			if (!hovered)
-			{
-				gui.hoveredComponent = null;
-				return true;
-			}
-			return false;
-		}
+		if (gui.hoveredComponent != null)
+			gui.hoveredComponent.unhover();
+		gui.hoveredComponent = null;
+		if (component == null || !component.isVisible())
+			return;
 
-		if (hovered)
-		{
-			if (gui.hoveredComponent != null)
-				gui.hoveredComponent.setHovered(false);
-
-			gui.hoveredComponent = component;
-		}
-
-		if (component == null)
-		{
-			if (gui.hoveredComponent != null)
-				gui.hoveredComponent.setHovered(false);
-			gui.hoveredComponent = null;
-		}
-
-		return true;
+		component.hover();
+		gui.hoveredComponent = component;
 	}
 
 	/**
@@ -832,30 +813,20 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		return current() != null ? current().focusedComponent : null;
 	}
 
-	public static boolean setFocusedComponent(UIComponent component, boolean focused)
+	public static void setFocusedComponent(UIComponent component)
 	{
 		MalisisGui gui = current();
-		if (gui == null)
-			return false;
+		if (gui == null || gui.focusedComponent == component)
+			return;
 
-		if (gui.focusedComponent == component)
-		{
-			if (!focused)
-			{
-				gui.focusedComponent = null;
-				return true;
-			}
-			return false;
-		}
+		if (gui.focusedComponent != null)
+			gui.focusedComponent.unfocus();
+		gui.focusedComponent = null;
+		if (component == null || !component.isVisible())
+			return;
 
-		if (focused)
-		{
-			if (gui.focusedComponent != null)
-				gui.focusedComponent.setFocused(false);
-
-			gui.focusedComponent = component;
-		}
-		return true;
+		component.focus();
+		gui.focusedComponent = component;
 	}
 
 	public static UIComponent getDraggedComponent()
@@ -893,6 +864,13 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		//				|| (gui != null && gui.inventoryContainer != null && keyCode == gui.mc.gameSettings.keyBindInventory.getKeyCode());
 	}
 
+	public static void closeGui()
+	{
+		if (current() == null)
+			return;
+		current().close();
+	}
+
 	public static void openLink(String url)
 	{
 		try
@@ -902,8 +880,8 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		}
 		catch (IOException | URISyntaxException e)
 		{
-			EGO.message("A problem occured while opening link : " + url + ": " + e.getMessage());
-			EGO.log.error("A problem occured while opening link : " + url, e);
+			EGO.message("A problem occured while opening url " + url + " : " + e.getMessage());
+			EGO.log.error("A problem occured while opening url " + url, e);
 		}
 	}
 }

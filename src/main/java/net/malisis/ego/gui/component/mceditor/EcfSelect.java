@@ -24,6 +24,7 @@
 
 package net.malisis.ego.gui.component.mceditor;
 
+import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.interaction.UISelect;
 import net.minecraft.util.text.TextFormatting;
@@ -39,7 +40,7 @@ public class EcfSelect extends UISelect<TextFormatting>
 
 	public EcfSelect(MCEditor editor)
 	{
-		super(Arrays.asList(TextFormatting.values()));
+		super(Arrays.asList(TextFormatting.values()), null);
 		this.editor = editor;
 		setStringFunction(tf -> tf + tf.getFriendlyName());
 	}
@@ -56,7 +57,6 @@ public class EcfSelect extends UISelect<TextFormatting>
 	{
 		super.click(button);
 		if (!expanded)
-			editor.getTextfield()
-				  .setFocused(true);
+			MalisisGui.setFocusedComponent(editor.getTextfield());
 	}
 }

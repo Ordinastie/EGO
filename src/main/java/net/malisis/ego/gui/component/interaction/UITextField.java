@@ -291,7 +291,7 @@ public class UITextField extends UIComponent
 	 *
 	 * @param focused the new focused
 	 */
-	@Override
+/*	@Override
 	public void setFocused(boolean focused)
 	{
 		if (!isEnabled() || !isVisible())
@@ -301,7 +301,8 @@ public class UITextField extends UIComponent
 			selectAllOnRelease = true;
 
 		super.setFocused(focused);
-	}
+	*}
+*/
 
 	/**
 	 * Gets the current cursor position.
@@ -601,7 +602,7 @@ public class UITextField extends UIComponent
 	{
 		if (keyCode == Keyboard.KEY_ESCAPE)
 		{
-			setFocused(false);
+			MalisisGui.setFocusedComponent(null);
 			return true; //we don't want to close the GUI
 		}
 

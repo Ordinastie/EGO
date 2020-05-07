@@ -148,6 +148,9 @@ public class GuiIcon
 	public static GuiIcon BAR_GRAY_EMPTY;
 	public static GuiIcon BAR_GRAY;
 
+	public static GuiIcon ACHIEVEMENT_BG;
+	public static GuiIcon EXPERIENCE_ORB;
+
 	public static void registerIcons(Atlas atlas)
 	{
 		FULL = new GuiIcon(0, 0, 1, 1);
@@ -234,6 +237,10 @@ public class GuiIcon
 		BAR_PURPLE = registerVanilla(atlas, "BAR_PURPLE", "gui/bars.png", 0, 55, 182, 5);
 		BAR_GRAY_EMPTY = registerVanilla(atlas, "BAR_GRAY_EMPTY", "gui/bars.png", 0, 60, 182, 5);
 		BAR_GRAY = registerVanilla(atlas, "BAR_GRAY", "gui/bars.png", 0, 65, 182, 5);
+
+		ACHIEVEMENT_BG = registerVanilla(atlas, "ACHIEVEMENT_BG", "gui/container/inventory.png", 141, 166, 24, 24);
+
+		EXPERIENCE_ORB = registerVanilla(atlas, "EXPERIENCE_ORB", "entity/experience_orb.png", 4, 4, 8, 8);
 	}
 
 	private static GuiIcon register(Atlas atlas, String name)
@@ -297,6 +304,7 @@ public class GuiIcon
 	public GuiIcon(GuiTexture texture, TextureAtlasSprite icon)
 	{
 		this(texture, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
+		location = new ResourceLocation(icon.getIconName());
 		width = icon.getIconWidth();
 		height = icon.getIconHeight();
 	}

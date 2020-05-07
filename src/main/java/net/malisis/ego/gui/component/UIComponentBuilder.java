@@ -19,6 +19,7 @@ import net.malisis.ego.gui.event.MouseEvent.IMouseEventBuilder;
 import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.Map.Entry;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
@@ -39,10 +40,11 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected Function<COMPONENT, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
 
 	protected int zIndex;
+	protected int color = 0xFFFFFF;
 	protected int alpha = 255;
 	protected UITooltip tooltip;
-	protected boolean enabled = true;
-	protected boolean visible = true;
+	protected BooleanSupplier enabled = () -> true;
+	protected BooleanSupplier visible = () -> true;
 	protected Function<COMPONENT, IGuiRenderer> background = null;
 	protected Function<COMPONENT, IGuiRenderer> foreground = null;
 	protected Object data;
@@ -118,6 +120,12 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		return self();
 	}
 
+	public BUILDER color(int color)
+	{
+		this.color = color;
+		return self();
+	}
+
 	public BUILDER alpha(int alpha)
 	{
 		this.alpha = alpha;
@@ -139,14 +147,25 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 
 	public BUILDER enabled(boolean enabled)
 	{
-		this.enabled = enabled;
+		return enabled(() -> enabled);
+	}
+
+	public BUILDER enabled(BooleanSupplier supplier)
+	{
+		this.enabled = checkNotNull(supplier);
 		return self();
+	}
+
+	public BUILDER visible(BooleanSupplier supplier)
+	{
+		this.visible = checkNotNull(supplier);
+		return self();
+
 	}
 
 	public BUILDER visible(boolean visible)
 	{
-		this.visible = visible;
-		return self();
+		return visible(() -> visible);
 	}
 
 	public BUILDER background(IGuiRenderer background)
@@ -189,6 +208,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		component.setEnabled(enabled);
 		component.setVisible(visible);
 		component.setZIndex(zIndex);
+		component.setColor(color);
 		component.setAlpha(alpha);
 		if (tooltip != null)
 			component.setTooltip(tooltip);

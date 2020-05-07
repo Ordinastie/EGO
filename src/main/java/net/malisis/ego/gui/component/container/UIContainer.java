@@ -97,19 +97,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	}
 
 	// #region getters/setters
-	@Override
-	public void setVisible(boolean visible)
-	{
-		super.setVisible(visible);
-		content.setVisible(visible);
-	}
-
-	@Override
-	public void setEnabled(boolean enabled)
-	{
-		super.setEnabled(enabled);
-		content.setEnabled(enabled);
-	}
 
 	/**
 	 * Set the padding for this {@link UIContainer}.
@@ -228,15 +215,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 								 .orElse(superComp);
 	}
 
-	/**
-	 * Called when this {@link UIComponent} gets its content updated.
-	 */
-	public void onContentUpdate()
-	{
-		//content.updateSize();
-		//fireEvent(new ContentUpdateEvent<>(this));
-	}
-
 	//#region IClipable
 	@Override
 	public ClipArea getClipArea()
@@ -276,7 +254,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		Arrays.stream(components)
 			  .filter(Objects::nonNull)
 			  .forEach(content::add);
-		onContentUpdate();
 	}
 
 	/**
@@ -291,7 +268,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		content.components.remove(component);
 		component.setParent(null);
-		onContentUpdate();
 	}
 
 	/**
@@ -304,7 +280,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			component.setParent(null);
 		}
 		content.components.clear();
-		onContentUpdate();
 	}
 
 	@Override
@@ -315,7 +290,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		{
 			component.onAddedToScreen(gui);
 		}
-		onContentUpdate();
 	}
 
 	@Override
@@ -442,33 +416,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 							 .orElse(0) - padding().top();
 		}
 
-		public void setVisible(boolean visible)
-		{
-			if (isVisible() == visible)
-				return;
-
-			if (!visible)
-			{
-				for (UIComponent c : components)
-				{
-					c.setHovered(false);
-					c.setFocused(false);
-				}
-			}
-		}
-
-		public void setEnabled(boolean enabled)
-		{
-			if (!enabled)
-			{
-				for (UIComponent c : components)
-				{
-					c.setHovered(false);
-					c.setFocused(false);
-				}
-			}
-		}
-
 		@Override
 		public void render(GuiRenderer renderer)
 		{
@@ -476,60 +423,84 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		}
 	}
 
-	public static class UIContainerBuilder extends UIComponentBuilder<UIContainerBuilder, UIContainer>
+	public static class UIContainerBuilder extends UIContainerBuilderG<UIContainerBuilder, UIContainer>
+	{
+		@Override
+		public UIContainer build()
+		{
+			return super.build(new UIContainer());
+		}
+	}
+
+	public abstract static class UIContainerBuilderG<BUILDER extends UIComponentBuilder<?, ?>, CONTAINER extends UIContainer>
+			extends UIComponentBuilder<BUILDER, CONTAINER>
 	{
 		protected Padding padding = Padding.NO_PADDING;
 		protected boolean clipContent = true;
-		protected Function<UIContainer, ILayout> layout = c -> null;
-		protected BiFunction<UIContainer, UIScrollBar.Type, UIScrollBar> vertical = null;
-		protected BiFunction<UIContainer, UIScrollBar.Type, UIScrollBar> horizontal = null;
+		protected Function<CONTAINER, ILayout> layout = c -> null;
+		protected BiFunction<CONTAINER, UIScrollBar.Type, UIScrollBar> vertical = null;
+		protected BiFunction<CONTAINER, UIScrollBar.Type, UIScrollBar> horizontal = null;
+		protected List<UIComponent> childs = Lists.newArrayList();
 
-		protected UIContainerBuilder()
+		protected UIContainerBuilderG()
 		{
 			widthOfContent();
 			heightOfContent();
 		}
 
-		public UIContainerBuilder padding(Padding padding)
+		@Override
+		@SuppressWarnings("unchecked")
+		public BUILDER self()
+		{
+			return (BUILDER) this;
+		}
+
+		public BUILDER padding(Padding padding)
 		{
 			this.padding = padding;
-			return this;
+			return self();
 		}
 
-		public UIContainerBuilder padding(int padding)
+		public BUILDER padding(int padding)
 		{
 			this.padding = Padding.of(padding);
-			return this;
+			return self();
 		}
 
-		public UIContainerBuilder noClipContent()
+		public BUILDER noClipContent()
 		{
 			clipContent = false;
-			return this;
+			return self();
 		}
 
-		public UIContainerBuilder layout(Function<UIContainer, ILayout> layout)
+		public BUILDER layout(Function<CONTAINER, ILayout> layout)
 		{
 			this.layout = checkNotNull(layout);
-			return this;
+			return self();
 		}
 
-		public UIContainerBuilder verticalSrollbar(BiFunction<UIContainer, Type, UIScrollBar> scrollbarFactory)
+		public BUILDER verticalScrollbar(BiFunction<CONTAINER, Type, UIScrollBar> scrollbarFactory)
 		{
 			vertical = scrollbarFactory;
 			return self();
 		}
 
-		public UIContainerBuilder horizontalSrollbar(BiFunction<UIContainer, Type, UIScrollBar> scrollbarFactory)
+		public BUILDER horizontalScrollbar(BiFunction<CONTAINER, Type, UIScrollBar> scrollbarFactory)
 		{
 			horizontal = scrollbarFactory;
 			return self();
 		}
 
-		@Override
-		public UIContainer build()
+		public BUILDER add(UIComponent component)
 		{
-			UIContainer container = build(new UIContainer());
+			childs.add(checkNotNull(component));
+			return self();
+		}
+
+		@Override
+		protected CONTAINER build(CONTAINER container)
+		{
+			super.build(container);
 			container.setPadding(padding);
 			container.setClipContent(clipContent);
 			container.setLayout(layout.apply(container));
@@ -537,6 +508,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 				vertical.apply(container, Type.VERTICAL);
 			if (horizontal != null)
 				horizontal.apply(container, Type.HORIZONTAL);
+
+			for (UIComponent c : childs)
+				container.add(c);
 
 			return container;
 		}
