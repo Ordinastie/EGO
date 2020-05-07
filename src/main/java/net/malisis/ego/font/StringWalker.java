@@ -24,23 +24,20 @@
 
 package net.malisis.ego.font;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Predicate;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.google.common.collect.Lists;
-
 import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.text.GuiText;
 import net.malisis.ego.gui.text.GuiText.LineInfo;
 import net.minecraft.util.text.TextFormatting;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author Ordinastie
- *
  */
 public class StringWalker
 {
@@ -57,8 +54,6 @@ public class StringWalker
 	protected boolean skipChars = true;
 	/** Whether to apply styles for format characters. */
 	protected boolean applyStyles;
-	/** Space between each line. */
-	protected int lineSpacing;
 
 	protected boolean rightAligned = false;
 
@@ -93,7 +88,6 @@ public class StringWalker
 	public StringWalker(String text, FontOptions options)
 	{
 		initLine(text);
-		this.lineSpacing = (options != null ? options.lineSpacing() : 2);
 		styles.add(options != null ? options : FontOptions.EMPTY);
 	}
 
@@ -101,7 +95,6 @@ public class StringWalker
 	{
 		this.lines = text.lines();
 		this.litteral = text.isLitteral();
-		this.lineSpacing = (options != null ? options.lineSpacing() : 2);
 		styles.add(options != null ? options : FontOptions.EMPTY);
 		this.rightAligned = options != null && options.isRightAligned();
 
@@ -186,9 +179,19 @@ public class StringWalker
 		return height;
 	}
 
+	public int charSpacing()
+	{
+		return currentStyle().charSpacing();
+	}
+
+	public int lineSpacing()
+	{
+		return currentStyle().lineSpacing();
+	}
+
 	public float lineHeight()
 	{
-		return lineHeight + lineSpacing;
+		return lineHeight;
 	}
 
 	public float lineWidth()
@@ -266,7 +269,9 @@ public class StringWalker
 		//position
 		x = 0;
 		if (rightAligned && lines.size() >= lineIndex)
-			x += lines.get(lineIndex).spaceWidth() - lines.get(lineIndex).width();
+			x += lines.get(lineIndex)
+					  .spaceWidth() - lines.get(lineIndex)
+										   .width();
 		//add last line height
 		height = 0;
 		width = 0;
@@ -281,7 +286,7 @@ public class StringWalker
 		globalIndex += endLineIndex - charIndex; //add line size
 		lineIndex++;
 		LineInfo lineInfo = lines.get(lineIndex);
-		y += lineHeight + lineSpacing;
+		y += lineHeight() + lineSpacing();
 		lineHeight = lineInfo.height();
 		initLine(lineInfo.text());
 
@@ -305,11 +310,13 @@ public class StringWalker
 		FontOptions options = currentStyle();
 
 		c = currentText.charAt(charIndex);
-		x += width; // add last width
-		width = options.getFont().getCharWidth(c, options);
+		x += width;//+ charSpacing(); // add last width
+		width = options.getFont()
+					   .getCharWidth(c, options);
 		//		if (lines.size() > 0 && c == ' '/*options.isJustified()*/)
 		//			width += lines.get(lineIndex).spaceWidth();
-		height = options.getFont().getCharHeight(c, options);
+		height = options.getFont()
+						.getCharHeight(c, options);
 		if (options.isBold())
 			width += options.getFontScale();
 

@@ -42,6 +42,7 @@ import java.util.Map;
  */
 public class MinecraftFont extends MalisisFont
 {
+	public static int FONT_SIZE = 9;
 	private int[] mcCharWidth;
 	//private float[] optifineCharWidth;
 	private byte[] glyphWidth;
@@ -59,7 +60,7 @@ public class MinecraftFont extends MalisisFont
 		super((Font) null);
 
 		fontGeneratorOptions = new FontGeneratorOptions();
-		fontGeneratorOptions.fontSize = 9F;
+		fontGeneratorOptions.fontSize = FONT_SIZE;
 		textureRl = new ResourceLocation("textures/font/ascii.png");
 		size = 256;
 
@@ -200,7 +201,7 @@ public class MinecraftFont extends MalisisFont
 			offsetY -= options.getFontScale() / 2;
 		}
 
-		super.drawChar(cd, offsetX, offsetY, options, color, alpha);
+		super.drawChar(cd, offsetX, offsetY + 1, options, color, alpha);
 	}
 
 	@Override
@@ -263,7 +264,7 @@ public class MinecraftFont extends MalisisFont
 		@Override
 		public float getCharHeight()
 		{
-			return fontRenderer.FONT_HEIGHT;
+			return FONT_SIZE;
 		}
 
 		@Override
@@ -285,7 +286,7 @@ public class MinecraftFont extends MalisisFont
 
 		public UnicodeCharData(char c)
 		{
-			super(c, 0, glyphWidth[c] & 15, fontRenderer.FONT_HEIGHT);
+			super(c, 0, glyphWidth[c] & 15, FONT_SIZE);
 			pad = glyphWidth[c] >>> 4;
 		}
 

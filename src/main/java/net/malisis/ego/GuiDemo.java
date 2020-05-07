@@ -18,6 +18,7 @@ import net.malisis.ego.gui.component.control.UIResizeHandle;
 import net.malisis.ego.gui.component.decoration.UIImage;
 import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.decoration.UIProgressBar;
+import net.malisis.ego.gui.component.decoration.UIPropertyBar;
 import net.malisis.ego.gui.component.interaction.UIButton;
 import net.malisis.ego.gui.component.interaction.UICheckBox;
 import net.malisis.ego.gui.component.interaction.UIPasswordField;
@@ -27,22 +28,27 @@ import net.malisis.ego.gui.component.interaction.UISlider;
 import net.malisis.ego.gui.component.interaction.UISlider.UISliderBuilder;
 import net.malisis.ego.gui.component.interaction.UITab;
 import net.malisis.ego.gui.component.interaction.UITextField;
+import net.malisis.ego.gui.component.layout.GridLayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
+import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class show most of the available components for GUI and how to use them.<br>
@@ -67,8 +73,21 @@ public class GuiDemo extends MalisisGui
 
 	private UIComponent debug()
 	{
+		UIContainer panel = UIContainer.panel()
+									   .middleCenter()
+									   .size(250, 150)
+									   .build();
 
-		return null;
+		UIPropertyBar bar = UIPropertyBar.builder(() -> counter % 200)
+										 .max(200)
+										 .parent(panel)
+										 .middleCenter()
+										 .color(0xAD62EC)
+										 .icon(GuiIcon.from(Items.BLAZE_POWDER))
+										 .size(150, 12)
+										 .build();
+
+		return panel;
 	}
 
 	@Override
@@ -86,7 +105,7 @@ public class GuiDemo extends MalisisGui
 										.size(400, 240)
 										.noClipContent()
 										.onLeftClick(e -> {
-											EGO.message("Clicked");
+											//EGO.message("Clicked");
 											return false;
 										})
 										.build();
@@ -148,13 +167,12 @@ public class GuiDemo extends MalisisGui
 
 		//add the window to the screen
 		addToScreen(window);
-		addDebug("Counter", () -> MalisisGui.counter + " (" + MalisisGui.xCounter + " / " + MalisisGui.xTotal + ")");
-
 	}
 
 	private UIContainer panel1()
 	{
 		UIContainer tabCont1 = UIContainer.builder()
+										  .middleCenter()
 										  .name("Panel 1")
 										  .build();
 
@@ -216,28 +234,45 @@ public class GuiDemo extends MalisisGui
 					 .build();
 
 		//Select
-		select = new UISelect<>(100,
-								Arrays.asList("Option 1", "Option 2", "Very ultra longer option 3", "Shorty", "Moar options", "Even more",
-											  "Even Steven", "And a potato too"));
-		select.setPosition(Position.below(select, rbMC, 5));
-		//select.setOptionsWidth(UISelect.SELECT_WIDTH);
+		select = UISelect.builder(
+				Arrays.asList("Option 1", "Option 2", "Very ultra longer option 3", "Shorty", "Moar options", "Even more", "Even Steven",
+							  "And a potato too"))
+						 .parent(tabCont1)
+						 .below(rbMC, 5)
+						 .select("Option 2")
+						 .build();
 		//select.maxDisplayedOptions(5);
-		select.select("Option 2");
-		//select.setColors(0x660000, 0xFFCCCC, 0xFF0000, 0x999999, 0x6600CC, 0x664444, false);
 
 		//uiselect size change button
-		UIButton.builder()
-				.parent(tabCont1)
-				.text("<-")
-				.position(b -> Position.rightOf(b, select, 5))
-				.size(12, 12)
-				.onClick(() -> {
-					currentSize += 20;
-					if (currentSize > 190)
-						currentSize = selectSize;
-					select.setSize(Size.of(currentSize, 12));
-				})
-				.build();
+		UIButton sizeButton = UIButton.builder()
+									  .parent(tabCont1)
+									  .text("<-")
+									  .position(b -> Position.rightOf(b, select, 5))
+									  .size(12, 12)
+									  .onClick(() -> {
+										  currentSize += 20;
+										  if (currentSize > 190)
+											  currentSize = selectSize;
+										  select.setSize(Size.of(currentSize, 12));
+									  })
+									  .build();
+
+		List<Item> items = ForgeRegistries.ITEMS.getValues()
+												.stream()
+												.sorted(Comparator.comparing(i -> new ItemStack(i).getDisplayName()))
+												.collect(Collectors.toList());
+		UISelect<Item> sel = UISelect.builder(items)
+									 .parent(tabCont1)
+									 .rightOf(sizeButton, 5)
+									 .layout(c -> GridLayout.builder(c)
+															.columns(10)
+															.cellSize(Size.of(19, 19))
+															.spacing(1, 1)
+															.build())
+									 .size(140, 20)
+									 .withOptions(SelectItemComponent::new)
+									 .optionsSize(oc -> Size.of(205, 140))
+									 .build();
 
 		//3 Buttons
 		UIButton btnHorizontal = UIButton.builder()
@@ -262,8 +297,8 @@ public class GuiDemo extends MalisisGui
 				.build();
 
 		//Add all elements
-		tabCont1.add(bar);
-		tabCont1.add(select);
+		//	tabCont1.add(bar);
+		//tabCont1.add(select);
 
 		//Create 5 buttons with itemStack as images
 		UIButton lastBtn = null;
@@ -291,9 +326,9 @@ public class GuiDemo extends MalisisGui
 				   .build();
 
 			lastBtn = UIButton.builder()
-							  .parent(tabCont1)
+							  //.parent(tabCont1)
 							  .content(cont)
-							  //				  .position(b -> lastBtn == null ? Position.topRight(b) : Position.below(b, lastBtn, 1))
+							  //.position(b -> lastBtn == null ? Position.topRight(b) : Position.below(b, lastBtn, 1))
 							  .build();
 		}
 
@@ -451,7 +486,7 @@ public class GuiDemo extends MalisisGui
 									.parent(sliderPanel)
 									.text("Color : {COLOR}")
 									.position(l -> Position.rightOf(l, sliderRed, 2))
-									.bind("COLOR", tabSlider::getColor)
+									//.bind("COLOR", tabSlider::getColor)
 									.build();
 
 		UIButton.builder()
@@ -491,7 +526,7 @@ public class GuiDemo extends MalisisGui
 
 		UIListContainer<Item> itemList = new UIListContainer<>();
 		itemList.setSize(Size.of(parentWidth(itemList, 1.0F, 0), 150));
-		itemList.setComponentFactory(item -> {
+		itemList.setComponentFactory((list, item) -> {
 			return new UIContainer()
 			{
 				{
@@ -546,6 +581,8 @@ public class GuiDemo extends MalisisGui
 
 	public void calculateColor(int newValue)
 	{
+		if (sliderRed == null || sliderGreen == null || sliderBlue == null)
+			return;
 		//get the different values
 		int r = sliderRed.getValue();
 		int g = sliderGreen.getValue();
@@ -562,5 +599,64 @@ public class GuiDemo extends MalisisGui
 			return;
 		float t = (System.currentTimeMillis() % 2000) / 2000f;
 		bar.setProgress(t);
+	}
+
+	public static class SelectItemComponent extends UIComponent
+	{
+		private Item item;
+		private UISelect<Item> select;
+		private final GuiShape btnBg;
+		private UIImage img;
+		private UILabel lbl;
+
+		public SelectItemComponent(UISelect<Item> select, Item item)
+		{
+			this.select = select;
+			this.item = item;
+
+			String name = new ItemStack(item).getDisplayName();
+
+			setSize(Size.of(19, 19));
+
+			btnBg = GuiShape.builder(this)
+							.icon(this, GuiIcon.BUTTON, GuiIcon.BUTTON_HOVER, null)
+							.border(2)
+							.build();
+
+			img = UIImage.builder()
+						 .parent(this)
+						 .middleLeft(2, 0)
+						 .size(16, 16)
+						 .item(item)
+						 .build();
+
+			lbl = UILabel.builder()
+						 .parent(this)
+						 .rightOf(img, 2)
+						 .middleAlignedTo(img)
+						 .text(name)
+						 .textColor(TextFormatting.WHITE)
+						 .shadow()
+						 .build();
+			setTooltip(name);
+
+			setBackground(this::background);
+			setForeground(this::foreground);
+		}
+
+		private void background(GuiRenderer renderer)
+		{
+			if (select.isTop(this))
+				return;
+
+			btnBg.render(renderer);
+		}
+
+		private void foreground(GuiRenderer renderer)
+		{
+			img.render(renderer);
+			if (select.isTop(this))
+				lbl.render(renderer);
+		}
 	}
 }

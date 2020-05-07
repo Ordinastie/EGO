@@ -463,7 +463,8 @@ public class MalisisFont
 		if (c == '\t')
 			return getCharWidth(' ', options) * 4;
 
-		return getCharData(c).getCharWidth() / fontGeneratorOptions.fontSize * (options != null ? options.getFontScale() : 1) * 9;
+		return getCharData(c).getCharWidth() / fontGeneratorOptions.fontSize * (options != null ? options.getFontScale() : 1)
+				* MinecraftFont.FONT_SIZE;
 	}
 
 	/**
@@ -475,7 +476,8 @@ public class MalisisFont
 	 */
 	public float getCharHeight(char c, FontOptions options)
 	{
-		return getCharData(c).getCharHeight() / fontGeneratorOptions.fontSize * (options != null ? options.getFontScale() : 1) * 9;
+		return getCharData(c).getCharHeight() / fontGeneratorOptions.fontSize * (options != null ? options.getFontScale() : 1)
+				* MinecraftFont.FONT_SIZE;
 	}
 
 	/**

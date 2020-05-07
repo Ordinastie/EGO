@@ -92,6 +92,8 @@ public class FontOptions
 	protected final boolean strikethrough;
 	/** Obfuscated text */
 	protected final boolean obfuscated;
+	/** Space between each character. */
+	protected int charSpacing;
 	/** Space between each line. */
 	protected final int lineSpacing;
 	/** Right aligned. */
@@ -108,6 +110,7 @@ public class FontOptions
 		underline = builder.underline;
 		strikethrough = builder.strikethrough;
 		obfuscated = builder.obfuscated;
+		charSpacing = builder.charSpacing;
 		lineSpacing = builder.lineSpacing;
 		rightAligned = builder.rightAligned;
 	}
@@ -195,6 +198,16 @@ public class FontOptions
 	public int getColor()
 	{
 		return color;
+	}
+
+	/**
+	 * Space between each character.
+	 *
+	 * @return the space
+	 */
+	public int charSpacing()
+	{
+		return charSpacing;
 	}
 
 	/**
@@ -373,6 +386,7 @@ public class FontOptions
 		protected boolean underline = false;
 		protected boolean strikethrough = false;
 		protected boolean obfuscated = false;
+		protected int charSpacing = 1;
 		protected int lineSpacing = 1;
 		protected boolean rightAligned = false;
 
@@ -476,6 +490,12 @@ public class FontOptions
 		public FontOptionsBuilder shadow(boolean shadow)
 		{
 			this.shadow = shadow;
+			return this;
+		}
+
+		public FontOptionsBuilder charSpacing(int spacing)
+		{
+			charSpacing = spacing;
 			return this;
 		}
 
@@ -592,6 +612,7 @@ public class FontOptions
 			if (currentPredicate != null)
 			{
 				suppliers.add(Pair.of(currentPredicate, buildBase()));
+				currentPredicate = null;
 				from(base);
 			}
 		}
