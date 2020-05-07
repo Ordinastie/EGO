@@ -24,9 +24,10 @@
 
 package net.malisis.ego.gui.render;
 
+import java.util.function.BooleanSupplier;
+
 /**
  * @author Ordinastie
- *
  */
 public interface IGuiRenderer
 {
@@ -39,4 +40,30 @@ public interface IGuiRenderer
 			other.render(r);
 		};
 	}
+
+	public default IGuiRenderer when(BooleanSupplier predicate)
+	{
+		return r -> {
+			if (predicate.getAsBoolean())
+				render(r);
+		};
+	}
+
+	public static IGuiRenderer of(IGuiRenderer renderer)
+	{
+		return renderer != null ? renderer : EMPTY;
+	}
+
+	public static IGuiRenderer EMPTY = new IGuiRenderer()
+	{
+		@Override
+		public void render(GuiRenderer renderer)
+		{
+		}
+
+		public IGuiRenderer and(IGuiRenderer other)
+		{
+			return other;
+		}
+	};
 }
