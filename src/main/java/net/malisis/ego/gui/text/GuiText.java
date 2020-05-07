@@ -587,7 +587,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	public static class Builder implements IPositionBuilder<Builder, GuiText>
 	{
-		private Supplier<String> base;
+		private Supplier<String> base = () -> "";
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
 		private Function<GuiText, IPosition> position = Position::topLeft;
