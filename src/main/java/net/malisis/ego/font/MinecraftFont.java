@@ -42,9 +42,9 @@ import java.util.Map;
  */
 public class MinecraftFont extends EGOFont
 {
+	public static int FONT_SIZE = 9;
 	public static final EGOFont INSTANCE = new MinecraftFont();
 
-	public static int FONT_SIZE = 9;
 	private int[] mcCharWidth;
 	//private float[] optifineCharWidth;
 	private byte[] glyphWidth;
@@ -94,7 +94,9 @@ public class MinecraftFont extends EGOFont
 		catch (ReflectiveOperationException e)
 		{
 			if (!silenced)
-				EGO.log.error("Could not change access for field " + FontRenderer.class.getSimpleName() + "." + (EGO.isObfEnv ? srgName : fieldName), e);
+				EGO.log.error("Could not change access for field " + FontRenderer.class.getSimpleName() + "." + (EGO.isObfEnv ?
+																												 srgName :
+																												 fieldName), e);
 			return null;
 		}
 
