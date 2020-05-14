@@ -4,7 +4,10 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import net.malisis.ego.gui.component.container.UIContainer;
+import net.malisis.ego.gui.component.control.IControlComponent;
+import net.malisis.ego.gui.component.control.UIMoveHandle;
 import net.malisis.ego.gui.component.decoration.UITooltip;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
@@ -19,6 +22,7 @@ import net.malisis.ego.gui.event.MouseEvent.IMouseEventBuilder;
 import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -28,9 +32,10 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		implements IPositionBuilder<BUILDER, COMPONENT>, ISizeBuilder<BUILDER, COMPONENT>, IMouseEventBuilder<BUILDER, COMPONENT>
 {
 
-	private Multimap<Class<?>, Predicate<?>> handlers = HashMultimap.create();
+	private final Multimap<Class<?>, Predicate<?>> handlers = HashMultimap.create();
 	protected String name;
 	protected UIComponent parent;
+	protected final Set<IControlComponent> controlComponents = Sets.newHashSet();
 	//pos & size
 	protected Function<COMPONENT, IntSupplier> x = o -> Positions.leftAligned(o, 0);
 	protected Function<COMPONENT, IntSupplier> y = o -> Positions.topAligned(o, 0);
@@ -192,6 +197,20 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		return self();
 	}
 
+	public BUILDER movable()
+	{
+		return withControl(UIMoveHandle.builder()
+									   .position(0, 0)
+									   .parentSize()
+									   .build());
+	}
+
+	public BUILDER withControl(IControlComponent controlComponent)
+	{
+		controlComponents.add(checkNotNull(controlComponent));
+		return self();
+	}
+
 	public BUILDER data(Object data)
 	{
 		this.data = data;
@@ -231,6 +250,8 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 			((UIContainer) parent).add(component);
 		else if (parent != null)
 			component.setParent(parent);
+
+		controlComponents.forEach(component::addControlComponent);
 
 		return component;
 	}

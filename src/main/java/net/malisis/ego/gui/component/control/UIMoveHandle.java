@@ -24,13 +24,14 @@
 
 package net.malisis.ego.gui.component.control;
 
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.container.UIContainer;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.element.position.Position;
-import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.render.GuiIcon;
-import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.element.position.Position.IPosition;
+import net.malisis.ego.gui.element.size.Size.ISize;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
@@ -39,58 +40,77 @@ public class UIMoveHandle extends UIComponent implements IControlComponent
 {
 	public enum Type
 	{
-		BOTH, HORIZONTAL, VERTICAL
+		BOTH,
+		HORIZONTAL,
+		VERTICAL
 	}
 
-	private Type type;
+	private final Type type;
 
-	public UIMoveHandle(UIComponent parent, Type type)
+	private UIMoveHandle(Type type)
 	{
 		this.type = type != null ? type : Type.BOTH;
-
-		int x = 1;
-		int y = 1;
-		if (parent instanceof UIContainer)
-		{
-			x -= ((UIContainer) parent).padding().left();
-			y -= ((UIContainer) parent).padding().top();
-		}
-		setPosition(Position.of(x, y));
-		setSize(Size.of(5, 5));
-		setZIndex(10);
-		parent.addControlComponent(this);
-
-		setForeground(GuiShape.builder(this).icon(GuiIcon.MOVE).build());
-	}
-
-	public UIMoveHandle(UIComponent parent)
-	{
-		this(parent, Type.BOTH);
+		//	setForeground(GuiShape.builder(this).icon(GuiIcon.MOVE).build());
 	}
 
 	@Override
 	public void mouseDrag(MouseButton button)
 	{
-		//		if (button != MouseButton.LEFT)
-		//			return super.mouseDrag(button);
-		//
-		//		UIComponent parentCont = getParent().getParent();
-		//		if (parentCont == null)
-		//			return super.mouseDrag(button);
-		//
-		//		int px = parent.position().x();
-		//		if (type == Type.BOTH || type == Type.HORIZONTAL)
-		//			px = parentCont.mousePosition().x();
-		//		int py = parent.position().y();
-		//		if (type == Type.BOTH || type == Type.VERTICAL)
-		//			py = parentCont.mousePosition().y();
-		//		if (px < 0)
-		//			px = 0;
-		//		if (py < 0)
-		//			py = 0;
-		//		//TODO: check x + w against screen size
-		//
-		//		getParent().setPosition(Position.of(px, py));
-		//		return true;
+		if (button != MouseButton.LEFT || getParent() == null)
+			return;
+
+		UIComponent parent = getParent();
+		IPosition current = parent.position();
+		IPosition delta = EGOGui.MOUSE_POSITION.moved();
+
+		int x = current.x() + (type == Type.VERTICAL ? 0 : delta.x());
+		int y = current.y() + (type == Type.HORIZONTAL ? 0 : delta.y());
+
+		UIComponent cont = parent.getParent();
+		if (cont != null && StringUtils.equals(cont.getName(), "Screen"))//need a better way
+		{
+			//constraint the component to the bounds of the screen
+			ISize size = parent.size();
+			x = Math.max(x, 0);
+			x = Math.min(x, cont.size()
+								.width() - size.width());
+			y = Math.max(y, 0);
+			y = Math.min(y, cont.size()
+								.height() - size.height());
+		}
+
+		getParent().setPosition(Position.of(x, y));
+	}
+
+	public static UIMoveHandlerBuilder builder()
+	{
+		return new UIMoveHandlerBuilder();
+	}
+
+	public static class UIMoveHandlerBuilder extends UIComponentBuilder<UIMoveHandlerBuilder, UIMoveHandle>
+	{
+		private Type type = Type.BOTH;
+
+		private UIMoveHandlerBuilder()
+		{
+		}
+
+		public UIMoveHandlerBuilder horizontal()
+		{
+			type = Type.HORIZONTAL;
+			return this;
+		}
+
+		public UIMoveHandlerBuilder vertical()
+		{
+			type = Type.VERTICAL;
+			return this;
+		}
+
+		@Override
+		public UIMoveHandle build()
+		{
+			return build(new UIMoveHandle(type));
+		}
 	}
 }

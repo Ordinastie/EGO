@@ -76,7 +76,21 @@ public class GuiDemo extends EGOGui
 		UIContainer panel = UIContainer.panel()
 									   .middleCenter()
 									   .size(250, 150)
+									   .withControl(UIMoveHandle.builder()
+																.position(0, 0)
+																.fillWidth()
+																.height(15)
+																.build())
 									   .build();
+
+		UILabel title = UILabel.builder()
+							   .parent(panel)
+							   .topCenter()
+							   .text("Panel Title")
+							   .textColor(0xFFFFFF)
+							   .shadow()
+							   .scale(1.3F)
+							   .build();
 
 		UIPropertyBar bar = UIPropertyBar.builder(() -> counter % 200)
 										 .max(200)
@@ -161,7 +175,6 @@ public class GuiDemo extends EGOGui
 		//new UICloseHandle(this, playerInv);
 
 		//add handles to the window
-		new UIMoveHandle(window);
 		new UIResizeHandle(window);
 		//new UICloseHandle(this, window);
 
