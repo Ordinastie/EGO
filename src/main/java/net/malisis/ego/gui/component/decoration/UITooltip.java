@@ -28,7 +28,7 @@ import static net.malisis.ego.gui.element.position.Positions.centered;
 import static net.malisis.ego.gui.element.position.Positions.middleAligned;
 
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.content.IContentHolder;
@@ -79,18 +79,18 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 	public int x()
 	{
 		int xOffset = 8;
-		int x = MalisisGui.MOUSE_POSITION.x() + xOffset;
-		return Math.min(x, MalisisGui.current()
-									 .width() - size().width());
+		int x = EGOGui.MOUSE_POSITION.x() + xOffset;
+		return Math.min(x, EGOGui.current()
+								 .width() - size().width());
 	}
 
 	@Override
 	public int y()
 	{
 		int yOffset = -16;
-		int y = MalisisGui.MOUSE_POSITION.y() + yOffset;
+		int y = EGOGui.MOUSE_POSITION.y() + yOffset;
 		if (y < 0)
-			y = MalisisGui.MOUSE_POSITION.y() - yOffset;
+			y = EGOGui.MOUSE_POSITION.y() - yOffset;
 		return y;
 	}
 

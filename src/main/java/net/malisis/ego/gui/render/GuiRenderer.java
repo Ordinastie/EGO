@@ -25,7 +25,7 @@
 package net.malisis.ego.gui.render;
 
 import net.malisis.ego.EGO;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.minecraft.client.Minecraft;
@@ -45,7 +45,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Renderer to use for {@link MalisisGui}.
+ * Renderer to use for {@link EGOGui}.
  *
  * @author Ordinastie
  */
@@ -64,7 +64,7 @@ public class GuiRenderer
 	private int scaleFactor;
 	/** Should the rendering be done according to scaleFactor. */
 	private boolean ignoreScale = false;
-	/** Default {@link GuiTexture} to use for current {@link MalisisGui}. */
+	/** Default {@link GuiTexture} to use for current {@link EGOGui}. */
 	private GuiTexture defaultGuiTexture;
 	/** Currently used {@link GuiTexture}. */
 	private GuiTexture currentTexture;
@@ -82,7 +82,7 @@ public class GuiRenderer
 	public GuiRenderer()
 	{
 		//defaultGuiTexture = MalisisGui.VANILLAGUI_TEXTURE;
-		defaultGuiTexture = MalisisGui.VANILLAGUI_TEXTURE;
+		defaultGuiTexture = EGOGui.VANILLAGUI_TEXTURE;
 	}
 
 	public BufferBuilder getBuffer()
@@ -492,7 +492,7 @@ public class GuiRenderer
 		}
 
 		itemRenderer.zLevel = 100;
-		drawItemStack(itemStack, MalisisGui.MOUSE_POSITION.x() - 8, MalisisGui.MOUSE_POSITION.y() - 8, label, null, false);
+		drawItemStack(itemStack, EGOGui.MOUSE_POSITION.x() - 8, EGOGui.MOUSE_POSITION.y() - 8, label, null, false);
 		itemRenderer.zLevel = 0;
 		return true;
 	}

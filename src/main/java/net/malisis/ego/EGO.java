@@ -27,7 +27,7 @@ package net.malisis.ego;
 import net.malisis.ego.atlas.Atlas;
 import net.malisis.ego.atlas.GuiAtlas;
 import net.malisis.ego.command.EGOCommand;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
 import net.minecraft.client.Minecraft;
@@ -104,7 +104,7 @@ public class EGO
 
 	/**
 	 * GuiDemo close event.<br>
-	 * Used to cancel the closing of the {@link MalisisGui} when opened from command line.
+	 * Used to cancel the closing of the {@link EGOGui} when opened from command line.
 	 *
 	 * @param event the event
 	 */
@@ -112,10 +112,10 @@ public class EGO
 	@SubscribeEvent
 	public void onGuiClose(GuiOpenEvent event)
 	{
-		if (!MalisisGui.cancelClose || event.getGui() != null)
+		if (!EGOGui.cancelClose || event.getGui() != null)
 			return;
 
-		MalisisGui.cancelClose = false;
+		EGOGui.cancelClose = false;
 		event.setCanceled(true);
 	}
 

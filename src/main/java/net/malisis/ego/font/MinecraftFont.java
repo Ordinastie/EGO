@@ -40,15 +40,17 @@ import java.util.Map;
 /**
  * @author Ordinastie
  */
-public class MinecraftFont extends MalisisFont
+public class MinecraftFont extends EGOFont
 {
+	public static final EGOFont INSTANCE = new MinecraftFont();
+
 	public static int FONT_SIZE = 9;
 	private int[] mcCharWidth;
 	//private float[] optifineCharWidth;
 	private byte[] glyphWidth;
 	private ResourceLocation[] unicodePages;
 	private ResourceLocation lastFontTexture;
-	private FontRenderer fontRenderer;
+	private final FontRenderer fontRenderer;
 	/** CharData for Unicode characters */
 	protected Map<Character, CharData> unicodeCharData = Maps.newHashMap();
 	/** Whether the character should drawn with unicode font even if unicode is disabled in MC options. */
@@ -72,17 +74,16 @@ public class MinecraftFont extends MalisisFont
 	/**
 	 * Changes the access level for the specified field for a class.
 	 *
-	 * @param clazz the clazz
 	 * @param fieldName the field name
 	 * @param srgName the srg name
 	 * @param silenced the silenced
 	 * @return the field
 	 */
-	private Field changeFieldAccess(Class<?> clazz, String fieldName, String srgName, boolean silenced)
+	private Field changeFieldAccess(String fieldName, String srgName, boolean silenced)
 	{
 		try
 		{
-			Field f = clazz.getDeclaredField(EGO.isObfEnv ? srgName : fieldName);
+			Field f = FontRenderer.class.getDeclaredField(EGO.isObfEnv ? srgName : fieldName);
 			f.setAccessible(true);
 			Field modifiers = Field.class.getDeclaredField("modifiers");
 			modifiers.setAccessible(true);
@@ -93,7 +94,7 @@ public class MinecraftFont extends MalisisFont
 		catch (ReflectiveOperationException e)
 		{
 			if (!silenced)
-				EGO.log.error("Could not change access for field " + clazz.getSimpleName() + "." + (EGO.isObfEnv ? srgName : fieldName), e);
+				EGO.log.error("Could not change access for field " + FontRenderer.class.getSimpleName() + "." + (EGO.isObfEnv ? srgName : fieldName), e);
 			return null;
 		}
 
@@ -102,15 +103,15 @@ public class MinecraftFont extends MalisisFont
 	private void setFields()
 	{
 		String srg = "field_78286_d";
-		Field charWidthField = changeFieldAccess(FontRenderer.class, "charWidth", srg, true);
+		Field charWidthField = changeFieldAccess("charWidth", srg, true);
 		if (charWidthField == null && FMLClientHandler.instance()
 													  .hasOptifine())
 		{
 			srg = "d";
-			charWidthField = changeFieldAccess(FontRenderer.class, "charWidth", srg, true);
+			charWidthField = changeFieldAccess("charWidth", srg, true);
 		}
-		Field glyphWidthField = changeFieldAccess(FontRenderer.class, "glyphWidth", "field_78287_e", false);
-		Field unicodePagesField = changeFieldAccess(FontRenderer.class, "UNICODE_PAGE_LOCATIONS", "field_111274_c", false);
+		Field glyphWidthField = changeFieldAccess("glyphWidth", "field_78287_e", false);
+		Field unicodePagesField = changeFieldAccess("UNICODE_PAGE_LOCATIONS", "field_111274_c", false);
 
 		try
 		{
@@ -219,7 +220,7 @@ public class MinecraftFont extends MalisisFont
 		{
 			//� => &
 			super(c == '\u00a7' ? '&' : c, 0, 0, 0);
-			pos = MalisisFont.CHARLIST.indexOf(this.c);
+			pos = EGOFont.CHARLIST.indexOf(this.c);
 		}
 
 		@Override

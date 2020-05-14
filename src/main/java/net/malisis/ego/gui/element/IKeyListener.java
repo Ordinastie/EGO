@@ -24,18 +24,18 @@
 
 package net.malisis.ego.gui.element;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 
 /**
- * That interfaces allows implementing classes to handle key strokes within a {@link MalisisGui}.<br>
- * {@link IKeyListener} can be registered with {@link MalisisGui#registerKeyListener(IKeyListener)} so they will always receive key typed.
+ * That interfaces allows implementing classes to handle key strokes within a {@link EGOGui}.<br>
+ * {@link IKeyListener} can be registered with {@link EGOGui#registerKeyListener(IKeyListener)} so they will always receive key typed.
  *
  * @author Ordinastie
  */
 public interface IKeyListener
 {
 	/**
-	 * Called when a key is typed inside {@link MalisisGui}.
+	 * Called when a key is typed inside {@link EGOGui}.
 	 *
 	 * @param keyChar the key char
 	 * @param keyCode the key code

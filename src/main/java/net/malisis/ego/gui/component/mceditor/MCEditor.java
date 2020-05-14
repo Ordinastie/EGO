@@ -26,9 +26,10 @@ package net.malisis.ego.gui.component.mceditor;
 
 import static net.malisis.ego.gui.element.position.Positions.bottomAligned;
 
+import net.malisis.ego.font.EGOFont;
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.font.MalisisFont;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.font.MinecraftFont;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.interaction.UICheckBox;
 import net.malisis.ego.gui.component.interaction.UISelect;
@@ -48,8 +49,9 @@ public class MCEditor extends UIContainer
 	private EcfSelect sel;
 	private UICheckBox cb;
 
-	private MalisisFont font = MalisisFont.minecraftFont;
-	private FontOptions fontOptions = FontOptions.builder().build();
+	private EGOFont font = MinecraftFont.INSTANCE;
+	private FontOptions fontOptions = FontOptions.builder()
+												 .build();
 
 	public MCEditor()
 	{
@@ -67,7 +69,7 @@ public class MCEditor extends UIContainer
 		add(tf, sel, cb);
 	}
 
-	public MCEditor(MalisisGui gui, ISize size)
+	public MCEditor(EGOGui gui, ISize size)
 	{
 		this();
 		setSize(size);
@@ -84,12 +86,12 @@ public class MCEditor extends UIContainer
 	}
 
 	//#region IGuiText
-	public MalisisFont getFont()
+	public EGOFont getFont()
 	{
 		return font;
 	}
 
-	public MCEditor setFont(MalisisFont font)
+	public MCEditor setFont(EGOFont font)
 	{
 		this.font = font;
 		return this;

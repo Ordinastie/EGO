@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
@@ -283,7 +283,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	}
 
 	@Override
-	public void onAddedToScreen(MalisisGui gui)
+	public void onAddedToScreen(EGOGui gui)
 	{
 		this.gui = gui;
 		for (UIComponent component : content.components)

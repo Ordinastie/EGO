@@ -34,7 +34,7 @@ import static net.malisis.ego.gui.element.position.Positions.rightAligned;
 import static net.malisis.ego.gui.element.position.Positions.topAligned;
 
 import net.malisis.ego.EGO;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.element.IChild;
@@ -113,14 +113,14 @@ public class Position
 		@Override
 		public int x()
 		{
-			if (xFunction != null && (!Position.CACHED || MalisisGui.needsUpdate(counterX)))
+			if (xFunction != null && (!Position.CACHED || EGOGui.needsUpdate(counterX)))
 			{
 				if (lock++ >= 5)
 				{
 					EGO.log.error("Possible infinite recursion detected for x. (" + lock + ")");
 					return x;
 				}
-				counterX = MalisisGui.counter;
+				counterX = EGOGui.counter;
 				x = xFunction.getAsInt();
 			}
 
@@ -131,14 +131,14 @@ public class Position
 		@Override
 		public int y()
 		{
-			if (yFunction != null && (!Position.CACHED || MalisisGui.needsUpdate(counterY)))
+			if (yFunction != null && (!Position.CACHED || EGOGui.needsUpdate(counterY)))
 			{
 				if (lock++ >= 5)
 				{
 					EGO.log.error("Possible infinite recursion detected for width. (" + lock + ")");
 					return y;
 				}
-				counterY = MalisisGui.counter;
+				counterY = EGOGui.counter;
 				y = yFunction.getAsInt();
 			}
 
@@ -213,13 +213,13 @@ public class Position
 		{
 			x = updateX();
 			y = updateY();
-			counter = MalisisGui.counter;
+			counter = EGOGui.counter;
 		}
 
 		@Override
 		public int x()
 		{
-			if (!Position.CACHED || MalisisGui.needsUpdate(counter))
+			if (!Position.CACHED || EGOGui.needsUpdate(counter))
 				update();
 			return x;
 		}
@@ -227,7 +227,7 @@ public class Position
 		@Override
 		public int y()
 		{
-			if (!Position.CACHED || MalisisGui.needsUpdate(counter))
+			if (!Position.CACHED || EGOGui.needsUpdate(counter))
 				update();
 			return y;
 		}

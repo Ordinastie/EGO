@@ -8,7 +8,7 @@ import com.google.common.base.Converter;
 import com.google.common.collect.ImmutableList;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.ComponentPosition;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.container.UIListContainer;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 /**
  * This class show most of the available components for GUI and how to use them.<br>
  */
-public class GuiDemo extends MalisisGui
+public class GuiDemo extends EGOGui
 {
 	//private static MalisisFont fontMC = MalisisFont.minecraftFont;
 	//private static MalisisFont fontBS = new MalisisFont(new ResourceLocation(MalisisDemos.modid + ":fonts/BrushScriptStd.otf"));

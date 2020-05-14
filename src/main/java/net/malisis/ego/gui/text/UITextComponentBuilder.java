@@ -8,7 +8,7 @@ import net.malisis.ego.cacheddata.FixedData;
 import net.malisis.ego.cacheddata.ICachedData;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
-import net.malisis.ego.font.MalisisFont;
+import net.malisis.ego.font.EGOFont;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.text.GuiText.Builder;
@@ -164,7 +164,7 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	}
 
 	//FontOptions
-	public BUILDER font(MalisisFont font)
+	public BUILDER font(EGOFont font)
 	{
 		fob().font(font);
 		return self();

@@ -25,7 +25,7 @@
 package net.malisis.ego.gui.element.size;
 
 import net.malisis.ego.EGO;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.IChild;
@@ -103,14 +103,14 @@ public class Size
 		@Override
 		public int width()
 		{
-			if (widthFunction != null && (!Size.CACHED || MalisisGui.needsUpdate(counterW)))
+			if (widthFunction != null && (!Size.CACHED || EGOGui.needsUpdate(counterW)))
 			{
 				if (lock++ >= 5)
 				{
 					EGO.log.error("Possible infinite recursion detected for width. (" + lock + ")");
 					return width;
 				}
-				counterW = MalisisGui.counter;
+				counterW = EGOGui.counter;
 				width = widthFunction.getAsInt();
 			}
 
@@ -121,14 +121,14 @@ public class Size
 		@Override
 		public int height()
 		{
-			if (heightFunction != null && (!Size.CACHED || MalisisGui.needsUpdate(counterH)))
+			if (heightFunction != null && (!Size.CACHED || EGOGui.needsUpdate(counterH)))
 			{
 				if (lock++ >= 5)
 				{
 					EGO.log.error("Possible infinite recursion detected for height. (" + lock + ")");
 					return height;
 				}
-				counterH = MalisisGui.counter;
+				counterH = EGOGui.counter;
 				height = heightFunction.getAsInt();
 			}
 

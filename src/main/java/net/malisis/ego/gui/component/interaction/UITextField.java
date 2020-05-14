@@ -26,7 +26,7 @@ package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.StringWalker;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContentHolder;
@@ -152,7 +152,7 @@ public class UITextField extends UIComponent
 	}
 
 	@Override
-	public void onAddedToScreen(MalisisGui gui)
+	public void onAddedToScreen(EGOGui gui)
 	{
 		this.gui = gui;
 	}
@@ -602,7 +602,7 @@ public class UITextField extends UIComponent
 	{
 		if (keyCode == Keyboard.KEY_ESCAPE)
 		{
-			MalisisGui.setFocusedComponent(null);
+			EGOGui.setFocusedComponent(null);
 			return true; //we don't want to close the GUI
 		}
 

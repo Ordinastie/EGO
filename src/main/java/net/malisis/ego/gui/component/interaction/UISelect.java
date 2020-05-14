@@ -27,7 +27,7 @@ package net.malisis.ego.gui.component.interaction;
 import static com.google.common.base.Preconditions.*;
 
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
@@ -117,7 +117,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	}
 
 	@Override
-	public void onAddedToScreen(MalisisGui gui)
+	public void onAddedToScreen(EGOGui gui)
 	{
 		this.gui = gui;
 		gui.addToScreen(optionsContainer);
@@ -226,7 +226,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		setSelected(option);
 
 		optionsContainer.hide();
-		MalisisGui.setFocusedComponent(this);
+		EGOGui.setFocusedComponent(this);
 
 		fireEvent(new ValueChange.Post<>(this, old, option));
 
@@ -404,7 +404,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		private void display()
 		{
 			scrollbar.updateScrollbar();
-			MalisisGui.setFocusedComponent(this);
+			EGOGui.setFocusedComponent(this);
 			setVisible(true);
 			expanded = true;
 		}
@@ -412,7 +412,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		private void hide()
 		{
 			if (isFocused())
-				MalisisGui.setFocusedComponent(null);
+				EGOGui.setFocusedComponent(null);
 			setVisible(false);
 			expanded = false;
 		}
@@ -429,13 +429,13 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		@SuppressWarnings("unchecked")
 		public void click()
 		{
-			UIComponent comp = getComponentAt(MalisisGui.MOUSE_POSITION.x(), MalisisGui.MOUSE_POSITION.y());
+			UIComponent comp = getComponentAt(EGOGui.MOUSE_POSITION.x(), EGOGui.MOUSE_POSITION.y());
 			if (comp == null)
 				return;
 
 			select((T) comp.getData());
 			hide();
-			MalisisGui.setFocusedComponent(UISelect.this);
+			EGOGui.setFocusedComponent(UISelect.this);
 		}
 
 		@Override

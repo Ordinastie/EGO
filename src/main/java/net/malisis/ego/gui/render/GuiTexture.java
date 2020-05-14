@@ -24,7 +24,7 @@
 
 package net.malisis.ego.gui.render;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -38,7 +38,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * The Class GuiTexture represents the textures loaded and to be drawn inside a {@link MalisisGui}.<br>
+ * The Class GuiTexture represents the textures loaded and to be drawn inside a {@link EGOGui}.<br>
  * The textures can used from a {@link ResourceLocation} if the resource is inside the project, from a {@link File} or directly from a
  * {@link BufferedImage}.<br>
  * In case of {@code ResourceLocation}, the original dimension should be specified for {@link GuiIcon} with size specified in pixels to

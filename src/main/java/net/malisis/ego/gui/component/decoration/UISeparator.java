@@ -24,7 +24,7 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
@@ -49,7 +49,7 @@ public class UISeparator extends UIComponent
 		//	setForeground(GuiShape.builder(this).icon(GuiIcon.SEPARATOR).color(this::getColor).build());
 	}
 
-	public UISeparator(MalisisGui gui)
+	public UISeparator(EGOGui gui)
 	{
 		this(false);
 	}

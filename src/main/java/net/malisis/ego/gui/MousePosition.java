@@ -38,7 +38,7 @@ public class MousePosition implements IPosition
 	/** Last known position of the mouse. */
 	protected int xPrevious, yPrevious;
 
-	public void udpate(MalisisGui gui)
+	public void udpate(EGOGui gui)
 	{
 		//if we ignore scaling, use real mouse position on screen
 		xPrevious = x;

@@ -1,7 +1,7 @@
 package net.malisis.ego.atlas;
 
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.interaction.UIButton;
@@ -10,7 +10,7 @@ import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.Size;
 
-public class GuiAtlas extends MalisisGui
+public class GuiAtlas extends EGOGui
 {
 	protected Atlas atlas;
 	protected UITextField search;

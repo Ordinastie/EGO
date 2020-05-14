@@ -24,7 +24,7 @@
 
 package net.malisis.ego.atlas;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.position.Position;
@@ -206,7 +206,7 @@ public class AtlasComponent extends UIComponent
 		if (button != MouseButton.LEFT)
 			return;
 
-		IPosition moved = MalisisGui.MOUSE_POSITION.moved();
+		IPosition moved = EGOGui.MOUSE_POSITION.moved();
 		offsetX += moved.x();
 		offsetY += moved.y();
 	}

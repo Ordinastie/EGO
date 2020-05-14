@@ -56,7 +56,7 @@ import javax.imageio.ImageIO;
 /**
  * @author Ordinastie
  */
-public class MalisisFont
+public class EGOFont
 {
 	public static String CHARLIST = "\u00c0\u00c1\u00c2\u00c8\u00ca\u00cb\u00cd\u00d3\u00d4\u00d5\u00da\u00df\u00e3\u00f5\u011f\u0130"
 			+ "\u0131\u0152\u0153\u015e\u015f\u0174\u0175\u017e\u0207\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&\'()*+,-"
@@ -68,7 +68,6 @@ public class MalisisFont
 			+ "\u2552\u2553\u256b\u256a\u2518\u250c\u2588\u2584\u258c\u2590\u2580\u03b1\u03b2\u0393\u03c0\u03a3\u03c3\u03bc\u03c4\u03a6"
 			+ "\u0398\u03a9\u03b4\u221e\u2205\u2208\u2229\u2261\u00b1\u2265\u2264\u2320\u2321\u00f7\u2248\u00b0\u2219\u00b7\u221a\u207f"
 			+ "\u00b2\u25a0\u0000";
-	public static MalisisFont minecraftFont = new MinecraftFont();
 
 	/** AWT font used **/
 	protected Font font;
@@ -88,32 +87,32 @@ public class MalisisFont
 
 	private boolean loaded = false;
 
-	public MalisisFont(File fontFile)
+	public EGOFont(File fontFile)
 	{
 		this(load(fontFile, FontGeneratorOptions.DEFAULT), null);
 	}
 
-	public MalisisFont(File fontFile, FontGeneratorOptions options)
+	public EGOFont(File fontFile, FontGeneratorOptions options)
 	{
 		this(load(fontFile, options), options);
 	}
 
-	public MalisisFont(ResourceLocation fontFile)
+	public EGOFont(ResourceLocation fontFile)
 	{
 		this(load(fontFile, FontGeneratorOptions.DEFAULT), null);
 	}
 
-	public MalisisFont(ResourceLocation fontFile, FontGeneratorOptions options)
+	public EGOFont(ResourceLocation fontFile, FontGeneratorOptions options)
 	{
 		this(load(fontFile, options), options);
 	}
 
-	public MalisisFont(Font font)
+	public EGOFont(Font font)
 	{
 		this(font, null);
 	}
 
-	public MalisisFont(Font font, FontGeneratorOptions options)
+	public EGOFont(Font font, FontGeneratorOptions options)
 	{
 		this.font = font;
 		if (font == null)

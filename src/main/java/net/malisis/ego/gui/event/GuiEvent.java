@@ -24,13 +24,13 @@
 
 package net.malisis.ego.gui.event;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 
 import java.util.function.Predicate;
 
 /**
- * Base for all events happening while a {@link MalisisGui} is opened.
+ * Base for all events happening while a {@link EGOGui} is opened.
  */
 public abstract class GuiEvent<T extends UIComponent>
 {

@@ -30,7 +30,7 @@ import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.malisis.ego.cacheddata.PredicatedData;
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
@@ -84,9 +84,9 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 										.parent(this)
 										.text("FPS: {FPS} ({DRAWCOUNT})\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size\n{TEXT}Text")
 										.bind("FPS", Minecraft::getDebugFPS)
-										.bind("DRAWCOUNT", () -> MalisisGui.current() != null ?
-																 MalisisGui.current()
-																		   .getRenderer().lastDrawCount :
+										.bind("DRAWCOUNT", () -> EGOGui.current() != null ?
+																 EGOGui.current()
+																	   .getRenderer().lastDrawCount :
 																 0)
 										.bind("POS", new PredicatedData<>(() -> Position.CACHED, ChatFormatting.DARK_GREEN,
 																		  ChatFormatting.DARK_RED))
@@ -108,7 +108,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	private int hierarchyColor;
 	private int hierarchyZIndex;
 
-	public DebugComponent(MalisisGui gui)
+	public DebugComponent(EGOGui gui)
 	{
 		this.gui = gui;
 
@@ -134,13 +134,13 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private void setDefaultDebug()
 	{
-		debugMap.put("Mouse", () -> MalisisGui.MOUSE_POSITION + (MalisisGui.getHoveredComponent() != null ?
-																 " (" + MalisisGui.getHoveredComponent()
-																				  .mousePosition() + ")" :
-																 ""));
-		debugMap.put("Focus", () -> String.valueOf(MalisisGui.getFocusedComponent()));
-		debugMap.put("Hover", () -> String.valueOf(MalisisGui.getHoveredComponent()));
-		debugMap.put("Dragged", () -> String.valueOf(MalisisGui.getDraggedComponent()));
+		debugMap.put("Mouse", () -> EGOGui.MOUSE_POSITION + (EGOGui.getHoveredComponent() != null ?
+															 " (" + EGOGui.getHoveredComponent()
+																		  .mousePosition() + ")" :
+															 ""));
+		debugMap.put("Focus", () -> String.valueOf(EGOGui.getFocusedComponent()));
+		debugMap.put("Hover", () -> String.valueOf(EGOGui.getHoveredComponent()));
+		debugMap.put("Dragged", () -> String.valueOf(EGOGui.getDraggedComponent()));
 		//		if (getGui().inventoryContainer() != null)
 		//			debugMap.put("Picked", () -> ItemUtils.toString(getGui().inventoryContainer().getPickedItemStack()));
 		updateGuiText();
@@ -274,9 +274,9 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 				setPosition(Position.topLeft(this));
 				break;
 			case Keyboard.KEY_O:
-				if (getGui().isOverlay() && MalisisGui.current() == null)
+				if (getGui().isOverlay() && EGOGui.current() == null)
 					getGui().display();
-				else if (getGui().isOverlay() && getGui() == MalisisGui.current())
+				else if (getGui().isOverlay() && getGui() == EGOGui.current())
 					getGui().close();
 		}
 
@@ -296,7 +296,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	public void drawHierarchy(GuiRenderer renderer)
 	{
-		UIComponent component = MalisisGui.getHoveredComponent();
+		UIComponent component = EGOGui.getHoveredComponent();
 		if (component == null || !GuiScreen.isAltKeyDown())
 			return;
 

@@ -25,7 +25,7 @@
 package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
@@ -177,7 +177,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 		fireEvent(button == MouseButton.LEFT ? new MouseLeftClick<>(this) : new MouseRightClick<>(this));
 		if (button == MouseButton.LEFT)
-			MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
+			EGOGui.playSound(SoundEvents.UI_BUTTON_CLICK);
 	}
 
 	@Override
@@ -209,7 +209,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 			return false;
 
 		fireEvent(new MouseLeftClick<>(this));
-		MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
+		EGOGui.playSound(SoundEvents.UI_BUTTON_CLICK);
 		return true;
 	}
 
@@ -249,7 +249,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 		public UIButtonBuilder link(String url)
 		{
-			return onClick(() -> MalisisGui.openLink(url));
+			return onClick(() -> EGOGui.openLink(url));
 		}
 
 		@Override

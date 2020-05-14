@@ -26,7 +26,7 @@ package net.malisis.ego.gui.component;
 
 import static com.google.common.base.Preconditions.*;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.control.IControlComponent;
@@ -80,8 +80,8 @@ import javax.annotation.Nonnull;
  */
 public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister<UIComponent>
 {
-	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
-	protected MalisisGui gui;
+	/** Reference to the {@link EGOGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
+	protected EGOGui gui;
 	/** Event handler. */
 	protected final EventHandler eventHandler = new EventHandler();
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
@@ -91,7 +91,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	/** Position of this {@link UIComponent} on screen. */
 	private final IPosition screenPosition = new ScreenPosition(this, this instanceof IControlComponent);
 	/** Position of the mouse inside this {@link UIComponent}. */
-	private final IPosition mousePosition = MalisisGui.MOUSE_POSITION.minus(screenPosition);
+	private final IPosition mousePosition = EGOGui.MOUSE_POSITION.minus(screenPosition);
 	/** Size of this {@link UIComponent}. */
 	protected ISize size = Size.inherited(this);
 	/** Size available for content. */
@@ -135,11 +135,11 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	// #region getters/setters
 
 	/**
-	 * Gets the {@link MalisisGui} this {@link UIComponent} was added to.
+	 * Gets the {@link EGOGui} this {@link UIComponent} was added to.
 	 *
 	 * @return the gui
 	 */
-	public MalisisGui getGui()
+	public EGOGui getGui()
 	{
 		return gui;
 	}
@@ -262,7 +262,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public boolean isHovered()
 	{
-		return isVisible() && MalisisGui.getHoveredComponent() == this;
+		return isVisible() && EGOGui.getHoveredComponent() == this;
 	}
 
 	/**
@@ -288,7 +288,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 */
 	public boolean isFocused()
 	{
-		return isVisible() && MalisisGui.getFocusedComponent() == this;
+		return isVisible() && EGOGui.getFocusedComponent() == this;
 	}
 
 	/**
@@ -607,7 +607,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 
 	/**
 	 * Called from the GUI when the mouse is dragged with a button pressed.<br>
-	 * To get the distance dragged, use {@code MalisisGui.MOUSE_POSITION.moved()}
+	 * To get the distance dragged, use {@code EGOGui.MOUSE_POSITION.moved()}
 	 *
 	 * @param button the button
 	 * @return if true, prevents {@link UIComponent#click(MouseButton)} to be called when button is released
@@ -755,7 +755,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	/**
 	 * Called when this {@link UIComponent} is added to screen.
 	 */
-	public void onAddedToScreen(MalisisGui gui)
+	public void onAddedToScreen(EGOGui gui)
 	{
 		this.gui = gui;
 	}

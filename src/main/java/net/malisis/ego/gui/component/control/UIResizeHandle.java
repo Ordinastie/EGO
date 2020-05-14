@@ -26,7 +26,6 @@ package net.malisis.ego.gui.component.control;
 
 import static net.malisis.ego.gui.element.position.Positions.*;
 
-import net.malisis.ego.gui.MalisisGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.Padding;

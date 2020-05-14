@@ -33,7 +33,7 @@ import net.malisis.ego.cacheddata.ICachedData;
 import net.malisis.ego.cacheddata.IntCachedData;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.StringWalker;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.element.IChild;
@@ -482,8 +482,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		if (fitWidth <= 0)
 			return false;
 
-		float factor = MalisisGui.current()
-								 .scaleFactor();
+		float factor = EGOGui.current()
+							 .scaleFactor();
 
 		//text already fits
 		if (size.width() <= fitWidth) //don't call size() (size->update->checkFitSize)

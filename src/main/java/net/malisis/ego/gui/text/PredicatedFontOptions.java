@@ -25,7 +25,7 @@
 package net.malisis.ego.gui.text;
 
 import net.malisis.ego.font.FontOptions;
-import net.malisis.ego.font.MalisisFont;
+import net.malisis.ego.font.EGOFont;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public class PredicatedFontOptions extends FontOptions
 	}
 
 	@Override
-	public MalisisFont getFont()
+	public EGOFont getFont()
 	{
 		return get(FontOptions::getFont, super.getFont());
 	}

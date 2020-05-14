@@ -5,7 +5,7 @@ import static net.malisis.ego.gui.component.MouseButton.RIGHT;
 import static net.malisis.ego.gui.component.MouseButton.UNKNOWN;
 
 import com.google.gson.reflect.TypeToken;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.position.Position;
@@ -23,7 +23,7 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 	{
 		super(source);
 		this.button = button;
-		position = Position.fixed(MalisisGui.MOUSE_POSITION);
+		position = Position.fixed(EGOGui.MOUSE_POSITION);
 	}
 
 	/**

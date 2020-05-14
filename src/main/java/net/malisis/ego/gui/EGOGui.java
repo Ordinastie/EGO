@@ -69,7 +69,7 @@ import java.util.function.Supplier;
  *
  * @author Ordinastie
  */
-public abstract class MalisisGui extends GuiScreen implements ISize
+public abstract class EGOGui extends GuiScreen implements ISize
 {
 	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(new ResourceLocation("ego", "textures/gui/gui.png"), 300, 100);
@@ -137,7 +137,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	public static int xCounter = 0;
 	public static int xTotal = 0;
 
-	protected MalisisGui()
+	protected EGOGui()
 	{
 		mc = Minecraft.getMinecraft();
 		itemRender = mc.getRenderItem();
@@ -158,7 +158,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Called before display() if this {@link MalisisGui} is not constructed yet.<br>
+	 * Called before display() if this {@link EGOGui} is not constructed yet.<br>
 	 * Called when Ctrl+R is pressed to rebuild the GUI.
 	 */
 	public abstract void construct();
@@ -185,7 +185,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Gets the {@link GuiRenderer} for this {@link MalisisGui}.
+	 * Gets the {@link GuiRenderer} for this {@link EGOGui}.
 	 *
 	 * @return the renderer
 	 */
@@ -253,7 +253,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Sets the resolution for this {@link MalisisGui}.
+	 * Sets the resolution for this {@link EGOGui}.
 	 */
 	public void setResolution()
 	{
@@ -283,7 +283,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Checks whether this {@link MalisisGui} is used as an overlay.
+	 * Checks whether this {@link EGOGui} is used as an overlay.
 	 *
 	 * @return true, if is overlay
 	 */
@@ -347,7 +347,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Gets the {@link UIContainer} at the specified coordinates inside this {@link MalisisGui}.
+	 * Gets the {@link UIContainer} at the specified coordinates inside this {@link EGOGui}.
 	 *
 	 * @param x the x coordinate
 	 * @param y the y coordinate
@@ -561,7 +561,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Draws this {@link MalisisGui}.
+	 * Draws this {@link EGOGui}.
 	 */
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTick)
@@ -632,7 +632,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Displays this {@link MalisisGui}.
+	 * Displays this {@link EGOGui}.
 	 */
 	public void display()
 	{
@@ -640,7 +640,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Display this {@link MalisisGui}.
+	 * Display this {@link EGOGui}.
 	 *
 	 * @param cancelClose the wether or not to cancel the next GuiDemo close event (used for when the GUI is opened from command)
 	 */
@@ -650,14 +650,14 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 		if (!doConstruct())
 			return;
 
-		MalisisGui.cancelClose = cancelClose;
+		EGOGui.cancelClose = cancelClose;
 		parent = Minecraft.getMinecraft().currentScreen;
 		Minecraft.getMinecraft()
 				 .displayGuiScreen(this);
 	}
 
 	/**
-	 * Closes this {@link MalisisGui}.
+	 * Closes this {@link EGOGui}.
 	 */
 	public void close()
 	{
@@ -723,27 +723,27 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	}
 
 	/**
-	 * Gets the current {@link MalisisGui} displayed.
+	 * Gets the current {@link EGOGui} displayed.
 	 *
-	 * @return null if no GUI being displayed or if not a {@link MalisisGui}
+	 * @return null if no GUI being displayed or if not a {@link EGOGui}
 	 */
-	public static MalisisGui current()
+	public static EGOGui current()
 	{
-		return current(MalisisGui.class);
+		return current(EGOGui.class);
 	}
 
 	/**
-	 * Gets the current {@link MalisisGui} of the specified type displayed.<br>
+	 * Gets the current {@link EGOGui} of the specified type displayed.<br>
 	 * If the current gu is not of <i>type</i>, null is returned.
 	 *
 	 * @param <T> the generic type
 	 * @param type the type
 	 * @return the t
 	 */
-	public static <T extends MalisisGui> T current(Class<T> type)
+	public static <T extends EGOGui> T current(Class<T> type)
 	{
 		GuiScreen gui = Minecraft.getMinecraft().currentScreen;
-		if (!(gui instanceof MalisisGui))
+		if (!(gui instanceof EGOGui))
 			return null;
 		try
 		{
@@ -789,7 +789,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 	 */
 	public static void setHoveredComponent(UIComponent component)
 	{
-		MalisisGui gui = current();
+		EGOGui gui = current();
 		if (gui == null || gui.hoveredComponent == component)
 			return;
 
@@ -815,7 +815,7 @@ public abstract class MalisisGui extends GuiScreen implements ISize
 
 	public static void setFocusedComponent(UIComponent component)
 	{
-		MalisisGui gui = current();
+		EGOGui gui = current();
 		if (gui == null || gui.focusedComponent == component)
 			return;
 

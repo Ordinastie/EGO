@@ -78,7 +78,7 @@ public class Link implements GuiYesNoCallback
 		isValid = true;
 	}
 
-	public float getWidth(MalisisFont font, FontOptions fro)
+	public float getWidth(EGOFont font, FontOptions fro)
 	{
 		return font.getStringWidth(StringUtils.isEmpty(text) ? url : text, fro);
 	}

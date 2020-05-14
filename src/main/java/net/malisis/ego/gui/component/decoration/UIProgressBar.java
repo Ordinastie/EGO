@@ -24,7 +24,7 @@
 
 package net.malisis.ego.gui.component.decoration;
 
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
@@ -78,7 +78,7 @@ public class UIProgressBar extends UIComponent
 	}
 
 	//by default, use furnace arrows
-	public UIProgressBar(MalisisGui gui)
+	public UIProgressBar(EGOGui gui)
 	{
 		this(Size.of(22, 16), GuiIcon.ARROW_EMPTY, GuiIcon.ARROW_FILLED);
 	}

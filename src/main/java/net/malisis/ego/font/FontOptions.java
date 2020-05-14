@@ -75,7 +75,7 @@ public class FontOptions
 		}
 	}
 
-	protected final MalisisFont font;
+	protected final EGOFont font;
 	/** Scale for the font **/
 	protected final float fontScale;
 	/** Color of the text **/
@@ -115,9 +115,9 @@ public class FontOptions
 		rightAligned = builder.rightAligned;
 	}
 
-	public MalisisFont getFont()
+	public EGOFont getFont()
 	{
-		return font != null && font.isLoaded() ? font : MalisisFont.minecraftFont;
+		return font != null && font.isLoaded() ? font : MinecraftFont.INSTANCE;
 	}
 
 	/**
@@ -377,7 +377,7 @@ public class FontOptions
 		private final List<Pair<Predicate<Object>, FontOptions>> suppliers = Lists.newArrayList();
 		private Object predicateParameter = null;
 
-		protected MalisisFont font = MalisisFont.minecraftFont;
+		protected EGOFont font = MinecraftFont.INSTANCE;
 		protected float fontScale = 1;
 		protected int color = 0x000000; //black
 		protected boolean shadow = false;
@@ -403,7 +403,7 @@ public class FontOptions
 			return from(base);
 		}
 
-		public FontOptionsBuilder font(MalisisFont font)
+		public FontOptionsBuilder font(EGOFont font)
 		{
 			this.font = checkNotNull(font);
 			return this;

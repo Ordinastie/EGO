@@ -24,11 +24,11 @@
 
 package net.malisis.ego.gui.render;
 
-import static net.malisis.ego.gui.MalisisGui.VANILLAGUI_TEXTURE;
+import static net.malisis.ego.gui.EGOGui.VANILLAGUI_TEXTURE;
 
 import net.malisis.ego.EGO;
 import net.malisis.ego.atlas.Atlas;
-import net.malisis.ego.gui.MalisisGui;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -477,7 +477,7 @@ public class GuiIcon
 										   .getItemModelMesher()
 										   .getParticleIcon(itemStack.getItem(), itemStack.getMetadata());
 
-		return new GuiIcon(MalisisGui.BLOCK_TEXTURE, icon);
+		return new GuiIcon(EGOGui.BLOCK_TEXTURE, icon);
 	}
 
 	public static GuiIcon from(Item item)
@@ -492,7 +492,7 @@ public class GuiIcon
 										   .getBlockModelShapes()
 										   .getTexture(state);
 
-		return new GuiIcon(MalisisGui.BLOCK_TEXTURE, icon);
+		return new GuiIcon(EGOGui.BLOCK_TEXTURE, icon);
 	}
 
 	public static GuiIcon from(Block block)
