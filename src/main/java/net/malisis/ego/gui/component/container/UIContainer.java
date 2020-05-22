@@ -263,11 +263,14 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public void remove(UIComponent component)
 	{
-		if (component.getParent() != this)
+		if (component == null || component.getParent() != this)
 			return;
 
 		content.components.remove(component);
 		component.setParent(null);
+
+		if (layout != null)
+			layout.remove(component);
 	}
 
 	/**
@@ -280,6 +283,8 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			component.setParent(null);
 		}
 		content.components.clear();
+		if (layout != null)
+			layout.clear();
 	}
 
 	@Override

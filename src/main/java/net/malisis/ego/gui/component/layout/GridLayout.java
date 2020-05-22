@@ -56,6 +56,16 @@ public class GridLayout implements ILayout
 		parent.add(component);
 	}
 
+	public void remove(UIComponent component)
+	{
+		//TODO
+	}
+
+	public void clear()
+	{
+		//TODO
+	}
+
 	private class Row implements IPositioned, ISized
 	{
 		private int row;

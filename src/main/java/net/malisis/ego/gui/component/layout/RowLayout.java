@@ -68,4 +68,15 @@ public class RowLayout implements ILayout
 			component.setPosition(Position.below(component, last, spacing));
 		last = component;
 	}
+
+	public void remove(UIComponent component)
+	{
+		checkNotNull(component);
+		//TODO
+	}
+
+	public void clear()
+	{
+
+	}
 }
