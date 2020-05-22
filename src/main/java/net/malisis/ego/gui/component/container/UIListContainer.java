@@ -24,11 +24,14 @@
 
 package net.malisis.ego.gui.component.container;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.collect.Maps;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.layout.RowLayout;
-import net.malisis.ego.gui.element.size.Size;
+import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
 import net.malisis.ego.gui.render.GuiRenderer;
 
 import java.util.Collection;
@@ -36,6 +39,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * @author Ordinastie
@@ -51,11 +55,12 @@ public class UIListContainer<S> extends UIContainer
 																										 .build();
 	protected int elementsSize;
 
+	protected boolean selectable = false;
+	protected boolean deselectable = false;
+	protected S selected;
+
 	public UIListContainer()
 	{
-		setSize(Size.sizeOfContent(this));
-		setClipContent(true);
-		setLayout(new RowLayout(this));
 	}
 
 	protected void buildElementComponents()
@@ -71,6 +76,22 @@ public class UIListContainer<S> extends UIContainer
 			add(comp);
 		}
 		elementsSize = elements.size();
+
+		if (selectable)
+		{
+			applyEventToElements();
+			if (selectedComponent() == null)
+				selected = null;
+		}
+	}
+
+	private void applyEventToElements()
+	{
+		componentElements.values()
+						 .forEach(c -> c.onLeftClick(e -> {
+							 select(c);
+							 return true;
+						 }));
 	}
 
 	protected UIComponent createElementComponent(S element)
@@ -81,7 +102,7 @@ public class UIListContainer<S> extends UIContainer
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements != null ? elements : Collections.emptyList();
-		//buildElementComponents();
+		//	buildElementComponents();
 	}
 
 	public Collection<S> getElements()
@@ -101,14 +122,65 @@ public class UIListContainer<S> extends UIContainer
 
 	public void setElementSpacing(int elementSpacing)
 	{
-		this.elementSpacing = elementSpacing;
+		setLayout(new RowLayout(this, elementSpacing));
 	}
 
-	//#region IClipable
-	@Override
-	public ClipArea getClipArea()
+	public void setSelectable(boolean selectable)
 	{
-		return super.getClipArea();// IClipable.NOCLIP;
+		this.selectable = selectable;
+	}
+
+	public void setDeselectable(boolean deselectable)
+	{
+		this.deselectable = deselectable;
+	}
+
+	@SuppressWarnings("unchecked")
+	public S select(UIComponent component)
+	{
+		select((S) component.getData());
+		return selected();
+	}
+
+	public UIComponent setSelected(S element)
+	{
+		UIComponent comp = getElementComponent(element);
+		selected = comp != null ? element : null;
+		return comp;
+	}
+
+	public UIComponent select(S element)
+	{
+		//checks the element has a valid component in the list
+		UIComponent comp = getElementComponent(element);
+		if (comp == null)
+			return null;
+
+		S oldValue = selected;
+		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, element)))
+			selected = element;
+		fireEvent(new ValueChange.Post<>(this, oldValue, selected));
+		return comp;
+	}
+
+	public S selected()
+	{
+		return selected;
+	}
+
+	public UIComponent selectedComponent()
+	{
+		return getElementComponent(selected);
+	}
+
+	public boolean isSelected(UIComponent component)
+	{
+		return component == selectedComponent();
+	}
+
+	public boolean isSelected(S element)
+	{
+		return element == selected;
 	}
 
 	@Override
@@ -119,4 +191,86 @@ public class UIListContainer<S> extends UIContainer
 
 		super.render(renderer);
 	}
+
+	public static <S> UIListContainerBuilder<S> builder(Collection<S> collection)
+	{
+		return new UIListContainerBuilder<>(collection);
+	}
+
+	public static class UIListContainerBuilder<S> extends UIContainerBuilderG<UIListContainerBuilder<S>, UIListContainer<S>>
+			implements IValueChangeBuilder<UIListContainerBuilder<S>, UIListContainer<S>, S>
+	{
+		private final Collection<S> elements;
+		private BiFunction<UIListContainer<S>, S, UIComponent> componentFactory = (lc, e) -> UILabel.builder()
+																									.text(Objects.toString(e))
+																									.build();
+		protected boolean selectable = false;
+		protected boolean deselectable = false;
+		protected S selected;
+
+		public UIListContainerBuilder(Collection<S> collection)
+		{
+			elements = collection;
+			layout(c -> new RowLayout(c, 1));
+		}
+
+		public UIListContainerBuilder<S> selectable()
+		{
+			return selectable(true);
+		}
+
+		public UIListContainerBuilder<S> selectable(boolean selectable)
+		{
+			this.selectable = selectable;
+			return this;
+		}
+
+		public UIListContainerBuilder<S> deselectable()
+		{
+			return deselectable(true);
+		}
+
+		public UIListContainerBuilder<S> deselectable(boolean deselectable)
+		{
+			this.deselectable = deselectable;
+			return this;
+		}
+
+		public UIListContainerBuilder<S> selected(S selected)
+		{
+			this.selected = selected;
+			return this;
+		}
+
+		public UIListContainerBuilder<S> factory(BiFunction<UIListContainer<S>, S, UIComponent> factory)
+		{
+			this.componentFactory = checkNotNull(factory);
+			return this;
+		}
+
+		/**
+		 * Alias for {@link #onChange(Consumer)}.
+		 *
+		 * @param consumer action to execute when an element is selected
+		 * @return the builder
+		 */
+		public UIListContainerBuilder<S> onSelect(Consumer<S> consumer)
+		{
+			return onChange(consumer);
+		}
+
+		@Override
+		public UIListContainer<S> build()
+		{
+			UIListContainer<S> list = build(new UIListContainer<>());
+			list.setComponentFactory(componentFactory);
+			list.setElements(elements);
+			list.setSelectable(selectable);
+			list.setDeselectable(deselectable);
+			list.setSelected(selected);
+
+			return list;
+		}
+	}
+
 }

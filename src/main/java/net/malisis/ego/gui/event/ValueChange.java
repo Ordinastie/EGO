@@ -85,7 +85,7 @@ public abstract class ValueChange<T extends UIComponent, S> extends GuiEvent<T>
 			register(ValueChange.Pre.class, (Predicate) onChange);
 		}
 
-		public default void onChange(Predicate<ValueChange.Post<T, S>> onChange)
+		public default void onPostChange(Predicate<ValueChange.Post<T, S>> onChange)
 		{
 			register(ValueChange.Post.class, (Predicate) onChange);
 		}
