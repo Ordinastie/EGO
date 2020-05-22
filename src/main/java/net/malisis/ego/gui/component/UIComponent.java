@@ -78,7 +78,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie
  */
-public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister<UIComponent>
+public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister<UIComponent>
 {
 	/** Reference to the {@link EGOGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
 	protected EGOGui gui;
@@ -839,5 +839,19 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	public String toString()
 	{
 		return (name == null ? getClass().getSimpleName() : name) + " " + getPropertyString();
+	}
+
+	public static BaseComponentBuilder base()
+	{
+		return new BaseComponentBuilder();
+	}
+
+	public static class BaseComponentBuilder extends UIComponentBuilder<BaseComponentBuilder, UIComponent>
+	{
+		@Override
+		public UIComponent build()
+		{
+			return build(new UIComponent());
+		}
 	}
 }
