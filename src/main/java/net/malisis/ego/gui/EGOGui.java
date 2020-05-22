@@ -41,8 +41,10 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -723,6 +725,26 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	}
 
 	/**
+	 * Gets the client world.
+	 *
+	 * @return the client world
+	 */
+	public World world()
+	{
+		return Minecraft.getMinecraft().world;
+	}
+
+	/**
+	 * Gets the client player.
+	 *
+	 * @return the client player
+	 */
+	public EntityPlayer player()
+	{
+		return Minecraft.getMinecraft().player;
+	}
+
+	/**
 	 * Gets the current {@link EGOGui} displayed.
 	 *
 	 * @return null if no GUI being displayed or if not a {@link EGOGui}
@@ -796,7 +818,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		if (gui.hoveredComponent != null)
 			gui.hoveredComponent.unhover();
 		gui.hoveredComponent = null;
-		if (component == null || !component.isVisible())
+		if (component == null/* || !component.isVisible()*/)
 			return;
 
 		component.hover();
