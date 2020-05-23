@@ -27,7 +27,7 @@ package net.malisis.ego.font;
 import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.Lists;
-import net.malisis.ego.gui.text.PredicatedFontOptions;
+import com.google.common.collect.Maps;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -77,29 +78,34 @@ public class FontOptions
 
 	protected final EGOFont font;
 	/** Scale for the font **/
-	protected final float fontScale;
+	protected final Float fontScale;
 	/** Color of the text **/
-	protected final int color; //black
+	protected final Integer color;
 	/** Draw with shadow **/
-	protected final boolean shadow;
+	protected final Boolean shadow;
 	/** Use bold font **/
-	protected final boolean bold;
+	protected final Boolean bold;
 	/** Use italic font **/
-	protected final boolean italic;
+	protected final Boolean italic;
 	/** Underline the text **/
-	protected final boolean underline;
+	protected final Boolean underline;
 	/** Strike through the text **/
-	protected final boolean strikethrough;
+	protected final Boolean strikethrough;
 	/** Obfuscated text */
-	protected final boolean obfuscated;
+	protected final Boolean obfuscated;
 	/** Space between each character. */
-	protected int charSpacing;
+	protected final Integer charSpacing;
 	/** Space between each line. */
-	protected final int lineSpacing;
+	protected final Integer lineSpacing;
 	/** Right aligned. */
-	protected final boolean rightAligned;
+	protected final Boolean rightAligned;
 
-	protected FontOptions(FontOptionsBuilder builder)
+	protected List<FontOptions> predicates = Lists.newArrayList();
+
+	protected Predicate<Object> predicate;
+	protected Object predicateParam;
+
+	protected FontOptions(FontOptionsBuilder builder, Object predicateParam)
 	{
 		font = builder.font;
 		fontScale = builder.fontScale;
@@ -113,10 +119,36 @@ public class FontOptions
 		charSpacing = builder.charSpacing;
 		lineSpacing = builder.lineSpacing;
 		rightAligned = builder.rightAligned;
+
+		predicate = builder.predicate;
+		this.predicateParam = predicateParam;
+
+		builder.predicates.values()
+						  .forEach(fob -> predicates.add(new FontOptions(fob, predicateParam)));
+	}
+
+	private <T> T get(Function<FontOptions, T> func, T value)
+	{
+		if (predicates.size() == 0)
+			return value;
+
+		return predicates.stream()
+						 .filter(FontOptions::test)
+						 .findFirst()
+						 .map(func)
+						 .orElse(value);
+	}
+
+	private boolean test()
+	{
+		if (predicate == null)
+			return false; //should never happen
+		return predicate.test(predicateParam);
 	}
 
 	public EGOFont getFont()
 	{
+		EGOFont font = get(FontOptions::getFont, this.font);
 		return font != null && font.isLoaded() ? font : MinecraftFont.INSTANCE;
 	}
 
@@ -125,9 +157,9 @@ public class FontOptions
 	 *
 	 * @return the font scale
 	 */
-	public float getFontScale()
+	public Float getFontScale()
 	{
-		return fontScale;
+		return get(FontOptions::getFontScale, fontScale);
 	}
 
 	/**
@@ -135,9 +167,9 @@ public class FontOptions
 	 *
 	 * @return true, if is bold
 	 */
-	public boolean isBold()
+	public Boolean isBold()
 	{
-		return bold;
+		return get(FontOptions::isBold, bold);
 	}
 
 	/**
@@ -145,9 +177,9 @@ public class FontOptions
 	 *
 	 * @return true, if is italic
 	 */
-	public boolean isItalic()
+	public Boolean isItalic()
 	{
-		return italic;
+		return get(FontOptions::isItalic, italic);
 	}
 
 	/**
@@ -155,9 +187,9 @@ public class FontOptions
 	 *
 	 * @return true, if is underline
 	 */
-	public boolean isUnderline()
+	public Boolean isUnderline()
 	{
-		return underline;
+		return get(FontOptions::isUnderline, underline);
 	}
 
 	/**
@@ -165,9 +197,9 @@ public class FontOptions
 	 *
 	 * @return true, if is strikethrough
 	 */
-	public boolean isStrikethrough()
+	public Boolean isStrikethrough()
 	{
-		return strikethrough;
+		return get(FontOptions::isStrikethrough, strikethrough);
 	}
 
 	/**
@@ -175,9 +207,9 @@ public class FontOptions
 	 *
 	 * @return true, if is obfuscated
 	 */
-	public boolean isObfuscated()
+	public Boolean isObfuscated()
 	{
-		return obfuscated;
+		return get(FontOptions::isObfuscated, obfuscated);
 	}
 
 	/**
@@ -185,9 +217,9 @@ public class FontOptions
 	 *
 	 * @return true, if successful
 	 */
-	public boolean hasShadow()
+	public Boolean hasShadow()
 	{
-		return shadow;
+		return get(FontOptions::hasShadow, shadow);
 	}
 
 	/**
@@ -195,9 +227,9 @@ public class FontOptions
 	 *
 	 * @return the color
 	 */
-	public int getColor()
+	public Integer getColor()
 	{
-		return color;
+		return get(FontOptions::getColor, color);
 	}
 
 	/**
@@ -205,9 +237,9 @@ public class FontOptions
 	 *
 	 * @return the space
 	 */
-	public int charSpacing()
+	public Integer charSpacing()
 	{
-		return charSpacing;
+		return get(FontOptions::charSpacing, charSpacing);
 	}
 
 	/**
@@ -215,9 +247,9 @@ public class FontOptions
 	 *
 	 * @return the space
 	 */
-	public int lineSpacing()
+	public Integer lineSpacing()
 	{
-		return lineSpacing;
+		return get(FontOptions::lineSpacing, lineSpacing);
 	}
 
 	/**
@@ -225,9 +257,9 @@ public class FontOptions
 	 *
 	 * @return true, if right aligned
 	 */
-	public boolean isRightAligned()
+	public Boolean isRightAligned()
 	{
-		return rightAligned;
+		return get(FontOptions::isRightAligned, rightAligned);
 	}
 
 	/**
@@ -372,26 +404,67 @@ public class FontOptions
 
 	public static class FontOptionsBuilder
 	{
-		protected FontOptions base;
-		protected Predicate<Object> currentPredicate;
-		private final List<Pair<Predicate<Object>, FontOptions>> suppliers = Lists.newArrayList();
+		private Map<Predicate<Object>, FontOptionsBuilder> predicates = Maps.newHashMap();
+		private FontOptionsBuilder baseBuilder;
+		private Predicate<Object> predicate;
 		private Object predicateParameter = null;
 
-		protected EGOFont font = MinecraftFont.INSTANCE;
-		protected float fontScale = 1;
-		protected int color = 0x000000; //black
-		protected boolean shadow = false;
-		protected boolean bold = false;
-		protected boolean italic = false;
-		protected boolean underline = false;
-		protected boolean strikethrough = false;
-		protected boolean obfuscated = false;
-		protected int charSpacing = 1;
-		protected int lineSpacing = 1;
-		protected boolean rightAligned = false;
+		protected EGOFont font;
+		/** Scale for the font **/
+		protected Float fontScale;
+		/** Color of the text **/
+		protected Integer color;
+		/** Draw with shadow **/
+		protected Boolean shadow;
+		/** Use bold font **/
+		protected Boolean bold;
+		/** Use italic font **/
+		protected Boolean italic;
+		/** Underline the text **/
+		protected Boolean underline;
+		/** Strike through the text **/
+		protected Boolean strikethrough;
+		/** Obfuscated text */
+		protected Boolean obfuscated;
+		/** Space between each character. */
+		protected Integer charSpacing;
+		/** Space between each line. */
+		protected Integer lineSpacing;
+		/** Right aligned. */
+		protected Boolean rightAligned;
 
 		public FontOptionsBuilder()
 		{
+			font = MinecraftFont.INSTANCE;
+			fontScale = 1F;
+			color = 0x000000;
+			shadow = false;
+			bold = false;
+			italic = false;
+			underline = false;
+			strikethrough = false;
+			obfuscated = false;
+			charSpacing = 1;
+			lineSpacing = 1;
+			rightAligned = false;
+		}
+
+		public FontOptionsBuilder(FontOptionsBuilder base, Predicate<Object> predicate)
+		{
+			baseBuilder = base;
+			this.predicate = predicate;
+			font = null;
+			fontScale = null;
+			color = null;
+			shadow = null;
+			bold = null;
+			italic = null;
+			underline = null;
+			strikethrough = null;
+			obfuscated = null;
+			charSpacing = null;
+			lineSpacing = null;
+			rightAligned = null;
 		}
 
 		/**
@@ -399,8 +472,7 @@ public class FontOptions
 		 */
 		public FontOptionsBuilder base()
 		{
-			addSupplier();
-			return from(base);
+			return baseBuilder != null ? baseBuilder : this;
 		}
 
 		public FontOptionsBuilder font(EGOFont font)
@@ -581,18 +653,15 @@ public class FontOptions
 		@SuppressWarnings("unchecked")
 		public <T> FontOptionsBuilder when(Predicate<T> predicate)
 		{
-			if (currentPredicate == null)
-				base = buildBase();
-			else
-				addSupplier();
+			if (this.predicate != null)
+				return baseBuilder.when(predicate);
 
-			currentPredicate = (Predicate<java.lang.Object>) predicate;
-			return this;
+			return predicates.computeIfAbsent((Predicate<Object>) predicate, p -> new FontOptionsBuilder(this, p));
 		}
 
 		public FontOptionsBuilder when(Predicate<Object> predicate, FontOptions predicatedOptions)
 		{
-			suppliers.add(Pair.of(predicate, predicatedOptions));
+			//suppliers.add(Pair.of(predicate, predicatedOptions));
 			return this;
 		}
 
@@ -602,29 +671,12 @@ public class FontOptions
 			return this;
 		}
 
-		private FontOptions buildBase()
-		{
-			return new FontOptions(this);
-		}
-
-		private void addSupplier()
-		{
-			if (currentPredicate != null)
-			{
-				suppliers.add(Pair.of(currentPredicate, buildBase()));
-				currentPredicate = null;
-				from(base);
-			}
-		}
-
 		public FontOptions build(Object predicateParameter)
 		{
-			addSupplier();
+			if (this.predicate != null)
+				return baseBuilder.build(predicateParameter);
 
-			if (suppliers.size() == 0)
-				return buildBase();
-
-			return new PredicatedFontOptions(this, suppliers, predicateParameter);
+			return new FontOptions(this, predicateParameter);
 		}
 
 		public FontOptions build()

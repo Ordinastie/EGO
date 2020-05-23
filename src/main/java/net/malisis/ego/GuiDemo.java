@@ -18,7 +18,6 @@ import net.malisis.ego.gui.component.control.UIResizeHandle;
 import net.malisis.ego.gui.component.decoration.UIImage;
 import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.decoration.UIProgressBar;
-import net.malisis.ego.gui.component.decoration.UIPropertyBar;
 import net.malisis.ego.gui.component.interaction.UIButton;
 import net.malisis.ego.gui.component.interaction.UICheckBox;
 import net.malisis.ego.gui.component.interaction.UIPasswordField;
@@ -85,21 +84,24 @@ public class GuiDemo extends EGOGui
 
 		UILabel title = UILabel.builder()
 							   .parent(panel)
-							   .topCenter()
+							   .middleCenter()
 							   .text("Panel Title")
 							   .textColor(0xFFFFFF)
 							   .shadow()
 							   .scale(1.3F)
+							   .when(UILabel::isHovered)
+							   .textColor(0x8396FF)
 							   .build();
 
-		UIPropertyBar bar = UIPropertyBar.builder(() -> counter % 200)
-										 .max(200)
-										 .parent(panel)
-										 .middleCenter()
-										 .color(0xAD62EC)
-										 .icon(GuiIcon.from(Items.BLAZE_POWDER))
-										 .size(150, 12)
-										 .build();
+		UIButton button = UIButton.builder()
+								  .parent(panel)
+								  .centered()
+								  .below(title)
+								  .text("Button")
+								  .textColor(TextFormatting.DARK_GREEN)
+								  .when(UIComponent::isHovered)
+								  .textColor(TextFormatting.GREEN)
+								  .build();
 
 		return panel;
 	}
