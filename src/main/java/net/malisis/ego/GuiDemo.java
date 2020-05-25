@@ -357,7 +357,8 @@ public class GuiDemo extends EGOGui
 											 .build();
 
 		//Textfield
-		UITextField tf = new UITextField("This is a textfield. You can type in it.");
+		UITextField tf = new UITextField();
+		tf.setText("This is a textfield. You can type in it.");
 		tf.setSize(Size.of(parentWidth(tf, 0.5F, -5), 14));
 		tf.setPosition(Position.topLeft(tf));
 		//tf.setOptions(0x660000, 0xFFCCCC, 0x770000, 0xFF0000, false);

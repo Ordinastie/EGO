@@ -47,7 +47,6 @@ public class UITextArea extends UITextField implements IScrollable
 	 */
 	public UITextArea()
 	{
-		super(true);
 		offset = UIScrollBar.scrollingOffset(this);
 		scrollbar = new UISlimScrollbar(this, UIScrollBar.Type.VERTICAL);
 		guiText.setWrapSize(() -> size().width() - padding().horizontal() - UIScrollBar.scrollbarWidth(this) - 4);

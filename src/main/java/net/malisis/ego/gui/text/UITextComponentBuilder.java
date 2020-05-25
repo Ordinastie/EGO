@@ -6,16 +6,13 @@ import com.google.common.collect.Maps;
 import net.malisis.ego.cacheddata.CachedData;
 import net.malisis.ego.cacheddata.FixedData;
 import net.malisis.ego.cacheddata.ICachedData;
-import net.malisis.ego.font.EGOFont;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.text.GuiText.Builder;
-import net.minecraft.util.text.TextFormatting;
 
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
@@ -29,7 +26,7 @@ import javax.annotation.Nonnull;
  * @param <BUILDER>
  */
 public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent>
-		extends UIComponentBuilder<BUILDER, COMPONENT>
+		extends UIComponentBuilder<BUILDER, COMPONENT> implements IFontOptionsBuilder<BUILDER, COMPONENT>
 {
 	protected GuiText.Builder guiTextBuilder = GuiText.builder();
 	protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
@@ -45,6 +42,13 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 	public FontOptionsBuilder fob()
 	{
 		return fontOptionsBuilder;
+	}
+
+	@Override
+	public BUILDER when(Predicate<COMPONENT> predicate)
+	{
+		fontOptionsBuilder = fob().when(predicate);
+		return self();
 	}
 
 	public BUILDER fontOptions(@Nonnull FontOptions fontOptions)
@@ -163,142 +167,11 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 		return self();
 	}
 
-	//FontOptions
-	public BUILDER font(EGOFont font)
-	{
-		fob().font(font);
-		return self();
-	}
-
-	public BUILDER scale(float scale)
-	{
-		fob().scale(scale);
-		return self();
-	}
-
-	public BUILDER textColor(int color)
-	{
-		fob().color(color);
-		return self();
-	}
-
-	public BUILDER textColor(TextFormatting color)
-	{
-		fob().color(color);
-		return self();
-	}
-
-	public BUILDER bold()
-	{
-		return bold(true);
-	}
-
-	public BUILDER bold(boolean bold)
-	{
-		fob().bold(bold);
-		return self();
-	}
-
-	public BUILDER italic()
-	{
-		return italic(true);
-	}
-
-	public BUILDER italic(boolean italic)
-	{
-		fob().italic(italic);
-		return self();
-	}
-
-	public BUILDER underline()
-	{
-		return underline(true);
-	}
-
-	public BUILDER underline(boolean underline)
-	{
-		fob().underline(underline);
-		return self();
-	}
-
-	public BUILDER strikethrough()
-	{
-		return strikethrough(true);
-	}
-
-	public BUILDER strikethrough(boolean strikethrough)
-	{
-		fob().strikethrough(strikethrough);
-		return self();
-	}
-
-	public BUILDER obfuscated()
-	{
-		return obfuscated(true);
-	}
-
-	public BUILDER obfuscated(boolean obfuscated)
-	{
-		fob().obfuscated(obfuscated);
-		return self();
-	}
-
-	public BUILDER shadow()
-	{
-		return shadow(true);
-	}
-
-	public BUILDER shadow(boolean shadow)
-	{
-		fob().shadow(shadow);
-		return self();
-	}
-
-	public BUILDER lineSpacing(int spacing)
-	{
-		fob().lineSpacing(spacing);
-		return self();
-	}
-
-	public BUILDER textRightAligned()
-	{
-		fob().rightAligned();
-		return self();
-	}
-
-	public BUILDER TextLeftAligned()
-	{
-		fob().leftAligned();
-		return self();
-	}
-
-	public BUILDER styles(String styles)
-	{
-		fob().styles(styles);
-		return self();
-	}
-
-	public BUILDER styles(TextFormatting... formats)
-	{
-		fob().styles(formats);
-		return self();
-	}
-
-	public BUILDER when(BooleanSupplier supplier)
-	{
-		return when(o -> supplier.getAsBoolean());
-	}
-
-	public BUILDER when(Predicate<COMPONENT> predicate)
-	{
-		fontOptionsBuilder = fob().when(predicate);
-		return self();
-	}
-
 	public GuiText buildText(COMPONENT component)
 	{
-		tb().parent(component)
-			.fontOptions(fontOptionsBuilder.build(component));
+		tb().parent(component);
+		tb().fontOptions(fob().build(component));
+
 		parameterFuncs.forEach((s, f) -> tb().bind(s, f.apply(component)));
 		if (wrapSize != null)
 			tb().wrapSize(wrapSize.apply(component));

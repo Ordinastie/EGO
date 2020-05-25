@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.util.text.TextFormatting;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -102,6 +103,7 @@ public class FontOptions
 
 	protected List<FontOptions> predicates = Lists.newArrayList();
 
+	protected FontOptions base;
 	protected Predicate<Object> predicate;
 	protected Object predicateParam;
 
@@ -124,19 +126,21 @@ public class FontOptions
 		this.predicateParam = predicateParam;
 
 		builder.predicates.values()
-						  .forEach(fob -> predicates.add(new FontOptions(fob, predicateParam)));
+						  .forEach(fob -> predicates.add(new FontOptions(this, fob, predicateParam)));
 	}
 
-	private <T> T get(Function<FontOptions, T> func, T value)
+	public FontOptions(FontOptions fontOptions, FontOptionsBuilder fob, Object predicateParam)
 	{
-		if (predicates.size() == 0)
-			return value;
+		this(fob, predicateParam);
+		this.base = fontOptions;
+	}
 
+	private FontOptions get()
+	{
 		return predicates.stream()
 						 .filter(FontOptions::test)
 						 .findFirst()
-						 .map(func)
-						 .orElse(value);
+						 .orElse(this);
 	}
 
 	private boolean test()
@@ -148,7 +152,7 @@ public class FontOptions
 
 	public EGOFont getFont()
 	{
-		EGOFont font = get(FontOptions::getFont, this.font);
+		EGOFont font = ObjectUtils.firstNonNull(get().font, this.font, MinecraftFont.INSTANCE);
 		return font != null && font.isLoaded() ? font : MinecraftFont.INSTANCE;
 	}
 
@@ -157,9 +161,9 @@ public class FontOptions
 	 *
 	 * @return the font scale
 	 */
-	public Float getFontScale()
+	public float getFontScale()
 	{
-		return get(FontOptions::getFontScale, fontScale);
+		return ObjectUtils.firstNonNull(get().fontScale, fontScale, 1F);
 	}
 
 	/**
@@ -167,9 +171,9 @@ public class FontOptions
 	 *
 	 * @return true, if is bold
 	 */
-	public Boolean isBold()
+	public boolean isBold()
 	{
-		return get(FontOptions::isBold, bold);
+		return ObjectUtils.firstNonNull(get().bold, bold, false);
 	}
 
 	/**
@@ -177,9 +181,9 @@ public class FontOptions
 	 *
 	 * @return true, if is italic
 	 */
-	public Boolean isItalic()
+	public boolean isItalic()
 	{
-		return get(FontOptions::isItalic, italic);
+		return ObjectUtils.firstNonNull(get().italic, italic, false);
 	}
 
 	/**
@@ -187,9 +191,9 @@ public class FontOptions
 	 *
 	 * @return true, if is underline
 	 */
-	public Boolean isUnderline()
+	public boolean isUnderline()
 	{
-		return get(FontOptions::isUnderline, underline);
+		return ObjectUtils.firstNonNull(get().underline, underline, false);
 	}
 
 	/**
@@ -197,9 +201,9 @@ public class FontOptions
 	 *
 	 * @return true, if is strikethrough
 	 */
-	public Boolean isStrikethrough()
+	public boolean isStrikethrough()
 	{
-		return get(FontOptions::isStrikethrough, strikethrough);
+		return ObjectUtils.firstNonNull(get().strikethrough, strikethrough, false);
 	}
 
 	/**
@@ -207,9 +211,9 @@ public class FontOptions
 	 *
 	 * @return true, if is obfuscated
 	 */
-	public Boolean isObfuscated()
+	public boolean isObfuscated()
 	{
-		return get(FontOptions::isObfuscated, obfuscated);
+		return ObjectUtils.firstNonNull(get().obfuscated, obfuscated, false);
 	}
 
 	/**
@@ -217,9 +221,9 @@ public class FontOptions
 	 *
 	 * @return true, if successful
 	 */
-	public Boolean hasShadow()
+	public boolean hasShadow()
 	{
-		return get(FontOptions::hasShadow, shadow);
+		return ObjectUtils.firstNonNull(get().shadow, shadow, false);
 	}
 
 	/**
@@ -227,9 +231,9 @@ public class FontOptions
 	 *
 	 * @return the color
 	 */
-	public Integer getColor()
+	public int getColor()
 	{
-		return get(FontOptions::getColor, color);
+		return ObjectUtils.firstNonNull(get().color, color, 0);
 	}
 
 	/**
@@ -237,9 +241,9 @@ public class FontOptions
 	 *
 	 * @return the space
 	 */
-	public Integer charSpacing()
+	public int charSpacing()
 	{
-		return get(FontOptions::charSpacing, charSpacing);
+		return ObjectUtils.firstNonNull(get().charSpacing, charSpacing, 1);
 	}
 
 	/**
@@ -247,9 +251,9 @@ public class FontOptions
 	 *
 	 * @return the space
 	 */
-	public Integer lineSpacing()
+	public int lineSpacing()
 	{
-		return get(FontOptions::lineSpacing, lineSpacing);
+		return ObjectUtils.firstNonNull(get().lineSpacing, lineSpacing, 1);
 	}
 
 	/**
@@ -257,9 +261,9 @@ public class FontOptions
 	 *
 	 * @return true, if right aligned
 	 */
-	public Boolean isRightAligned()
+	public boolean isRightAligned()
 	{
-		return get(FontOptions::isRightAligned, rightAligned);
+		return ObjectUtils.firstNonNull(get().rightAligned, rightAligned, false);
 	}
 
 	/**

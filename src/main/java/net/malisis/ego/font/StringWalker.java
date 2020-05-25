@@ -402,6 +402,9 @@ public class StringWalker
 	 */
 	public boolean walkToY(int y)
 	{
+		if (lines.size() <= 1)
+			return true;
+
 		if (this.y + lineHeight > y)
 			return true;
 		while (nextLine())

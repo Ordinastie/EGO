@@ -149,7 +149,7 @@ public class GuiAtlas extends EGOGui
 									 .fontOptions(labelOptions)
 									 .build();
 
-		search = new UITextField(false);
+		search = new UITextField();
 		search.setPosition(Position.of(Positions.centered(search, 0), Positions.below(filterLabel, 0)));
 		search.setSize(Size.of(100, 12));
 		leftPanel.add(search);

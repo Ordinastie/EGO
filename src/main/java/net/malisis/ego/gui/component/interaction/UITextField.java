@@ -25,10 +25,12 @@
 package net.malisis.ego.gui.component.interaction;
 
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.font.StringWalker;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContentHolder;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IOffset;
@@ -43,6 +45,7 @@ import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.text.IFontOptionsBuilder;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
@@ -51,6 +54,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * UITextField.
@@ -105,20 +109,22 @@ public class UITextField extends UIComponent
 											 .icon(GuiIcon.NONE)
 											 .build();
 
-	public UITextField(boolean multiLine)
+	protected GuiShape cursorRenderer = cursorShape;
+
+	public UITextField()
 	{
 		guiText = GuiText.builder()
 						 .parent(this)
 						 .text(this::getText)
 						 .translated(false)
 						 .literal(true)
-						 .position(3, 3)
+						 .position(2, 1)
 						 .fontOptions(FontOptions.builder()
 												 .color(0xFFFFFF)
 												 .shadow()
 												 .build())
 						 .build();
-		setSize(Size.of(100, 14));
+		setSize(Size.of(100, 12));
 
 		GuiShape background = GuiShape.builder(this)
 									  .icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD_BG, null, GuiIcon.TEXTFIELD_BG_DISABLED))
@@ -129,32 +135,12 @@ public class UITextField extends UIComponent
 							 .and(this::drawSelectionBox));
 	}
 
-	/**
-	 * Instantiates a new {@link UITextField}.
-	 */
-	public UITextField()
-	{
-		this(false);
-	}
-
-	public UITextField(String text)
-	{
-		this();
-		setText(text);
-	}
-
 	@Override
 	public void setParent(UIComponent parent)
 	{
 
 		super.setParent(parent);
 
-	}
-
-	@Override
-	public void onAddedToScreen(EGOGui gui)
-	{
-		this.gui = gui;
 	}
 
 	// #region Getters/Setters
@@ -173,7 +159,7 @@ public class UITextField extends UIComponent
 			text = "";
 		this.text.setLength(0);
 		this.text.append(text);
-		guiText.setText(text);
+		//		guiText.setText(text);
 
 		selectingText = false;
 		xOffset = 0;
@@ -190,6 +176,11 @@ public class UITextField extends UIComponent
 	public String getText()
 	{
 		return text.toString();
+	}
+
+	public void setFontOptions(FontOptions fontOptions)
+	{
+		guiText.setFontOptions(fontOptions);
 	}
 
 	@Override
@@ -239,12 +230,10 @@ public class UITextField extends UIComponent
 	 * Sets the cursor color.
 	 *
 	 * @param cursorColor the cursor color
-	 * @return the UI text field
 	 */
-	public UITextField setCursorColor(int cursorColor)
+	public void setCursorColor(int cursorColor)
 	{
 		this.cursorColor = cursorColor;
-		return this;
 	}
 
 	/**
@@ -261,12 +250,10 @@ public class UITextField extends UIComponent
 	 * Sets the select color.
 	 *
 	 * @param selectColor the select color
-	 * @return the UI text field
 	 */
-	public UITextField setSelectColor(int selectColor)
+	public void setSelectColor(int selectColor)
 	{
 		this.selectColor = selectColor;
-		return this;
 	}
 
 	/**
@@ -301,7 +288,7 @@ public class UITextField extends UIComponent
 			selectAllOnRelease = true;
 
 		super.setFocused(focused);
-	*}
+	}
 */
 
 	/**
@@ -348,12 +335,10 @@ public class UITextField extends UIComponent
 	 * Sets the editable.
 	 *
 	 * @param editable the editable
-	 * @return the UI text field
 	 */
-	public UITextField setEditable(boolean editable)
+	public void setEditable(boolean editable)
 	{
 		this.editable = editable;
-		return this;
 	}
 
 	/**
@@ -364,7 +349,8 @@ public class UITextField extends UIComponent
 	public void setFilter(Function<String, String> filterFunction)
 	{
 		this.filterFunction = filterFunction;
-		text = new StringBuilder(this.filterFunction.apply(text.toString()));
+		if (filterFunction != null)
+			text = new StringBuilder(this.filterFunction.apply(text.toString()));
 	}
 
 	/**
@@ -375,6 +361,11 @@ public class UITextField extends UIComponent
 	public Function<String, String> getFilter()
 	{
 		return filterFunction;
+	}
+
+	public void setCursor(GuiShape cursor)
+	{
+		cursorRenderer = cursor;
 	}
 
 	// #end Getters/Setters
@@ -408,7 +399,7 @@ public class UITextField extends UIComponent
 		if (filterFunction != null)
 			newValue = filterFunction.apply(newValue);
 
-		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
+		if (fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
 			return;
 
 		text = new StringBuilder(newValue);
@@ -434,8 +425,11 @@ public class UITextField extends UIComponent
 		String newValue = new StringBuilder(oldValue).delete(start, end)
 													 .toString();
 
-		if (!fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
+		if (fireEvent(new ValueChange.Pre<>(this, oldValue, newValue)))
+		{
+			selectingText = false;
 			return;
+		}
 
 		text = new StringBuilder(newValue);
 		guiText.setText(newValue);
@@ -635,10 +629,10 @@ public class UITextField extends UIComponent
 				if (isEditable())
 					deleteFromCursor(1);
 				return true;
-			case Keyboard.KEY_TAB:
-				if (isEditable())
-					addText("\t");
-				return true;
+			//case Keyboard.KEY_TAB:
+			//	if (isEditable())
+			//		addText("\t");
+			//	return true;
 			default:
 				if ((ChatAllowedCharacters.isAllowedCharacter(keyChar) || keyChar == '\u00a7') && isEditable())
 					addText(Character.toString(keyChar));
@@ -705,13 +699,14 @@ public class UITextField extends UIComponent
 	//#end Input
 	public void drawCursor(GuiRenderer renderer)
 	{
-		if (!isFocused())
+		if (cursorRenderer == null || !isFocused())
 			return;
 
 		long elaspedTime = startTimer - System.currentTimeMillis();
 		if ((elaspedTime / 500) % 2 != 0)
 			return;
-		cursorShape.render(renderer);
+
+		cursorRenderer.render(renderer);
 	}
 
 	/**
@@ -785,7 +780,7 @@ public class UITextField extends UIComponent
 		/** The y position in the text. */
 		protected int y;
 		/** The height of the line. */
-		protected int height = 9;
+		protected int height = 10;
 
 		public int index()
 		{
@@ -811,7 +806,7 @@ public class UITextField extends UIComponent
 		@Override
 		public int y()
 		{
-			return y + 2;
+			return y + 1;
 		}
 
 		/**
@@ -1020,4 +1015,108 @@ public class UITextField extends UIComponent
 		}
 	}
 	//#end CursorPosition
+
+	public static UITextFieldBuilder builder()
+	{
+		return new UITextFieldBuilder();
+	}
+
+	public static class UITextFieldBuilder extends UIComponentBuilder<UITextFieldBuilder, UITextField>
+			implements IFontOptionsBuilder<UITextFieldBuilder, UITextField>
+	{
+		private String text = "";
+		private boolean editable = true;
+		protected boolean autoSelectOnFocus = false;
+
+		private GuiShape cursor;
+		protected int cursorColor = 0xD0D0D0;
+		protected int selectColor = 0x0000FF;
+
+		protected Function<String, String> filterFunction;
+
+		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
+
+		private UITextFieldBuilder()
+		{
+			width(100);
+			height(12);
+		}
+
+		@Override
+		public FontOptionsBuilder fob()
+		{
+			return fontOptionsBuilder;
+		}
+
+		@Override
+		public UITextFieldBuilder when(Predicate<UITextField> predicate)
+		{
+			fontOptionsBuilder = fob().when(predicate);
+			return this;
+		}
+
+		public UITextFieldBuilder text(String text)
+		{
+			this.text = text;
+			return this;
+		}
+
+		public UITextFieldBuilder editable()
+		{
+			return editable(true);
+		}
+
+		public UITextFieldBuilder editable(boolean editable)
+		{
+			this.editable = editable;
+			return this;
+		}
+
+		public UITextFieldBuilder autoSelectOnFocus()
+		{
+			return autoSelectOnFocus(true);
+		}
+
+		public UITextFieldBuilder autoSelectOnFocus(boolean autoSelect)
+		{
+			this.autoSelectOnFocus = autoSelect;
+			return this;
+		}
+
+		public UITextFieldBuilder cursor(GuiShape cursor)
+		{
+			this.cursor = cursor;
+			return this;
+		}
+
+		public UITextFieldBuilder cursorColor(int color)
+		{
+			this.cursorColor = color;
+			return this;
+		}
+
+		public UITextFieldBuilder filter(Function<String, String> func)
+		{
+			this.filterFunction = func;
+			return this;
+		}
+
+		@Override
+		public UITextField build()
+		{
+			UITextField tf = build(new UITextField());
+			tf.setText(text);
+			tf.setEditable(editable);
+			tf.setAutoSelectOnFocus(autoSelectOnFocus);
+
+			if (cursor != null)
+				tf.setCursor(cursor);
+			tf.setCursorColor(cursorColor);
+			tf.setFilter(filterFunction);
+
+			tf.setFontOptions(fob().build(tf));
+
+			return tf;
+		}
+	}
 }

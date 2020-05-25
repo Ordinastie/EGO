@@ -56,7 +56,7 @@ public class MCEditor extends UIContainer
 	public MCEditor()
 	{
 		super();
-		tf = new UITextField(true);
+		tf = new UITextField();
 		tf.setPosition(Position.of(0, bottomAligned(tf, 0)));
 		tf.setSize(Size.of(Sizes.parentWidth(tf, 1.0F, 0), Sizes.parentHeight(tf, 0.9f, 0)));
 
