@@ -62,6 +62,7 @@ import net.malisis.ego.gui.event.StateChangeEvent.FocusEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.UnfocusEvent;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import java.util.LinkedHashSet;
@@ -610,7 +611,6 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 	 * To get the distance dragged, use {@code EGOGui.MOUSE_POSITION.moved()}
 	 *
 	 * @param button the button
-	 * @return if true, prevents {@link UIComponent#click(MouseButton)} to be called when button is released
 	 */
 	public void mouseDrag(MouseButton button)
 	{
@@ -713,6 +713,22 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 		}
 
 		return isInsideBounds(x, y) ? this : null;
+	}
+
+	public UIComponent getComponent(String name)
+	{
+		if (StringUtils.isEmpty(name))
+			return null;
+
+		if (name.equals(getName()))
+			return this;
+
+		UIComponent found;
+		for (IControlComponent c : controlComponents)
+			if ((found = c.getComponent(name)) != null)
+				return found;
+
+		return null;
 	}
 
 	/**

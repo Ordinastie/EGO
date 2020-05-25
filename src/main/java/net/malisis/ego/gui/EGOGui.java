@@ -130,6 +130,8 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	protected GuiScreen parent = null;
 	protected boolean showParentOnClose = false;
 
+	protected UIComponent modalComponent = null;
+
 	/** Debug **/
 	private DebugComponent debugComponent;
 
@@ -157,6 +159,12 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		counter = 0;
 		xCounter = 0;
 		xTotal = 0;
+	}
+
+	protected EGOGui(GuiScreen parent)
+	{
+		this();
+		this.parent = parent;
 	}
 
 	/**
@@ -357,7 +365,8 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
-		UIComponent component = screen.getComponentAt(x, y);
+		UIComponent component = modalComponent != null ? modalComponent : screen;
+		component = component.getComponentAt(x, y);
 		return component == screen /*|| component == debugComponent*/ ? null : component;
 	}
 
@@ -536,14 +545,21 @@ public abstract class EGOGui extends GuiScreen implements ISize
 			if (debugComponent.keyTyped(keyChar, keyCode))
 				return;
 
-			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)
-				close();
+			if (isGuiCloseKey(keyCode))
+			{
+				if (modalComponent != null)
+					closeModal();
+				else if (mc.currentScreen == this)
+					close();
+			}
 
+			//reload current gui
 			if (!EGO.isObfEnv && GuiScreen.isCtrlKeyDown() && (current() != null || isOverlay))
 			{
 				if (keyCode == Keyboard.KEY_R)
 				{
 					clearScreen();
+					modalComponent = null;
 					setResolution();
 					setHoveredComponent(null);
 					setFocusedComponent(null);
@@ -611,6 +627,11 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	{
 		debugComponent.addDebug(name, supplier);
 	}
+
+	public void watch(String componentName)
+	{
+		debugComponent.watch(componentName);
+	}
 	//#end Debug
 
 	/**
@@ -644,7 +665,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	/**
 	 * Display this {@link EGOGui}.
 	 *
-	 * @param cancelClose the wether or not to cancel the next GuiDemo close event (used for when the GUI is opened from command)
+	 * @param cancelClose whether or not to cancel the next close event (used for when the GUI is opened from command)
 	 */
 	public void display(boolean cancelClose)
 	{
@@ -656,6 +677,25 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		parent = Minecraft.getMinecraft().currentScreen;
 		Minecraft.getMinecraft()
 				 .displayGuiScreen(this);
+	}
+
+	public void displayModal(UIComponent component)
+	{
+		if (component == null)
+			return;
+
+		modalComponent = component;
+		setFocusedComponent(null);
+		setHoveredComponent(null);
+		addToScreen(modalComponent);
+	}
+
+	public void hideModal()
+	{
+		if (modalComponent == null)
+			return;
+		removeFromScreen(modalComponent);
+		modalComponent = null;
 	}
 
 	/**
@@ -744,6 +784,18 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		return Minecraft.getMinecraft().player;
 	}
 
+	public UIComponent findComponent(String name)
+	{
+		UIComponent comp;
+		if (modalComponent instanceof UIContainer)
+		{
+			if ((comp = modalComponent.getComponent(name)) != null)
+				return comp;
+		}
+
+		return screen.getComponent(name);
+	}
+
 	/**
 	 * Gets the current {@link EGOGui} displayed.
 	 *
@@ -819,7 +871,10 @@ public abstract class EGOGui extends GuiScreen implements ISize
 			gui.hoveredComponent.unhover();
 		gui.hoveredComponent = null;
 		if (component == null/* || !component.isVisible()*/)
+		{
+			gui.tooltip = null;
 			return;
+		}
 
 		component.hover();
 		gui.hoveredComponent = component;
@@ -888,9 +943,15 @@ public abstract class EGOGui extends GuiScreen implements ISize
 
 	public static void closeGui()
 	{
-		if (current() == null)
-			return;
-		current().close();
+		if (current() != null)
+			current().close();
+	}
+
+	public static void closeModal()
+	{
+		if (current() != null)
+			current().hideModal();
+
 	}
 
 	public static void openLink(String url)

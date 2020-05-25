@@ -60,6 +60,14 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	public UIComponent getComponentAt(int x, int y);
 
 	/**
+	 * Gets the {@link UIComponent} matching the specified name.
+	 *
+	 * @param name the name
+	 * @return the component
+	 */
+	public UIComponent getComponent(String name);
+
+	/**
 	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>
 	 * See {@link UIComponent#keyTyped(char, int)}.
 	 *

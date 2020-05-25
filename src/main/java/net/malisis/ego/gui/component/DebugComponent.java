@@ -211,6 +211,17 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		updateGuiText();
 	}
 
+ 	public void watch(String watched)
+	{
+		addDebug("Watched", () -> String.valueOf(EGOGui.current()
+													   .findComponent(watched)));
+	}
+
+	public void unWatch()
+	{
+		removeDebug("Watched");
+	}
+
 	@Override
 	public void scrollWheel(int delta)
 	{

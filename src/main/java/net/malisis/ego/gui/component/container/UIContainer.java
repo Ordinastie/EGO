@@ -146,39 +146,17 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public UIComponent getComponent(String name)
 	{
-		return getComponent(name, false);
-	}
-
-	/**
-	 * Gets the {@link UIComponent} matching the specified name. If recursive is true, looks for the {@code UIComponent} inside it child
-	 * {@link UIContainer} too.
-	 *
-	 * @param name the name
-	 * @param recursive if true, look inside child {@code UIContainer}
-	 * @return the component
-	 */
-	public UIComponent getComponent(String name, boolean recursive)
-	{
 		if (StringUtils.isEmpty(name))
 			return null;
 
-		for (UIComponent c : content.components)
-		{
-			if (name.equals(c.getName()))
-				return c;
-		}
-
-		if (!recursive)
-			return null;
+		UIComponent found;
+		if ((found = super.getComponent(name)) != null)
+			return found;
 
 		for (UIComponent c : content.components)
 		{
-			if (c instanceof UIContainer)
-			{
-				UIComponent found = getComponent(name, true);
-				if (found != null)
-					return found;
-			}
+			if ((found = c.getComponent(name)) != null)
+				return found;
 		}
 
 		return null;
