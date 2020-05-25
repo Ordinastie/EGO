@@ -94,7 +94,7 @@ public class StringWalker
 	public StringWalker(GuiText text, FontOptions options)
 	{
 		this.lines = text.lines();
-		this.litteral = text.isLitteral();
+		this.litteral = text.isLiteral();
 		styles.add(options != null ? options : FontOptions.EMPTY);
 		this.rightAligned = options != null && options.isRightAligned();
 
