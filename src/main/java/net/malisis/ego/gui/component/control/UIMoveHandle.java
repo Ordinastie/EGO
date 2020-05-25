@@ -93,6 +93,14 @@ public class UIMoveHandle extends UIComponent implements IControlComponent
 
 		private UIMoveHandlerBuilder()
 		{
+			x(0);
+			y(0);
+			width(c -> () -> c.getParent()
+							  .size()
+							  .width());
+			height(c -> () -> c.getParent()
+							   .size()
+							   .height());
 		}
 
 		public UIMoveHandlerBuilder horizontal()

@@ -200,8 +200,6 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER movable()
 	{
 		return withControl(UIMoveHandle.builder()
-									   .position(0, 0)
-									   .parentSize()
 									   .build());
 	}
 
