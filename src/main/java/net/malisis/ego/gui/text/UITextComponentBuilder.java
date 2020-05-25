@@ -113,12 +113,6 @@ public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<
 		return self();
 	}
 
-	public BUILDER translated()
-	{
-		tb().translated();
-		return self();
-	}
-
 	public BUILDER literal(boolean literal)
 	{
 		tb().literal(literal);

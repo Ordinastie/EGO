@@ -98,13 +98,16 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	/** Text wrap size. 0 means do not wrap. */
 	private IntCachedData wrapSize;
-	private IntCachedData fitSize;
+	private final IntCachedData fitSize;
+
+	private final CachedData<FontOptions> cachedOptions = new CachedData<>(this::getFontOptions, (fo1, fo2) -> fo1.isBold() != fo2.isBold()
+			|| fo1.getFontScale() != fo2.getFontScale());
 
 	private IPosition position;
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
-	private ISize size = Size.ZERO;
-	private IntSupplier zIndex;
-	private IntSupplier alpha;
+	private ISize size;
+	private final IntSupplier zIndex;
+	private final IntSupplier alpha;
 
 	//private boolean buildLines = true;
 	//private boolean buildCache = true;
@@ -263,7 +266,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 *
 	 * @return true, if is literal
 	 */
-	public boolean isLitteral()
+	public boolean isLiteral()
 	{
 		return literal;
 	}
@@ -295,10 +298,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 */
 	public void setFontOptions(FontOptions fontOptions)
 	{
-		checkNotNull(fontOptions);
-		//TODO: should be checked in update directly and all the time because bold/scale could change with PredicatedFontOptions
-		update(defaultOptions.isBold() != fontOptions.isBold() || defaultOptions.getFontScale() != fontOptions.getFontScale());
-		this.defaultOptions = fontOptions;
+		this.defaultOptions = checkNotNull(fontOptions);
 	}
 
 	/**
@@ -333,28 +333,22 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		return changed;
 	}
 
-	private void update()
-	{
-		update(false);
-	}
-
 	/**
 	 * Update the cache and the lines if necessary.
-	 *
-	 * @return
 	 */
-	private void update(boolean force)
+	private void update()
 	{
 		base.update();
 		wrapSize.update();
 		fitSize.update();
+		cachedOptions.update();
 
 		boolean buildCache = base.hasChanged() || hasParametersChanged();
-		boolean buildLines = buildCache || wrapSize.hasChanged() || fitSize.hasChanged();
-		if (buildCache || force || !CACHED)
+		boolean buildLines = buildCache || wrapSize.hasChanged() || fitSize.hasChanged() || cachedOptions.hasChanged();
+		if (buildCache || !CACHED)
 			generateCache();
 
-		if (buildLines || force || !CACHED)
+		if (buildLines || !CACHED)
 		{
 			buildLines(defaultOptions);
 			if (checkFitSize())
@@ -715,12 +709,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		public Builder translated(boolean translated)
 		{
 			this.translated = translated;
-			return this;
-		}
-
-		public Builder translated()
-		{
-			translated = true;
 			return this;
 		}
 
