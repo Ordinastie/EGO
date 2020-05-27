@@ -415,7 +415,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		}
 	}
 
-	public abstract static class UIContainerBuilderG<BUILDER extends UIComponentBuilder<?, ?>, CONTAINER extends UIContainer>
+	public abstract static class UIContainerBuilderG<BUILDER extends UIContainerBuilderG<?, ?>, CONTAINER extends UIContainer>
 			extends UIComponentBuilder<BUILDER, CONTAINER>
 	{
 		protected Padding padding = Padding.NO_PADDING;
