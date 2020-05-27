@@ -227,7 +227,6 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 	public void setZIndex(int zIndex)
 	{
 		this.zIndex = zIndex;
-		//TODO: fire event to notify parent to reorder components
 	}
 
 	/**
