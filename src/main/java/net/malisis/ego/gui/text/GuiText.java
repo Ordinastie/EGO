@@ -101,7 +101,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	private final IntCachedData fitSize;
 
 	private final CachedData<FontOptions> cachedOptions = new CachedData<>(this::getFontOptions, (fo1, fo2) -> fo1.isBold() != fo2.isBold()
-			|| fo1.getFontScale() != fo2.getFontScale());
+			|| fo1.getFontScale() != fo2.getFontScale() || fo1.getFont() != fo2.getFont());
 
 	private IPosition position;
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
