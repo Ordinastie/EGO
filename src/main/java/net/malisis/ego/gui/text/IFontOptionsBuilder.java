@@ -112,6 +112,12 @@ public interface IFontOptionsBuilder<BUILDER, COMPONENT>
 		return self();
 	}
 
+	default BUILDER obfuscatedCharList(String charList)
+	{
+		fob().obfuscatedCharList(charList);
+		return self();
+	}
+
 	default BUILDER shadow()
 	{
 		return shadow(true);

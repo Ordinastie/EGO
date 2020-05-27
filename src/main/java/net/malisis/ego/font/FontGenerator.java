@@ -24,6 +24,9 @@
 
 package net.malisis.ego.font;
 
+import net.malisis.ego.EGO;
+import org.apache.commons.io.FileUtils;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -35,13 +38,8 @@ import java.nio.charset.StandardCharsets;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FileUtils;
-
-import net.malisis.ego.EGO;
-
 /**
  * @author Ordinastie
- *
  */
 public class FontGenerator
 {
@@ -52,9 +50,9 @@ public class FontGenerator
 			f.mkdir();
 	}
 
-	private Font font;
-	private CharData[] charData;
-	private FontGeneratorOptions options;
+	private final Font font;
+	private final CharData[] charData;
+	private final FontGeneratorOptions options;
 
 	public FontGenerator(Font font, CharData[] charData, FontGeneratorOptions options)
 	{

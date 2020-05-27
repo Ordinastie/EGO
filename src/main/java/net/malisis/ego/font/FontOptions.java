@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -68,7 +67,7 @@ public class FontOptions
 			int j = (i >> 3 & 1) * 85;
 			int r = (i >> 2 & 1) * 170 + j;
 			int g = (i >> 1 & 1) * 170 + j;
-			int b = (i >> 0 & 1) * 170 + j;
+			int b = (i & 1) * 170 + j;
 
 			if (i == 6) //GOLD
 				r += 85;
@@ -100,6 +99,8 @@ public class FontOptions
 	protected final Integer lineSpacing;
 	/** Right aligned. */
 	protected final Boolean rightAligned;
+	/* Obfuscated char list */
+	protected String obfuscatedCharList = null;
 
 	protected List<FontOptions> predicates = Lists.newArrayList();
 
@@ -121,6 +122,7 @@ public class FontOptions
 		charSpacing = builder.charSpacing;
 		lineSpacing = builder.lineSpacing;
 		rightAligned = builder.rightAligned;
+		obfuscatedCharList = builder.obfuscatedCharList;
 
 		predicate = builder.predicate;
 		this.predicateParam = predicateParam;
@@ -214,6 +216,11 @@ public class FontOptions
 	public boolean isObfuscated()
 	{
 		return ObjectUtils.firstNonNull(get().obfuscated, obfuscated, false);
+	}
+
+	public String getObfuscatedCharList()
+	{
+		return ObjectUtils.firstNonNull(get().obfuscatedCharList, obfuscatedCharList);
 	}
 
 	/**
@@ -436,6 +443,8 @@ public class FontOptions
 		protected Integer lineSpacing;
 		/** Right aligned. */
 		protected Boolean rightAligned;
+		/* Obfuscated char list */
+		protected String obfuscatedCharList = null;
 
 		public FontOptionsBuilder()
 		{
@@ -555,6 +564,12 @@ public class FontOptions
 		public FontOptionsBuilder obfuscated(boolean obfuscated)
 		{
 			this.obfuscated = obfuscated;
+			return this;
+		}
+
+		public FontOptionsBuilder obfuscatedCharList(String chars)
+		{
+			this.obfuscatedCharList = chars;
 			return this;
 		}
 

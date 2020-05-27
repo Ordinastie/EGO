@@ -246,7 +246,7 @@ public class EGOFont
 	{
 		CharData cd = getCharData(c);
 		if (options.isObfuscated())
-			cd = getRandomChar(cd);
+			cd = getRandomChar(cd, options.getObfuscatedCharList());
 		float fs = options.getFontScale();
 
 		//draw shadow first
@@ -333,16 +333,19 @@ public class EGOFont
 		buffer.endVertex();
 	}
 
-	public CharData getRandomChar(CharData cd)
+	public CharData getRandomChar(CharData cd, String charList)
 	{
 		Random rand = Minecraft.getMinecraft().fontRenderer.fontRandom;
 		float w = cd.getCharWidth();
+		float err = w / 10;
+		if (charList == null)
+			charList = CHARLIST;
 
 		while (true)
 		{
-			int index = rand.nextInt(CHARLIST.length());
-			cd = getCharData(CHARLIST.charAt(index));
-			if (cd.getCharWidth() == w)
+			int index = rand.nextInt(charList.length());
+			cd = getCharData(charList.charAt(index));
+			if (cd.getCharWidth() > w - err && cd.getCharWidth() < cd.getCharWidth() + err)
 				return cd;
 		}
 	}
@@ -513,6 +516,7 @@ public class EGOFont
 			CharData cd = new CharData(c, lm.getAscent(), (float) bounds.getWidth(), fontGeneratorOptions.fontSize);
 			charData[c] = cd;
 			totalWidth += cd.getFullWidth(fontGeneratorOptions);
+			//System.out.println(cd.getChar() + " : " + cd.getCharWidth());
 		}
 
 		int split = 1;
