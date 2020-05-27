@@ -24,6 +24,8 @@
 
 package net.malisis.ego.gui.component.decoration;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.control.IScrollable;
@@ -48,19 +50,24 @@ import javax.annotation.Nonnull;
  */
 public class UILabel extends UIComponent implements IScrollable, IClipable
 {
-	protected final GuiText text;
+	protected GuiText text;
 	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
 
 	/**
 	 * Instantiates a new {@link UILabel}.
 	 */
-	protected UILabel(UILabelBuilder builder)
+	protected UILabel()
 	{
-		text = builder.buildText(this);
-		setForeground(text);
+
 	}
 
 	// #region getters/setters
+	public void setGuiText(GuiText guiText)
+	{
+		this.text = checkNotNull(guiText);
+		setForeground(text);
+	}
+
 	@Override
 	public GuiText content()
 	{
@@ -132,9 +139,19 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 		return new UILabelBuilder();
 	}
 
-	public static class UILabelBuilder extends UITextComponentBuilder<UILabelBuilder, UILabel>
+	public static class UILabelBuilder extends UILabelBuilderG<UILabelBuilder, UILabel>
 	{
-		protected UILabelBuilder()
+		@Override
+		public UILabel build()
+		{
+			return build(new UILabel());
+		}
+	}
+
+	public abstract static class UILabelBuilderG<BUILDER extends UILabelBuilderG<?, ?>, COMPONENT extends UILabel>
+			extends UITextComponentBuilder<BUILDER, COMPONENT>
+	{
+		protected UILabelBuilderG()
 		{
 			//by default, label size spans to fit the text
 			guiTextBuilder.wrapSize(0);
@@ -142,27 +159,29 @@ public class UILabel extends UIComponent implements IScrollable, IClipable
 			height = l -> Sizes.heightOfContent(l, 0);
 		}
 
-		public UILabelBuilder contentSize()
+		public BUILDER contentSize()
 		{
 			super.size(Size::sizeOfContent);
 			wrapSize(0);
 			wrapSize = null;
-			return this;
+			return self();
 		}
 
 		@Override
-		public UILabelBuilder size(Function<UILabel, ISize> func)
+		public BUILDER size(Function<COMPONENT, ISize> func)
 		{
 			super.size(func);
 			//automatically wrap to the resulting size of the UILabel
 			wrapSize(l -> l.innerSize()::width);
-			return this;
+			return self();
 		}
 
 		@Override
-		public UILabel build()
+		public COMPONENT build(COMPONENT label)
 		{
-			return build(new UILabel(this));
+			label.setGuiText(buildText(label));
+			super.build(label);
+			return label;
 		}
 	}
 
