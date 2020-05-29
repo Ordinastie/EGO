@@ -24,6 +24,8 @@
 
 package net.malisis.ego.gui.component.interaction;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.font.StringWalker;
@@ -53,6 +55,8 @@ import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -67,7 +71,6 @@ public class UITextField extends UIComponent
 	protected final GuiText guiText;
 	/** Current text of this {@link UITextField}. */
 	protected StringBuilder text = new StringBuilder();
-	protected Function<String, String> filterFunction;
 
 	/** The padding of this {@link UITextField}. */
 	protected Padding padding = Padding.of(1);
@@ -92,6 +95,13 @@ public class UITextField extends UIComponent
 	protected boolean autoSelectOnFocus = false;
 	/** Whether this {@link UITextField} is editable. */
 	protected boolean editable = true;
+	protected Function<String, String> filterFunction = Function.identity();
+	/** Checks whether the character input is allowed **/
+	protected BiPredicate<UITextField, Character> allowedInput = (tf, c) -> true;
+	/** Check whether the text entered is valid. No internal use. */
+	protected Predicate<UITextField> validator = tf -> true;
+
+	private boolean isValid = true;
 
 	//options
 	/** Cursor color for this {@link UITextField}. */
@@ -110,6 +120,7 @@ public class UITextField extends UIComponent
 											 .build();
 
 	protected GuiShape cursorRenderer = cursorShape;
+	private Consumer<UITextField> enterCallback;
 
 	public UITextField()
 	{
@@ -152,13 +163,10 @@ public class UITextField extends UIComponent
 	 */
 	public void setText(String text)
 	{
-		if (filterFunction != null)
-			text = filterFunction.apply(text);
-
 		if (text == null)
 			text = "";
 		this.text.setLength(0);
-		this.text.append(text);
+		addText(text);
 		//		guiText.setText(text);
 
 		selectingText = false;
@@ -176,6 +184,16 @@ public class UITextField extends UIComponent
 	public String getText()
 	{
 		return text.toString();
+	}
+
+	public int getTextAsInt()
+	{
+		return Integer.parseInt(getText());
+	}
+
+	public float getTextAsFloat()
+	{
+		return Float.parseFloat(getText());
 	}
 
 	public void setFontOptions(FontOptions fontOptions)
@@ -274,24 +292,6 @@ public class UITextField extends UIComponent
 	}
 
 	/**
-	 * Sets the focused.
-	 *
-	 * @param focused the new focused
-	 */
-/*	@Override
-	public void setFocused(boolean focused)
-	{
-		if (!isEnabled() || !isVisible())
-			return;
-
-		if (!this.focused)
-			selectAllOnRelease = true;
-
-		super.setFocused(focused);
-	}
-*/
-
-	/**
 	 * Gets the current cursor position.
 	 *
 	 * @return the position of the cursor.
@@ -363,9 +363,49 @@ public class UITextField extends UIComponent
 		return filterFunction;
 	}
 
+	public void setAllowedInput(BiPredicate<UITextField, Character> allowedInput)
+	{
+		this.allowedInput = allowedInput;
+	}
+
+	public BiPredicate<UITextField, Character> getAllowedInput()
+	{
+		return allowedInput;
+	}
+
+	public void setValidator(Predicate<UITextField> validator)
+	{
+		this.validator = validator;
+	}
+
+	public Predicate<UITextField> getValidator()
+	{
+		return validator;
+	}
+
+	public void setEnterCallback(Consumer<UITextField> consumer)
+	{
+		this.enterCallback = consumer;
+	}
+
+	public Consumer<UITextField> getEnterCallback()
+	{
+		return enterCallback;
+	}
+
 	public void setCursor(GuiShape cursor)
 	{
 		cursorRenderer = cursor;
+	}
+
+	public boolean isValid()
+	{
+		return isValid;
+	}
+
+	public boolean isInvalid()
+	{
+		return !isValid;
 	}
 
 	// #end Getters/Setters
@@ -391,10 +431,20 @@ public class UITextField extends UIComponent
 		if (selectingText)
 			deleteSelectedText();
 
+		if (filterFunction != null)
+			str = filterFunction.apply(str);
+
 		StringBuilder oldText = text;
 		String oldValue = text.toString();
-		String newValue = oldText.insert(cursor.index, str)
-								 .toString();
+
+		int index = cursor.index();
+		for (int i = 0; i < str.length(); i++)
+		{
+			char c = str.charAt(i);
+			if (allowedInput.test(this, c))
+				text.insert(index++, c);
+		}
+		String newValue = text.toString();
 
 		if (filterFunction != null)
 			newValue = filterFunction.apply(newValue);
@@ -404,8 +454,9 @@ public class UITextField extends UIComponent
 
 		text = new StringBuilder(newValue);
 		guiText.setText(newValue);
+		cursor.jumpBy(index);
 
-		cursor.jumpBy(str.length());
+		isValid = validator.test(this);
 
 		fireEvent(new ValueChange.Post<>(this, oldValue, newValue));
 	}
@@ -435,6 +486,8 @@ public class UITextField extends UIComponent
 		guiText.setText(newValue);
 		selectingText = false;
 		cursor.jumpTo(start);
+
+		isValid = validator.test(this);
 
 		fireEvent(new ValueChange.Post<>(this, oldValue, newValue));
 	}
@@ -543,6 +596,22 @@ public class UITextField extends UIComponent
 	//#region Input
 
 	@Override
+	public void focus()
+	{
+		if (!autoSelectOnFocus)
+			return;
+		selectingText = true;
+		selectionCursor.jumpToStart();
+		cursor.jumpToEnd();
+	}
+
+	@Override
+	public void unfocus()
+	{
+		selectingText = false;
+	}
+
+	@Override
 	public void mouseDown(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
@@ -565,14 +634,14 @@ public class UITextField extends UIComponent
 	@Override
 	public void mouseUp(MouseButton button)
 	{
-		if (!autoSelectOnFocus || !selectAllOnRelease || button != MouseButton.LEFT)
-			return;
-
-		selectingText = true;
-		selectionCursor.jumpTo(0);
-		cursor.jumpTo(text.length());
-
-		selectAllOnRelease = false;
+		//		if (!autoSelectOnFocus || !selectAllOnRelease || button != MouseButton.LEFT)
+		//			return;
+		//
+		//		selectingText = true;
+		//		selectionCursor.jumpTo(0);
+		//		cursor.jumpTo(text.length());
+		//
+		//		selectAllOnRelease = false;
 	}
 
 	@Override
@@ -600,8 +669,8 @@ public class UITextField extends UIComponent
 			return true; //we don't want to close the GUI
 		}
 
-		if (handleCtrlKeyDown(keyCode))
-			return true;
+		if (GuiScreen.isCtrlKeyDown())
+			return handleCtrlKeyDown(keyCode);
 
 		switch (keyCode)
 		{
@@ -629,6 +698,11 @@ public class UITextField extends UIComponent
 				if (isEditable())
 					deleteFromCursor(1);
 				return true;
+			case Keyboard.KEY_RETURN:
+			case Keyboard.KEY_NUMPADENTER:
+				if (enterCallback != null)
+					enterCallback.accept(this);
+				return true;
 			//case Keyboard.KEY_TAB:
 			//	if (isEditable())
 			//		addText("\t");
@@ -648,9 +722,6 @@ public class UITextField extends UIComponent
 	 */
 	protected boolean handleCtrlKeyDown(int keyCode)
 	{
-		if (!GuiScreen.isCtrlKeyDown())
-			return false;
-
 		switch (keyCode)
 		{
 			case Keyboard.KEY_LEFT:
@@ -1026,13 +1097,16 @@ public class UITextField extends UIComponent
 	{
 		private String text = "";
 		private boolean editable = true;
-		protected boolean autoSelectOnFocus = false;
+		protected boolean autoSelectOnFocus = true;
 
 		private GuiShape cursor;
 		protected int cursorColor = 0xD0D0D0;
 		protected int selectColor = 0x0000FF;
 
-		protected Function<String, String> filterFunction;
+		protected Function<String, String> filterFunction = Function.identity();
+		protected BiPredicate<UITextField, Character> allowedInput = (tf, c) -> true;
+		protected Consumer<UITextField> enterCallback;
+		protected Predicate<UITextField> validator = tf -> true;
 
 		protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
 
@@ -1101,6 +1175,34 @@ public class UITextField extends UIComponent
 			return this;
 		}
 
+		public UITextFieldBuilder allowedInput(BiPredicate<UITextField, Character> allowedInput)
+		{
+			this.allowedInput = checkNotNull(allowedInput);
+			return this;
+		}
+
+		public UITextFieldBuilder allowedInput(Predicate<Character> allowedInput)
+		{
+			return allowedInput((tc, c) -> allowedInput.test(c));
+		}
+
+		public UITextFieldBuilder validator(Predicate<UITextField> validator)
+		{
+			this.validator = checkNotNull(validator);
+			return this;
+		}
+
+		public UITextFieldBuilder onEnter(Runnable callback)
+		{
+			return onEnter(tf -> callback.run());
+		}
+
+		public UITextFieldBuilder onEnter(Consumer<UITextField> callback)
+		{
+			enterCallback = callback;
+			return this;
+		}
+
 		@Override
 		public UITextField build()
 		{
@@ -1113,6 +1215,9 @@ public class UITextField extends UIComponent
 				tf.setCursor(cursor);
 			tf.setCursorColor(cursorColor);
 			tf.setFilter(filterFunction);
+			tf.setAllowedInput(allowedInput);
+			tf.setEnterCallback(enterCallback);
+			tf.setValidator(validator);
 
 			tf.setFontOptions(fob().build(tf));
 
