@@ -102,7 +102,7 @@ public class FontOptions
 	/* Obfuscated char list */
 	protected String obfuscatedCharList = null;
 
-	protected List<FontOptions> predicates = Lists.newArrayList();
+	protected List<FontOptions> predicates = Lists.newLinkedList();
 
 	protected FontOptions base;
 	protected Predicate<Object> predicate;
@@ -415,7 +415,7 @@ public class FontOptions
 
 	public static class FontOptionsBuilder
 	{
-		private Map<Predicate<Object>, FontOptionsBuilder> predicates = Maps.newHashMap();
+		private final Map<Predicate<Object>, FontOptionsBuilder> predicates = Maps.newLinkedHashMap();
 		private FontOptionsBuilder baseBuilder;
 		private Predicate<Object> predicate;
 		private Object predicateParameter = null;
