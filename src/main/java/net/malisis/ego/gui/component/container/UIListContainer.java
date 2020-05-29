@@ -102,7 +102,7 @@ public class UIListContainer<S> extends UIContainer
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements != null ? elements : Collections.emptyList();
-		//	buildElementComponents();
+		elementsSize = -1;//ensure rebuilding
 	}
 
 	public Collection<S> getElements()
