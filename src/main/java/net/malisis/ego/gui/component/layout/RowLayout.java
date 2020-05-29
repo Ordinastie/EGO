@@ -77,6 +77,6 @@ public class RowLayout implements ILayout
 
 	public void clear()
 	{
-
+		last = null;
 	}
 }
