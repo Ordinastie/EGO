@@ -58,6 +58,8 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
+
 /**
  * {@link UIContainer} are the base for components holding other components.<br>
  * Child components are drawn in the foreground.<br>
@@ -365,12 +367,14 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		{
 		}
 
+		@Nonnull
 		@Override
 		public IPosition position()
 		{
 			return Position.ZERO;
 		}
 
+		@Nonnull
 		@Override
 		public ISize size()
 		{

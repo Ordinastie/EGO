@@ -43,6 +43,8 @@ import net.malisis.ego.gui.element.size.Size.ISized;
 
 import java.util.function.IntSupplier;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Ordinastie
  */
@@ -54,24 +56,42 @@ public class Position
 
 	public interface IPositioned
 	{
-		public default IPosition position()
+		@Nonnull
+		default IPosition position()
 		{
 			return Position.ZERO;
 		}
+
+		/**
+		 * @return position().x()
+		 */
+		default int x()
+		{
+			return position().x();
+		}
+
+		/**
+		 * @return position().y()
+		 */
+		default int y()
+		{
+			return position().y();
+		}
+
 	}
 
 	public interface IPosition
 	{
-		public int x();
+		int x();
 
-		public int y();
+		int y();
 
-		public default IPosition offset(int x, int y)
+		default IPosition offset(int x, int y)
 		{
 			return plus(Position.of(x, y));
 		}
 
-		public default IPosition plus(IPosition other)
+		default IPosition plus(IPosition other)
 		{
 			if (other == null || other == Position.ZERO)
 				return this;
@@ -81,7 +101,7 @@ public class Position
 			return new DynamicPosition(0, 0, () -> x() + other.x(), () -> y() + other.y());
 		}
 
-		public default IPosition minus(IPosition other)
+		default IPosition minus(IPosition other)
 		{
 			if (other == null || other == Position.ZERO)
 				return this;
@@ -263,91 +283,176 @@ public class Position
 	/**
 	 * Creates a fixed {@link IPosition} based on the current values of <code>other</code>.
 	 *
-	 * @param other
-	 * @return
+	 * @param other the position to copy the current values from
+	 * @return the position
 	 */
-	public static IPosition fixed(IPosition other)
+	public static IPosition of(IPosition other)
 	{
 		return new DynamicPosition(other.x(), other.y(), null, null);
 	}
 
-	//position relative to parent
-	public static IPosition inParent(IChild<?> owner, int x, int y)
-	{
-		return new DynamicPosition(0, 0, leftAligned(owner, x), topAligned(owner, y));
-	}
+	//positions relative to parent
 
 	/**
-	 * Positions the <code>owner</code> as the top left of its parent.<br>
+	 * Positions the <code>owner</code> at the top left of its parent.<br>
 	 * Does respect parent padding if any.
 	 *
-	 * @param owner the owner
-	 * @return the i position
+	 * @param owner the element to be positioned
+	 * @return the position
 	 */
 	public static IPosition topLeft(IChild<?> owner)
 	{
 		return of(leftAligned(owner, 0), topAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the top center of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
+
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topCenter(T owner)
 	{
 		return of(centered(owner, 0), topAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the top right of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topRight(T owner)
 	{
 		return of(rightAligned(owner, 0), topAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the middle left of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleLeft(T owner)
 	{
 		return of(leftAligned(owner, 0), middleAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the middle center of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleCenter(T owner)
 	{
 		return of(centered(owner, 0), middleAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the middle right of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleRight(T owner)
 	{
 		return of(rightAligned(owner, 0), middleAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the bottom left of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomLeft(T owner)
 	{
 		return of(leftAligned(owner, 0), bottomAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the bottom center of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomCenter(T owner)
 	{
 		return of(centered(owner, 0), bottomAligned(owner, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> at the bottom right of its parent.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @return the position
+	 */
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomRight(T owner)
 	{
 		return of(rightAligned(owner, 0), bottomAligned(owner, 0));
 	}
 
 	//position relative to other
+
+	/**
+	 * Positions the <code>owner</code> to the left of and middle aligned to <code>other</code>.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @param other the element <code>owner</code> is positioned relative to.
+	 * @return the position
+	 */
 	public static <T extends IPositioned & ISized> IPosition leftOf(ISized owner, T other, int spacing)
 	{
 		return of(Positions.leftOf(owner, other, spacing), middleAlignedTo(owner, other, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> to the right of and middle aligned to <code>other</code>.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @param other the element <code>owner</code> is positioned relative to.
+	 * @return the position
+	 */
 	public static <T extends IPositioned & ISized> IPosition rightOf(ISized owner, T other, int spacing)
 	{
-		return of(Positions.rightOf(other, spacing), middleAlignedTo(owner, other, 0));
+		return of(Positions.rightOf(owner, other, spacing), middleAlignedTo(owner, other, 0));
 	}
 
+	/**
+	 * Positions the <code>owner</code> above and left aligned to <code>other</code>.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @param other the element <code>owner</code> is positioned relative to.
+	 * @return the position
+	 */
 	public static <T extends IPositioned & ISized, U extends IPositioned & ISized> IPosition above(T owner, U other, int spacing)
 	{
 		return of(leftAlignedTo(other, 0), Positions.above(owner, other, spacing));
 	}
 
+	/**
+	 * Positions the <code>owner</code> below and left aligned to <code>other</code>.<br>
+	 * Does respect parent padding if any.
+	 *
+	 * @param owner the element to be positioned
+	 * @param other the element <code>owner</code> is positioned relative to.
+	 * @return the position
+	 */
 	public static <T extends IPositioned & ISized> IPosition below(Object owner, T other, int spacing)
 	{
-		return of(leftAlignedTo(other, 0), Positions.below(other, spacing));
+		return of(leftAlignedTo(other, 0), Positions.below(owner, other, spacing));
 	}
-
 }

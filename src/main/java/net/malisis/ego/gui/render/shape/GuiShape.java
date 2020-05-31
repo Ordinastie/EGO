@@ -51,6 +51,8 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToIntBiFunction;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Ordinastie
  */
@@ -81,6 +83,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		this.border = border;
 	}
 
+	@Nonnull
 	@Override
 	public IPosition position()
 	{
@@ -92,6 +95,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		return zIndex != null ? zIndex.getAsInt() : 0;
 	}
 
+	@Nonnull
 	@Override
 	public ISize size()
 	{

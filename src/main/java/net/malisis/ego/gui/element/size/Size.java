@@ -33,6 +33,8 @@ import net.malisis.ego.gui.element.position.Position.IPositioned;
 
 import java.util.function.IntSupplier;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Ordinastie
  */
@@ -44,24 +46,35 @@ public class Size
 
 	public interface ISized
 	{
-		public default ISize size()
+		@Nonnull
+		default ISize size()
 		{
 			return Size.ZERO;
+		}
+
+		default int width()
+		{
+			return size().width();
+		}
+
+		default int height()
+		{
+			return size().height();
 		}
 	}
 
 	public interface ISize
 	{
-		public int width();
+		int width();
 
-		public int height();
+		int height();
 
-		public default ISize offset(int x, int y)
+		default ISize offset(int x, int y)
 		{
 			return plus(Size.of(x, y));
 		}
 
-		public default ISize plus(ISize other)
+		default ISize plus(ISize other)
 		{
 			if (other == null || other == Size.ZERO)
 				return this;
@@ -71,7 +84,7 @@ public class Size
 			return Size.of(() -> width() + other.width(), () -> height() + other.height());
 		}
 
-		public default ISize minus(ISize other)
+		default ISize minus(ISize other)
 		{
 			if (other == null || other == Size.ZERO)
 				return this;

@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.*;
 
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.IChild;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Position.IPositioned;
@@ -36,7 +37,7 @@ import net.malisis.ego.gui.element.size.Size.ISized;
 import java.util.function.IntSupplier;
 
 /**
- * The Class PositionFunctions.
+ * This class contains helper functions for positioning of elements.
  *
  * @author Ordinastie
  */
@@ -53,10 +54,8 @@ public class Positions
 	 */
 	public static IntSupplier leftAligned(IChild<?> owner, int spacing)
 	{
-		return () -> {
-			return Padding.of(owner.getParent())
-						  .left() + spacing;
-		};
+		return () -> Padding.of(owner.getParent())
+							.left() + spacing;
 	}
 
 	/**
@@ -75,9 +74,7 @@ public class Positions
 			U parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return parent.size()
-						 .width() - owner.size()
-										 .width() - Padding.of(parent)
+			return parent.width() - owner.width() - Padding.of(parent)
 														   .right() - spacing;
 		};
 	}
@@ -97,10 +94,8 @@ public class Positions
 			U parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (parent.size()
-						  .width() - Padding.of(parent)
-											.horizontal() - owner.size()
-																 .width()) / 2 + offset + Padding.of(parent)
+			return (parent.width() - Padding.of(parent)
+											.horizontal() - owner.width()) / 2 + offset + Padding.of(parent)
 																								 .left();
 		};
 	}
@@ -114,10 +109,8 @@ public class Positions
 	 */
 	public static IntSupplier topAligned(IChild<?> owner, int spacing)
 	{
-		return () -> {
-			return Padding.of(owner.getParent())
-						  .top() + spacing;
-		};
+		return () -> Padding.of(owner.getParent())
+							.top() + spacing;
 	}
 
 	/**
@@ -136,9 +129,7 @@ public class Positions
 			U parent = owner.getParent();
 			if (owner.getParent() == null)
 				return 0;
-			return parent.size()
-						 .height() - owner.size()
-										  .height() - Padding.of(parent)
+			return parent.height() - owner.height() - Padding.of(parent)
 															 .bottom() - spacing;
 		};
 
@@ -159,10 +150,8 @@ public class Positions
 			U parent = owner.getParent();
 			if (owner.getParent() == null)
 				return 0;
-			return (int) (Math.ceil(((float) parent.size()
-												   .height() - Padding.of(parent)
-																	  .vertical() - owner.size()
-																						 .height()) / 2) + offset + Padding.of(parent)
+			return (int) (Math.ceil(((float) parent.height() - Padding.of(parent)
+																	  .vertical() - owner.height()) / 2) + offset + Padding.of(parent)
 																														   .top());
 		};
 	}
@@ -179,11 +168,7 @@ public class Positions
 	public static IntSupplier leftOf(ISized owner, IPositioned other, int spacing)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.x() - owner.size()
-									.width() - spacing;
-		};
+		return () -> other.x() - owner.width() - Margin.horizontal(owner, other) - spacing;
 	}
 
 	/**
@@ -194,14 +179,10 @@ public class Positions
 	 * @param spacing the spacing
 	 * @return the int supplier
 	 */
-	public static <T extends IPositioned & ISized> IntSupplier rightOf(T other, int spacing)
+	public static <T extends IPositioned & ISized> IntSupplier rightOf(Object owner, T other, int spacing)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.x() + other.size()
-									.width() + spacing;
-		};
+		return () -> other.x() + other.width() + Margin.horizontal(other, owner) + spacing;
 	}
 
 	/**
@@ -214,11 +195,7 @@ public class Positions
 	public static IntSupplier above(ISized owner, IPositioned other, int spacing)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.y() - owner.size()
-									.height() - spacing;
-		};
+		return () -> other.y() - owner.height() - Margin.vertical(owner, other) - spacing;
 	}
 
 	/**
@@ -229,14 +206,10 @@ public class Positions
 	 * @param spacing the spacing
 	 * @return the int supplier
 	 */
-	public static <T extends IPositioned & ISized> IntSupplier below(T other, int spacing)
+	public static <T extends IPositioned & ISized> IntSupplier below(Object owner, T other, int spacing)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.y() + other.size()
-									.height() + spacing;
-		};
+		return () -> other.y() + other.height() + Margin.vertical(other, owner) + spacing;
 
 	}
 
@@ -252,10 +225,7 @@ public class Positions
 	public static IntSupplier leftAlignedTo(IPositioned other, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.x() + offset;
-		};
+		return () -> other.x() + offset;
 	}
 
 	/**
@@ -269,12 +239,7 @@ public class Positions
 	public static <T extends IPositioned & ISized> IntSupplier rightAlignedTo(ISized owner, T other, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.x() + other.size()
-									.width() - owner.size()
-													.width() + offset;
-		};
+		return () -> other.x() + other.width() - owner.width() + offset;
 	}
 
 	/**
@@ -288,12 +253,7 @@ public class Positions
 	public static <T extends IPositioned & ISized> IntSupplier centeredTo(ISized owner, T other, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.x() + (other.size()
-									 .width() - owner.size()
-													 .width()) / 2 + offset;
-		};
+		return () -> other.x() + (other.width() - owner.width()) / 2 + offset;
 	}
 
 	/**
@@ -306,10 +266,7 @@ public class Positions
 	public static IntSupplier topAlignedTo(IPositioned other, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.y() + offset;
-		};
+		return () -> other.y() + offset;
 
 	}
 
@@ -325,12 +282,7 @@ public class Positions
 	{
 
 		checkNotNull(other);
-		return () -> {
-			return other.position()
-						.y() + other.size()
-									.height() - owner.size()
-													 .height() + offset;
-		};
+		return () -> other.y() + other.height() - owner.height() + offset;
 
 	}
 
@@ -345,12 +297,7 @@ public class Positions
 	public static <T extends IPositioned & ISized> IntSupplier middleAlignedTo(ISized owner, T other, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return (int) (other.position()
-							   .y() + Math.ceil(((float) other.size()
-															  .height() - owner.size()
-																			   .height()) / 2) + offset);
-		};
+		return () -> (int) (other.y() + Math.ceil(((float) other.height() - owner.height()) / 2) + offset);
 	}
 
 	/**
@@ -368,10 +315,8 @@ public class Positions
 			U parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (parent.size()
-						  .width() - Padding.of(parent)
-											.horizontal()) / 2 - owner.size()
-																	  .width() + offset;
+			return (parent.width() - Padding.of(parent)
+											.horizontal()) / 2 - owner.width() + offset;
 		};
 	}
 
@@ -390,8 +335,7 @@ public class Positions
 			U parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (parent.size()
-						  .width() - Padding.of(parent)
+			return (parent.width() - Padding.of(parent)
 											.horizontal()) / 2 + offset;
 		};
 	}

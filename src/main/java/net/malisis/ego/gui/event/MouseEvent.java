@@ -23,7 +23,7 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 	{
 		super(source);
 		this.button = button;
-		position = Position.fixed(EGOGui.MOUSE_POSITION);
+		position = Position.of(EGOGui.MOUSE_POSITION);
 	}
 
 	/**
@@ -98,52 +98,52 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public interface IMouseEventRegister<T extends UIComponent> extends IEventRegister
 	{
-		public default void onMouseMove(Predicate<MouseMove<T>> onMouseMove)
+		default void onMouseMove(Predicate<MouseMove<T>> onMouseMove)
 		{
 			register(MouseMove.class, (Predicate) onMouseMove);
 		}
 
-		public default void onLeftClick(Predicate<MouseLeftClick<T>> onClick)
+		default void onLeftClick(Predicate<MouseLeftClick<T>> onClick)
 		{
 			register(MouseLeftClick.class, (Predicate) onClick);
 		}
 
-		public default void onRightClick(Predicate<MouseRightClick<T>> onRightClick)
+		default void onRightClick(Predicate<MouseRightClick<T>> onRightClick)
 		{
 			register(MouseRightClick.class, (Predicate) onRightClick);
 		}
 
-		public default void onDoubleClick(Predicate<MouseDoubleClick<T>> onDoubleClick)
+		default void onDoubleClick(Predicate<MouseDoubleClick<T>> onDoubleClick)
 		{
 			register(MouseDoubleClick.class, (Predicate) onDoubleClick);
 		}
 
-		public default void onMouseOver(Predicate<MouseOver<T>> onMouseOver)
+		default void onMouseOver(Predicate<MouseOver<T>> onMouseOver)
 		{
 			register(MouseOver.class, (Predicate) onMouseOver);
 		}
 
-		public default void onMouseOut(Predicate<MouseOut<T>> onMouseOut)
+		default void onMouseOut(Predicate<MouseOut<T>> onMouseOut)
 		{
 			register(MouseOut.class, (Predicate) onMouseOut);
 		}
 
-		public default void onMouseDown(Predicate<MouseDown<T>> onMouseDown)
+		default void onMouseDown(Predicate<MouseDown<T>> onMouseDown)
 		{
 			register(MouseDown.class, (Predicate) onMouseDown);
 		}
 
-		public default void onMouseUp(Predicate<MouseUp<T>> onMouseUp)
+		default void onMouseUp(Predicate<MouseUp<T>> onMouseUp)
 		{
 			register(MouseUp.class, (Predicate) onMouseUp);
 		}
 
-		public default void onMouseDrag(Predicate<MouseDrag<T>> onMouseDrag)
+		default void onMouseDrag(Predicate<MouseDrag<T>> onMouseDrag)
 		{
 			register(MouseDrag.class, (Predicate) onMouseDrag);
 		}
 
-		public default void onScrollWheel(Predicate<ScrollWheel<T>> onScrollWheel)
+		default void onScrollWheel(Predicate<ScrollWheel<T>> onScrollWheel)
 		{
 			register(ScrollWheel.class, (Predicate) onScrollWheel);
 		}
@@ -153,66 +153,66 @@ public class MouseEvent<T extends UIComponent> extends GuiEvent<T>
 	public interface IMouseEventBuilder<BUILDER, COMPONENT extends UIComponent> extends IEventRegister
 	{
 		@SuppressWarnings("unchecked")
-		public default BUILDER self()
+		default BUILDER self()
 		{
 			return (BUILDER) this;
 		}
 
-		public default BUILDER onMouseMove(Predicate<MouseMove<COMPONENT>> onMouseMove)
+		default BUILDER onMouseMove(Predicate<MouseMove<COMPONENT>> onMouseMove)
 		{
 			register(MouseMove.class, (Predicate) onMouseMove);
 			return self();
 		}
 
-		public default BUILDER onLeftClick(Predicate<MouseLeftClick<COMPONENT>> onClick)
+		default BUILDER onLeftClick(Predicate<MouseLeftClick<COMPONENT>> onClick)
 		{
 			register(MouseLeftClick.class, (Predicate) onClick);
 			return self();
 		}
 
-		public default BUILDER onRightClick(Predicate<MouseRightClick<COMPONENT>> onRightClick)
+		default BUILDER onRightClick(Predicate<MouseRightClick<COMPONENT>> onRightClick)
 		{
 			register(MouseRightClick.class, (Predicate) onRightClick);
 			return self();
 		}
 
-		public default BUILDER onDoubleClick(Predicate<MouseDoubleClick<COMPONENT>> onDoubleClick)
+		default BUILDER onDoubleClick(Predicate<MouseDoubleClick<COMPONENT>> onDoubleClick)
 		{
 			register(MouseDoubleClick.class, (Predicate) onDoubleClick);
 			return self();
 		}
 
-		public default BUILDER onMouseOver(Predicate<MouseOver<COMPONENT>> onMouseOver)
+		default BUILDER onMouseOver(Predicate<MouseOver<COMPONENT>> onMouseOver)
 		{
 			register(MouseOver.class, (Predicate) onMouseOver);
 			return self();
 		}
 
-		public default BUILDER onMouseOut(Predicate<MouseOut<COMPONENT>> onMouseOut)
+		default BUILDER onMouseOut(Predicate<MouseOut<COMPONENT>> onMouseOut)
 		{
 			register(MouseOut.class, (Predicate) onMouseOut);
 			return self();
 		}
 
-		public default BUILDER onMouseDown(Predicate<MouseDown<COMPONENT>> onMouseDown)
+		default BUILDER onMouseDown(Predicate<MouseDown<COMPONENT>> onMouseDown)
 		{
 			register(MouseDown.class, (Predicate) onMouseDown);
 			return self();
 		}
 
-		public default BUILDER onMouseUp(Predicate<MouseUp<COMPONENT>> onMouseUp)
+		default BUILDER onMouseUp(Predicate<MouseUp<COMPONENT>> onMouseUp)
 		{
 			register(MouseUp.class, (Predicate) onMouseUp);
 			return self();
 		}
 
-		public default BUILDER onMouseDrag(Predicate<MouseDrag<COMPONENT>> onMouseDrag)
+		default BUILDER onMouseDrag(Predicate<MouseDrag<COMPONENT>> onMouseDrag)
 		{
 			register(MouseDrag.class, (Predicate) onMouseDrag);
 			return self();
 		}
 
-		public default BUILDER onScrollWheel(Predicate<ScrollWheel<COMPONENT>> onScrollWheel)
+		default BUILDER onScrollWheel(Predicate<ScrollWheel<COMPONENT>> onScrollWheel)
 		{
 			register(ScrollWheel.class, (Predicate) onScrollWheel);
 			return self();

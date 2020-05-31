@@ -61,6 +61,8 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+
 /**
  * The Class GuiString represents a String to be used and displayed in a GUI.<br>
  * It can be translated, and used with fixed or dynamic named parameters.<br>
@@ -151,6 +153,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		this.position = position;
 	}
 
+	@Nonnull
 	@Override
 	public IPosition position()
 	{
@@ -163,6 +166,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	 *
 	 * @return the i size
 	 */
+	@Nonnull
 	@Override
 	public ISize size()
 	{

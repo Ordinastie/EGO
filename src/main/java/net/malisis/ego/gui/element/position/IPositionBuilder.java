@@ -48,325 +48,325 @@ import java.util.function.IntSupplier;
  */
 public interface IPositionBuilder<BUILDER, OWNER extends IPositioned & ISized & IChild<UIComponent>>
 {
-	public BUILDER position(Function<OWNER, IPosition> func);
+	BUILDER position(Function<OWNER, IPosition> func);
 
-	public BUILDER x(Function<OWNER, IntSupplier> func);
+	BUILDER x(Function<OWNER, IntSupplier> func);
 
-	public BUILDER y(Function<OWNER, IntSupplier> func);
+	BUILDER y(Function<OWNER, IntSupplier> func);
 
-	public default BUILDER position(IPosition position)
+	default BUILDER position(IPosition position)
 	{
 		checkNotNull(position);
 		return position(o -> position);
 	}
 
-	public default BUILDER position(int x, int y)
+	default BUILDER position(int x, int y)
 	{
 		return position(o -> Position.of(x, y));
 	}
 
-	public default BUILDER x(int x)
+	default BUILDER x(int x)
 	{
 		return x(o -> () -> x);
 	}
 
-	public default BUILDER y(int y)
+	default BUILDER y(int y)
 	{
 		return y(o -> () -> y);
 	}
 
-	public default BUILDER x(IntSupplier func)
+	default BUILDER x(IntSupplier func)
 	{
 		return x(s -> func);
 	}
 
-	public default BUILDER y(IntSupplier func)
+	default BUILDER y(IntSupplier func)
 	{
 		return y(s -> func);
 	}
 
-	public default BUILDER topLeft()
+	default BUILDER topLeft()
 	{
 		return topLeft(0, 0);
 	}
 
-	public default BUILDER topLeft(int leftSpacing, int topSpacing)
+	default BUILDER topLeft(int leftSpacing, int topSpacing)
 	{
 		leftAligned(leftSpacing);
 		return topAligned(topSpacing);
 	}
 
-	public default BUILDER topCenter()
+	default BUILDER topCenter()
 	{
 		return topCenter(0, 0);
 	}
 
-	public default BUILDER topCenter(int centerOffset, int topSpacing)
+	default BUILDER topCenter(int centerOffset, int topSpacing)
 	{
 		centered(centerOffset);
 		return topAligned(topSpacing);
 	}
 
-	public default BUILDER topRight()
+	default BUILDER topRight()
 	{
 		return topRight(0, 0);
 	}
 
-	public default BUILDER topRight(int rightSpacing, int topSpacing)
+	default BUILDER topRight(int rightSpacing, int topSpacing)
 	{
 		rightAligned(rightSpacing);
 		return topAligned(topSpacing);
 	}
 
-	public default BUILDER middleLeft()
+	default BUILDER middleLeft()
 	{
 		return middleLeft(0, 0);
 	}
 
-	public default BUILDER middleLeft(int leftSpacing, int middleOffset)
+	default BUILDER middleLeft(int leftSpacing, int middleOffset)
 	{
 		leftAligned(leftSpacing);
 		return middleAligned(middleOffset);
 	}
 
-	public default BUILDER middleCenter()
+	default BUILDER middleCenter()
 	{
 		return middleCenter(0, 0);
 	}
 
-	public default BUILDER middleCenter(int centerOffset, int middleOffset)
+	default BUILDER middleCenter(int centerOffset, int middleOffset)
 	{
 		centered(centerOffset);
 		return middleAligned(middleOffset);
 	}
 
-	public default BUILDER middleRight()
+	default BUILDER middleRight()
 	{
 		return middleRight(0, 0);
 	}
 
-	public default BUILDER middleRight(int rightSpacing, int middleOffset)
+	default BUILDER middleRight(int rightSpacing, int middleOffset)
 	{
 		rightAligned(rightSpacing);
 		return middleAligned(middleOffset);
 	}
 
-	public default BUILDER bottomLeft()
+	default BUILDER bottomLeft()
 	{
 		return bottomLeft(0, 0);
 	}
 
-	public default BUILDER bottomLeft(int leftSpacing, int bottomSpacing)
+	default BUILDER bottomLeft(int leftSpacing, int bottomSpacing)
 	{
 		leftAligned(leftSpacing);
 		return bottomAligned(bottomSpacing);
 	}
 
-	public default BUILDER bottomCenter()
+	default BUILDER bottomCenter()
 	{
 		return bottomCenter(0, 0);
 	}
 
-	public default BUILDER bottomCenter(int centerOffset, int bottomSpacing)
+	default BUILDER bottomCenter(int centerOffset, int bottomSpacing)
 	{
 		centered(centerOffset);
 		return bottomAligned(bottomSpacing);
 	}
 
-	public default BUILDER bottomRight()
+	default BUILDER bottomRight()
 	{
 		return bottomRight(0, 0);
 	}
 
-	public default BUILDER bottomRight(int rightSpacing, int bottomSpacing)
+	default BUILDER bottomRight(int rightSpacing, int bottomSpacing)
 	{
 		rightAligned(rightSpacing);
 		return bottomAligned(bottomSpacing);
 	}
 
 	//X alignment inside parent
-	public default BUILDER leftAligned()
+	default BUILDER leftAligned()
 	{
 		return x(o -> Positions.leftAligned(o, 0));
 	}
 
-	public default BUILDER leftAligned(int spacing)
+	default BUILDER leftAligned(int spacing)
 	{
 		return x(o -> Positions.leftAligned(o, spacing));
 	}
 
-	public default BUILDER centered()
+	default BUILDER centered()
 	{
 		return x(o -> Positions.centered(o, 0));
 	}
 
-	public default BUILDER centered(int offset)
+	default BUILDER centered(int offset)
 	{
 		return x(o -> Positions.centered(o, offset));
 	}
 
-	public default BUILDER rightAligned()
+	default BUILDER rightAligned()
 	{
 		return x(o -> Positions.rightAligned(o, 0));
 	}
 
-	public default BUILDER rightAligned(int spacing)
+	default BUILDER rightAligned(int spacing)
 	{
 		return x(o -> Positions.rightAligned(o, spacing));
 	}
 
 	//Y alignment inside parent
-	public default BUILDER topAligned()
+	default BUILDER topAligned()
 	{
 		return y(o -> Positions.topAligned(o, 0));
 	}
 
-	public default BUILDER topAligned(int spacing)
+	default BUILDER topAligned(int spacing)
 	{
 		return y(o -> Positions.topAligned(o, spacing));
 	}
 
-	public default BUILDER middleAligned()
+	default BUILDER middleAligned()
 	{
 		return y(o -> Positions.middleAligned(o, 0));
 	}
 
-	public default BUILDER middleAligned(int offset)
+	default BUILDER middleAligned(int offset)
 	{
 		return y(o -> Positions.middleAligned(o, offset));
 	}
 
-	public default BUILDER bottomAligned()
+	default BUILDER bottomAligned()
 	{
 		return y(o -> Positions.bottomAligned(o, 0));
 	}
 
-	public default BUILDER bottomAligned(int spacing)
+	default BUILDER bottomAligned(int spacing)
 	{
 		return y(o -> Positions.bottomAligned(o, spacing));
 	}
 
 	//X relative to other
-	public default BUILDER leftOf(IPositioned other)
+	default BUILDER leftOf(IPositioned other)
 	{
 		return x(o -> Positions.leftOf(o, other, 0));
 	}
 
-	public default BUILDER leftOf(IPositioned other, int spacing)
+	default BUILDER leftOf(IPositioned other, int spacing)
 	{
 		return x(o -> Positions.leftOf(o, other, spacing));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER rightOf(T other)
+	default <T extends IPositioned & ISized> BUILDER rightOf(T other)
 	{
-		return x(o -> Positions.rightOf(other, 0));
+		return x(o -> Positions.rightOf(o, other, 0));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER rightOf(T other, int spacing)
+	default <T extends IPositioned & ISized> BUILDER rightOf(T other, int spacing)
 	{
-		return x(o -> Positions.rightOf(other, spacing));
+		return x(o -> Positions.rightOf(o, other, spacing));
 	}
 
 	//Y relative to other
-	public default BUILDER above(IPositioned other)
+	default BUILDER above(IPositioned other)
 	{
 		return y(o -> Positions.above(o, other, 0));
 	}
 
-	public default BUILDER above(IPositioned other, int spacing)
+	default BUILDER above(IPositioned other, int spacing)
 	{
 		return y(o -> Positions.above(o, other, spacing));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER below(T other)
+	default <T extends IPositioned & ISized> BUILDER below(T other)
 	{
-		return y(o -> Positions.below(other, 0));
+		return y(o -> Positions.below(o, other, 0));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER below(T other, int spacing)
+	default <T extends IPositioned & ISized> BUILDER below(T other, int spacing)
 	{
-		return y(o -> Positions.below(other, spacing));
+		return y(o -> Positions.below(o, other, spacing));
 	}
 
 	//X alignment relative to other
-	public default BUILDER leftAlignedTo(IPositioned other)
+	default BUILDER leftAlignedTo(IPositioned other)
 	{
 		return x(o -> Positions.leftAlignedTo(other, 0));
 	}
 
-	public default BUILDER leftAlignedTo(IPositioned other, int offset)
+	default BUILDER leftAlignedTo(IPositioned other, int offset)
 	{
 		return x(o -> Positions.leftAlignedTo(other, offset));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER rightAlignedTo(T other)
+	default <T extends IPositioned & ISized> BUILDER rightAlignedTo(T other)
 	{
 		return x(o -> Positions.rightAlignedTo(o, other, 0));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER rightAlignedTo(T other, int offset)
+	default <T extends IPositioned & ISized> BUILDER rightAlignedTo(T other, int offset)
 	{
 		return x(o -> Positions.rightAlignedTo(o, other, offset));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER centeredTo(T other)
+	default <T extends IPositioned & ISized> BUILDER centeredTo(T other)
 	{
 		return x(o -> Positions.centeredTo(o, other, 0));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER centeredTo(T other, int offset)
+	default <T extends IPositioned & ISized> BUILDER centeredTo(T other, int offset)
 	{
 		return x(o -> Positions.centeredTo(o, other, offset));
 	}
 
 	//Y alignment relative to other
-	public default BUILDER topAlignedTo(IPositioned other)
+	default BUILDER topAlignedTo(IPositioned other)
 	{
 		return y(o -> Positions.topAlignedTo(other, 0));
 	}
 
-	public default BUILDER topAlignedTo(IPositioned other, int offset)
+	default BUILDER topAlignedTo(IPositioned other, int offset)
 	{
 		return y(o -> Positions.topAlignedTo(other, offset));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER bottomAlignedTo(T other)
+	default <T extends IPositioned & ISized> BUILDER bottomAlignedTo(T other)
 	{
 		return y(o -> Positions.bottomAlignedTo(o, other, 0));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER bottomAlignedTo(T other, int offset)
+	default <T extends IPositioned & ISized> BUILDER bottomAlignedTo(T other, int offset)
 	{
 		return y(o -> Positions.bottomAlignedTo(o, other, offset));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER middleAlignedTo(T other)
+	default <T extends IPositioned & ISized> BUILDER middleAlignedTo(T other)
 	{
 		return y(o -> Positions.middleAlignedTo(o, other, 0));
 	}
 
-	public default <T extends IPositioned & ISized> BUILDER middleAlignedTo(T other, int offset)
+	default <T extends IPositioned & ISized> BUILDER middleAlignedTo(T other, int offset)
 	{
 		return y(o -> Positions.middleAlignedTo(o, other, offset));
 	}
 
 	//X relative to center
-	public default BUILDER leftOfCenter()
+	default BUILDER leftOfCenter()
 	{
 		return x(o -> Positions.leftOfCenter(o, 0));
 	}
 
-	public default BUILDER leftOfCenter(int offset)
+	default BUILDER leftOfCenter(int offset)
 	{
 		return x(o -> Positions.leftOfCenter(o, offset));
 	}
 
-	public default BUILDER rightOfCenter()
+	default BUILDER rightOfCenter()
 	{
 		return x(o -> Positions.rightOfCenter(o, 0));
 	}
 
-	public default BUILDER rightOfCenter(int offset)
+	default BUILDER rightOfCenter(int offset)
 	{
 		return x(o -> Positions.rightOfCenter(o, offset));
 	}
