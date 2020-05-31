@@ -376,6 +376,7 @@ public class UITextField extends UIComponent
 	public void setValidator(Predicate<UITextField> validator)
 	{
 		this.validator = validator;
+		isValid = validator.test(this);
 	}
 
 	public Predicate<UITextField> getValidator()
