@@ -5,10 +5,13 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.control.IControlComponent;
 import net.malisis.ego.gui.component.control.UIMoveHandle;
 import net.malisis.ego.gui.component.decoration.UITooltip;
+import net.malisis.ego.gui.element.Margin;
+import net.malisis.ego.gui.element.Margin.InheritedMargin;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
@@ -43,6 +46,8 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected Function<COMPONENT, IntSupplier> width = o -> Sizes.parentWidth(o, 1F, 0);
 	protected Function<COMPONENT, IntSupplier> height = o -> Sizes.parentHeight(o, 1F, 0);
 	protected Function<COMPONENT, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
+	protected int mleft, mright, mtop, mbottom;
+	protected Function<COMPONENT, Margin> margin = o -> Margin.of(mtop, mbottom, mleft, mright);
 
 	protected int zIndex;
 	protected int color = 0xFFFFFF;
@@ -53,6 +58,15 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected Function<COMPONENT, IGuiRenderer> background = null;
 	protected Function<COMPONENT, IGuiRenderer> foreground = null;
 	protected Object data;
+
+	public UIComponentBuilder()
+	{
+		Margin margin = EGOGui.defaultMargin();
+		mleft = margin.left();
+		mright = margin.right();
+		mtop = margin.top();
+		mbottom = margin.bottom();
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -116,6 +130,52 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	public BUILDER height(Function<COMPONENT, IntSupplier> height)
 	{
 		this.height = checkNotNull(height);
+		return self();
+	}
+
+	public BUILDER margin(int margin)
+	{
+		mtop = mbottom = mleft = mright = margin;
+		return self();
+	}
+
+	public BUILDER marginTop(int margin)
+	{
+		mtop = margin;
+		return self();
+	}
+
+	public BUILDER marginBottom(int margin)
+	{
+		mbottom = margin;
+		return self();
+	}
+
+	public BUILDER marginLeft(int margin)
+	{
+		mleft = margin;
+		return self();
+	}
+
+	public BUILDER marginRight(int margin)
+	{
+		mright = margin;
+		return self();
+	}
+
+	public BUILDER margin(Margin margin)
+	{
+		return margin(o -> margin);
+	}
+
+	public BUILDER inheritMargin()
+	{
+		return margin(InheritedMargin::new);
+	}
+
+	public BUILDER margin(Function<COMPONENT, Margin> func)
+	{
+		this.margin = checkNotNull(func);
 		return self();
 	}
 
@@ -222,6 +282,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		component.setName(name);
 		component.setPosition(position.apply(component));
 		component.setSize(size.apply(component));
+		component.setMargin(margin.apply(component));
 		component.setEnabled(enabled);
 		component.setVisible(visible);
 		component.setZIndex(zIndex);

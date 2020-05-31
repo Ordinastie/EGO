@@ -36,6 +36,7 @@ import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.IKeyListener;
 import net.malisis.ego.gui.element.IOffset;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
@@ -97,6 +98,8 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 	protected ISize size = Size.inherited(this);
 	/** Size available for content. */
 	protected ISize innerSize = Size.of(Sizes.innerWidth(this), Sizes.innerHeight(this));
+	/** Margin of this component */
+	protected Margin margin = EGOGui.defaultMargin();
 	/** Z index of the component. */
 	protected int zIndex = 0;
 	/** Color of the component. Effect dependent on renderers. */
@@ -214,9 +217,23 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 		return size;
 	}
 
+	@Nonnull
 	public ISize innerSize()
 	{
 		return innerSize;
+	}
+
+	public void setMargin(Margin margin)
+	{
+		if (margin == null)
+			margin = Margin.NO_MARGIN;
+		this.margin = margin;
+	}
+
+	@Nonnull
+	public Margin margin()
+	{
+		return margin;
 	}
 
 	/**
@@ -836,12 +853,10 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 	 */
 	public String getPropertyString()
 	{
-		String str = position() + "@" + size() + " | Screen=" + screenPosition();
+		String str = position() + "@" + size() + " | Screen=" + screenPosition() + " | ";
 		if (this instanceof IPadded)
-		{
-			Padding p = Padding.of(this);
-			str += " | Padding " + p.left() + "." + p.right() + "." + p.right() + "." + p.right();
-		}
+			str += Padding.of(this) + ", ";
+		str += Margin.of(this);
 		return str;
 	}
 

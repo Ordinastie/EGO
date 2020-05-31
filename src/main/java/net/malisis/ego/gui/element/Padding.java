@@ -26,46 +26,67 @@ package net.malisis.ego.gui.element;
 
 /**
  * @author Ordinastie
- *
  */
-public interface Padding
+public class Padding
 {
-	public static final Padding NO_PADDING = new FixedPadding(0, 0, 0, 0);
+	public static final Padding NO_PADDING = new Padding(0, 0, 0, 0);
+
+	protected final int top, bottom, left, right;
+
+	protected Padding(int top, int bottom, int left, int right)
+	{
+		this.top = top;
+		this.bottom = bottom;
+		this.left = left;
+		this.right = right;
+	}
 
 	/**
 	 * Left padding.
 	 *
 	 * @return the left padding
 	 */
-	public int left();
+	public int left()
+	{
+		return left;
+	}
 
 	/**
 	 * Right padding.
 	 *
 	 * @return the right padding
 	 */
-	public int right();
+	public int right()
+	{
+		return right;
+	}
 
 	/**
 	 * Top padding.
 	 *
 	 * @return the top padding.
 	 */
-	public int top();
+	public int top()
+	{
+		return top;
+	}
 
 	/**
 	 * Bottom padding.
 	 *
 	 * @return the bottom padding.
 	 */
-	public int bottom();
+	public int bottom()
+	{
+		return bottom;
+	}
 
 	/**
 	 * Horizontal padding.
 	 *
 	 * @return the horizontal padding
 	 */
-	public default int horizontal()
+	public int horizontal()
 	{
 		return left() + right();
 	}
@@ -75,46 +96,15 @@ public interface Padding
 	 *
 	 * @return the vertical padding
 	 */
-	public default int vertical()
+	public int vertical()
 	{
 		return top() + bottom();
 	}
 
-	public static class FixedPadding implements Padding
+	@Override
+	public String toString()
 	{
-		protected final int top, bottom, left, right;
-
-		private FixedPadding(int top, int bottom, int left, int right)
-		{
-			this.top = top;
-			this.bottom = bottom;
-			this.left = left;
-			this.right = right;
-		}
-
-		@Override
-		public int left()
-		{
-			return left;
-		}
-
-		@Override
-		public int right()
-		{
-			return right;
-		}
-
-		@Override
-		public int bottom()
-		{
-			return bottom;
-		}
-
-		@Override
-		public int top()
-		{
-			return top;
-		}
+		return "Pad{" + top() + "." + bottom() + "." + left() + "." + right() + "}";
 	}
 
 	public static Padding of(int padding)
@@ -129,9 +119,16 @@ public interface Padding
 
 	public static Padding of(int top, int bottom, int left, int right)
 	{
-		return top == 0 && bottom == 0 && left == 0 && right == 0 ? NO_PADDING : new FixedPadding(top, bottom, left, right);
+		return top == 0 && bottom == 0 && left == 0 && right == 0 ? NO_PADDING : new Padding(top, bottom, left, right);
 	}
 
+	/**
+	 * Gets the {@link Padding} of an object.<br>
+	 * If objects is not and instance of {@link IPadded}, return NO_PADDING.
+	 *
+	 * @param component object to get the padding from
+	 * @return the padding
+	 */
 	public static Padding of(Object component)
 	{
 		return component instanceof IPadded ? ((IPadded) component).padding() : Padding.NO_PADDING;
@@ -142,7 +139,7 @@ public interface Padding
 	 */
 	public interface IPadded
 	{
-		public default Padding padding()
+		default Padding padding()
 		{
 			return NO_PADDING;
 		}

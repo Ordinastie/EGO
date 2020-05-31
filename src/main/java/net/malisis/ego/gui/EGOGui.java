@@ -30,6 +30,7 @@ import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.element.IKeyListener;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiRenderer;
@@ -78,6 +79,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 
 	public static final MousePosition MOUSE_POSITION = new MousePosition();
 
+	private static EGOGui current;
 	public static IGuiRenderer GRADIENT_BG = GuiShape.builder()
 													 .width(() -> current().width())
 													 .height(() -> current().height())
@@ -112,6 +114,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	/** Whether this GUI is considered as an overlay **/
 	protected boolean isOverlay = false;
 
+	protected Margin defaultMargin = Margin.NO_MARGIN;
 	/** Currently hovered child component. */
 	protected UIComponent hoveredComponent;
 	/** Currently focused child component. */
@@ -290,6 +293,13 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	public void setBackground(IGuiRenderer background)
 	{
 		screen.setBackground(background);
+	}
+
+	public void setDefaultMargin(Margin margin)
+	{
+		if (margin == null)
+			margin = Margin.NO_MARGIN;
+		defaultMargin = margin;
 	}
 
 	/**
@@ -670,6 +680,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	public void display(boolean cancelClose)
 	{
 		setResolution();
+		current = this;
 		if (!doConstruct())
 			return;
 
@@ -706,6 +717,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		setFocusedComponent(null);
 		setHoveredComponent(null);
 		Keyboard.enableRepeatEvents(false);
+		current = null;
 		if (mc.player != null)
 			mc.player.closeScreen();
 
@@ -803,7 +815,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	 */
 	public static EGOGui current()
 	{
-		return current(EGOGui.class);
+		return current;
 	}
 
 	/**
@@ -909,6 +921,11 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	public static UIComponent getDraggedComponent()
 	{
 		return current() != null ? current().draggedComponent : null;
+	}
+
+	public static Margin defaultMargin()
+	{
+		return current != null ? current.defaultMargin : Margin.NO_MARGIN;
 	}
 
 	//	/**
