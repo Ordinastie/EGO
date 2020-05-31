@@ -7,7 +7,6 @@ import net.malisis.ego.gui.component.decoration.UILabel;
 import net.malisis.ego.gui.component.interaction.UIButton;
 import net.malisis.ego.gui.component.interaction.UITextField;
 import net.malisis.ego.gui.element.position.Position;
-import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.Size;
 
 public class GuiAtlas extends EGOGui
@@ -149,10 +148,12 @@ public class GuiAtlas extends EGOGui
 									 .fontOptions(labelOptions)
 									 .build();
 
-		search = new UITextField();
-		search.setPosition(Position.of(Positions.centered(search, 0), Positions.below(filterLabel, 0)));
-		search.setSize(Size.of(100, 12));
-		leftPanel.add(search);
+		search = UITextField.builder()
+							.parent(leftPanel)
+							.centered()
+							.below(filterLabel)
+							.width(100)
+							.build();
 
 		UIButton reload = UIButton.builder()
 								  .parent(leftPanel)

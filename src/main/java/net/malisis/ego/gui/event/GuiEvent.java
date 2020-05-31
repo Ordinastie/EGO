@@ -48,6 +48,6 @@ public abstract class GuiEvent<T extends UIComponent>
 
 	public interface IEventRegister
 	{
-		public <T extends GuiEvent<? extends UIComponent>> void register(Class<T> clazz, Predicate<T> handler);
+		<T extends GuiEvent<? extends UIComponent>> void register(Class<T> clazz, Predicate<T> handler);
 	}
 }

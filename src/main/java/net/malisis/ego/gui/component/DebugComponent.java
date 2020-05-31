@@ -65,45 +65,46 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	private static float scale = 1;
 	private static int alpha = 80;
 
-	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
+	private final HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
 	private GuiText text;
-	private FontOptions fontOptions = FontOptions.builder()
-												 .color(0xFFFFFF)
-												 .scale(scale)
-												 .shadow()
+	private final FontOptions fontOptions = FontOptions.builder()
+													   .color(0xFFFFFF)
+													   .scale(scale)
+													   .shadow()
+													   .build();
+	private final Padding padding = Padding.of(5, 5);
+	private final GuiShape borderShape = GuiShape.builder()
+												 .icon(GuiIcon.BORDER)
+												 .color(this::hierarchyColor)
+												 .zIndex(this::hierarchyZIndex)
+												 .border(2)
 												 .build();
-	private Padding padding = Padding.of(5, 5);
-	private GuiShape borderShape = GuiShape.builder()
-										   .icon(GuiIcon.BORDER)
-										   .color(this::hierarchyColor)
-										   .zIndex(this::hierarchyZIndex)
-										   .border(2)
-										   .build();
 
-	private GuiText cachedText = GuiText.builder()
-										.parent(this)
-										.text("FPS: {FPS} ({DRAWCOUNT})\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size\n{TEXT}Text")
-										.bind("FPS", Minecraft::getDebugFPS)
-										.bind("DRAWCOUNT", () -> EGOGui.current() != null ?
-																 EGOGui.current()
-																	   .getRenderer().lastDrawCount :
-																 0)
-										.bind("POS", new PredicatedData<>(() -> Position.CACHED, ChatFormatting.DARK_GREEN,
-																		  ChatFormatting.DARK_RED))
-										.bind("SIZE",
-											  new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
-										.bind("TEXT", new PredicatedData<>(() -> GuiText.CACHED, ChatFormatting.DARK_GREEN,
-																		   ChatFormatting.DARK_RED))
-										.translated(false)
-										.fontOptions(FontOptions.builder()
-																.color(0xFFFFFF)
-																.scale(scale)
-																.shadow()
-																.rightAligned()
-																.build())
-										.position(Position::topRight)
-										.alpha(255) //do not respect the component alpha
-										.build();
+	private final GuiText cachedText = GuiText.builder()
+											  .parent(this)
+											  .text("FPS: {FPS} ({DRAWCOUNT})\n{POS}Position" + ChatFormatting.RESET
+															+ "\n{SIZE}Size\n{TEXT}Text")
+											  .bind("FPS", Minecraft::getDebugFPS)
+											  .bind("DRAWCOUNT", () -> EGOGui.current() != null ?
+																	   EGOGui.current()
+																			 .getRenderer().lastDrawCount :
+																	   0)
+											  .bind("POS", new PredicatedData<>(() -> Position.CACHED, ChatFormatting.DARK_GREEN,
+																				ChatFormatting.DARK_RED))
+											  .bind("SIZE", new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN,
+																				 ChatFormatting.DARK_RED))
+											  .bind("TEXT", new PredicatedData<>(() -> GuiText.CACHED, ChatFormatting.DARK_GREEN,
+																				 ChatFormatting.DARK_RED))
+											  .translated(false)
+											  .fontOptions(FontOptions.builder()
+																	  .color(0xFFFFFF)
+																	  .scale(scale)
+																	  .shadow()
+																	  .rightAligned()
+																	  .build())
+											  .position(Position::topRight)
+											  .alpha(255) //do not respect the component alpha
+											  .build();
 
 	private int hierarchyColor;
 	private int hierarchyZIndex;
@@ -211,7 +212,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		updateGuiText();
 	}
 
- 	public void watch(String watched)
+	public void watch(String watched)
 	{
 		addDebug("Watched", () -> String.valueOf(EGOGui.current()
 													   .findComponent(watched)));

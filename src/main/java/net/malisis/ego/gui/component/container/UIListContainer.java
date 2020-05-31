@@ -211,7 +211,7 @@ public class UIListContainer<S> extends UIContainer
 		public UIListContainerBuilder(Collection<S> collection)
 		{
 			elements = collection;
-			layout(c -> new RowLayout(c, 1));
+			layout(c -> new RowLayout(c, 0));
 		}
 
 		public UIListContainerBuilder<S> selectable()
