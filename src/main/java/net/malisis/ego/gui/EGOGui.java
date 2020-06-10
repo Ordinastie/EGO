@@ -24,6 +24,8 @@
 
 package net.malisis.ego.gui;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import net.malisis.ego.EGO;
 import net.malisis.ego.gui.component.DebugComponent;
 import net.malisis.ego.gui.component.MouseButton;
@@ -63,7 +65,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -133,7 +137,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	protected GuiScreen parent = null;
 	protected boolean showParentOnClose = false;
 
-	protected UIComponent modalComponent = null;
+	protected List<UIComponent> modalComponents = Lists.newLinkedList();
 
 	/** Debug **/
 	private DebugComponent debugComponent;
@@ -366,6 +370,11 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		keyListeners.remove(listener);
 	}
 
+	public Optional<UIComponent> getCurrentModal()
+	{
+		return Optional.ofNullable(Iterables.getLast(modalComponents, null));
+	}
+
 	/**
 	 * Gets the {@link UIContainer} at the specified coordinates inside this {@link EGOGui}.
 	 *
@@ -375,7 +384,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
-		UIComponent component = modalComponent != null ? modalComponent : screen;
+		UIComponent component = getCurrentModal().orElse(screen);
 		component = component.getComponentAt(x, y);
 		return component == screen /*|| component == debugComponent*/ ? null : component;
 	}
@@ -557,7 +566,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 
 			if (isGuiCloseKey(keyCode))
 			{
-				if (modalComponent != null)
+				if (getCurrentModal().isPresent())
 					closeModal();
 				else if (mc.currentScreen == this)
 					close();
@@ -568,8 +577,8 @@ public abstract class EGOGui extends GuiScreen implements ISize
 			{
 				if (keyCode == Keyboard.KEY_R)
 				{
+					modalComponents.clear();
 					clearScreen();
-					modalComponent = null;
 					setResolution();
 					setHoveredComponent(null);
 					setFocusedComponent(null);
@@ -695,18 +704,19 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		if (component == null)
 			return;
 
-		modalComponent = component;
+		modalComponents.add(component);
 		setFocusedComponent(null);
 		setHoveredComponent(null);
-		addToScreen(modalComponent);
+		addToScreen(component);
 	}
 
 	public void hideModal()
 	{
-		if (modalComponent == null)
+		Optional<UIComponent> o = getCurrentModal();
+		if (!o.isPresent())
 			return;
-		removeFromScreen(modalComponent);
-		modalComponent = null;
+		removeFromScreen(o.get());
+		modalComponents.remove(o.get());
 	}
 
 	/**
@@ -798,14 +808,11 @@ public abstract class EGOGui extends GuiScreen implements ISize
 
 	public UIComponent findComponent(String name)
 	{
-		UIComponent comp;
-		if (modalComponent instanceof UIContainer)
-		{
-			if ((comp = modalComponent.getComponent(name)) != null)
-				return comp;
-		}
-
-		return screen.getComponent(name);
+		return modalComponents.stream()
+							  .map(c -> c.getComponent(name))
+							  .filter(Objects::nonNull)
+							  .findAny()
+							  .orElse(screen.getComponent(name));
 	}
 
 	/**
