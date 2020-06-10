@@ -1,37 +1,29 @@
 package net.malisis.ego.gui.text;
 
 import net.malisis.ego.font.EGOFont;
+import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
-public interface IFontOptionsBuilder<BUILDER, COMPONENT>
+public interface IFontOptionsBuilder<BUILDER, PARAMETER>
 {
-
 	BUILDER self();
+
+	void setFontOptionsBuilder(FontOptionsBuilder builder);
 
 	/**
 	 * @return the actual {@link FontOptionsBuilder} used in the builder implementing {@link IFontOptionsBuilder}
 	 */
 	FontOptionsBuilder fob();
 
-	/**
-	 * {@link FontOptionsBuilder#when(Predicate)} returns a different instance than the base builder.<br>
-	 * Implementation of the {@link IFontOptionsBuilder} interface overwrite the builder that will be returned by {@link FontOptionsBuilder#when(Predicate)}
-	 * <code>
-	 * BUILDER when(Predicate<COMPONENT> predicate);
-	 * {
-	 * fontOptionsBuilder = fob().when(predicate);
-	 * return self();
-	 * }
-	 * </code>
-	 *
-	 * @param predicate
-	 * @return
-	 */
-	BUILDER when(Predicate<COMPONENT> predicate);
+	default BUILDER when(Predicate<PARAMETER> predicate)
+	{
+		setFontOptionsBuilder(fob().when(predicate));
+		return self();
+	}
 
 	default BUILDER font(EGOFont font)
 	{
@@ -164,4 +156,8 @@ public interface IFontOptionsBuilder<BUILDER, COMPONENT>
 		return when(o -> supplier.getAsBoolean());
 	}
 
+	default FontOptions buildFontOptions()
+	{
+		return fob().build();
+	}
 }
