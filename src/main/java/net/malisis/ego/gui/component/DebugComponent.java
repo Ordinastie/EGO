@@ -31,7 +31,8 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.malisis.ego.cacheddata.PredicatedData;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.EGOGui;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
@@ -115,6 +116,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 		setAlpha(alpha);
 		setZIndex(100);
+		setMargin(Margin.NO_MARGIN);
 
 		if (!isTop)
 			setPosition(Position.bottomLeft(this));
