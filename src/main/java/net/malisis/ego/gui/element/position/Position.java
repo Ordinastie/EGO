@@ -33,10 +33,8 @@ import static net.malisis.ego.gui.element.position.Positions.middleAlignedTo;
 import static net.malisis.ego.gui.element.position.Positions.rightAligned;
 import static net.malisis.ego.gui.element.position.Positions.topAligned;
 
-import net.malisis.ego.EGO;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.control.IScrollable;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.size.Size.ISized;
@@ -98,7 +96,7 @@ public class Position
 			if (this == Position.ZERO)
 				return other;
 
-			return new DynamicPosition(0, 0, () -> x() + other.x(), () -> y() + other.y());
+			return new CachedPosition(0, 0, () -> x() + other.x(), () -> y() + other.y());
 		}
 
 		default IPosition minus(IPosition other)
@@ -108,24 +106,48 @@ public class Position
 			if (this == Position.ZERO)
 				return other;
 
-			return new DynamicPosition(0, 0, () -> x() - other.x(), () -> y() - other.y());
+			return new CachedPosition(0, 0, () -> x() - other.x(), () -> y() - other.y());
 		}
 	}
 
-	public static class DynamicPosition implements IPosition
+	public static class FixedPosition implements IPosition
 	{
-		protected int counterX = -1;
-		protected int counterY = -1;
-		protected int lock = 0;
 		protected int x;
 		protected int y;
+
+		public FixedPosition(int x, int y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+
+		@Override
+		public int x()
+		{
+			return x;
+		}
+
+		@Override
+		public int y()
+		{
+			return y;
+		}
+
+		@Override
+		public String toString()
+		{
+			return x + "," + y;
+		}
+	}
+
+	public static class DynamicPosition extends FixedPosition
+	{
 		protected final IntSupplier xFunction;
 		protected final IntSupplier yFunction;
 
 		DynamicPosition(int x, int y, IntSupplier xFunction, IntSupplier yFunction)
 		{
-			this.x = x;
-			this.y = y;
+			super(x, y);
 			this.xFunction = xFunction;
 			this.yFunction = yFunction;
 		}
@@ -133,18 +155,43 @@ public class Position
 		@Override
 		public int x()
 		{
+			if (xFunction != null)
+				x = xFunction.getAsInt();
+			return x;
+		}
+
+		@Override
+		public int y()
+		{
+			if (yFunction != null)
+				y = yFunction.getAsInt();
+			return y;
+		}
+
+		public IPosition cached()
+		{
+			return new CachedPosition(x, y, xFunction, yFunction);
+		}
+	}
+
+	public static class CachedPosition extends DynamicPosition
+	{
+		protected int counterX = -1;
+		protected int counterY = -1;
+
+		public CachedPosition(int x, int y, IntSupplier xFunction, IntSupplier yFunction)
+		{
+			super(x, y, xFunction, yFunction);
+		}
+
+		@Override
+		public int x()
+		{
 			if (xFunction != null && (!Position.CACHED || EGOGui.needsUpdate(counterX)))
 			{
-				if (lock++ >= 5)
-				{
-					EGO.log.error("Possible infinite recursion detected for x. (" + lock + ")");
-					return x;
-				}
 				counterX = EGOGui.counter;
 				x = xFunction.getAsInt();
 			}
-
-			lock = 0;
 			return x;
 		}
 
@@ -153,23 +200,17 @@ public class Position
 		{
 			if (yFunction != null && (!Position.CACHED || EGOGui.needsUpdate(counterY)))
 			{
-				if (lock++ >= 5)
-				{
-					EGO.log.error("Possible infinite recursion detected for width. (" + lock + ")");
-					return y;
-				}
 				counterY = EGOGui.counter;
 				y = yFunction.getAsInt();
 			}
 
-			lock = 0;
 			return y;
 		}
 
 		@Override
 		public String toString()
 		{
-			return x() + "," + y();
+			return x + "," + y;
 		}
 	}
 
@@ -198,9 +239,9 @@ public class Position
 		{
 			int x = owner.position()
 						 .x();
-			if (owner instanceof IChild<?>)
+			if (owner instanceof IChild)
 			{
-				Object parent = ((IChild<?>) owner).getParent();
+				Object parent = ((IChild) owner).getParent();
 				if (parent instanceof UIComponent)
 					x += ((UIComponent) parent).screenPosition()
 											   .x();
@@ -216,15 +257,15 @@ public class Position
 		{
 			int y = owner.position()
 						 .y();
-			if (owner instanceof IChild<?>)
+			if (owner instanceof IChild)
 			{
-				Object parent = ((IChild<?>) owner).getParent();
+				Object parent = ((IChild) owner).getParent();
 				if (parent instanceof UIComponent)
 					y += ((UIComponent) parent).screenPosition()
 											   .y();
-				if (!fixed && parent instanceof IScrollable)
-					y += ((IScrollable) parent).offset()
-											   .y();
+				if (!fixed && parent instanceof IOffset)
+					y += ((IOffset) parent).offset()
+										   .y();
 			}
 			return y;
 		}
@@ -255,29 +296,37 @@ public class Position
 		@Override
 		public String toString()
 		{
-			return x() + "," + y();
+			return x + "," + y;
 		}
 	}
 
 	//Position shortcuts
 	public static IPosition of(int x, int y)
 	{
-		return new DynamicPosition(x, y, null, null);
+		return new FixedPosition(x, y);
 	}
 
 	public static IPosition of(int x, IntSupplier y)
 	{
-		return new DynamicPosition(x, 0, null, y);
+		return new CachedPosition(x, 0, null, y);
 	}
 
 	public static IPosition of(IntSupplier x, int y)
 	{
-		return new DynamicPosition(0, y, x, null);
+		return new CachedPosition(0, y, x, null);
 	}
 
 	public static IPosition of(IntSupplier x, IntSupplier y)
 	{
-		return new DynamicPosition(0, 0, x, y);
+		return new CachedPosition(0, 0, x, y);
+	}
+
+	public static IPosition of(int x, int y, IntSupplier xFunc, IntSupplier yFunc, boolean cached)
+	{
+		if (xFunc == null && yFunc == null)
+			return of(x, y);
+		DynamicPosition p = new DynamicPosition(x, y, xFunc, yFunc);
+		return cached ? p.cached() : p;
 	}
 
 	/**
@@ -288,7 +337,7 @@ public class Position
 	 */
 	public static IPosition of(IPosition other)
 	{
-		return new DynamicPosition(other.x(), other.y(), null, null);
+		return new FixedPosition(other.x(), other.y());
 	}
 
 	//positions relative to parent
@@ -300,7 +349,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static IPosition topLeft(IChild<?> owner)
+	public static IPosition topLeft(IChild owner)
 	{
 		return of(leftAligned(owner, 0), topAligned(owner, 0));
 	}
@@ -313,7 +362,7 @@ public class Position
 	 * @return the position
 	 */
 
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topCenter(T owner)
+	public static <T extends ISized & IChild> IPosition topCenter(T owner)
 	{
 		return of(centered(owner, 0), topAligned(owner, 0));
 	}
@@ -325,7 +374,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topRight(T owner)
+	public static <T extends ISized & IChild> IPosition topRight(T owner)
 	{
 		return of(rightAligned(owner, 0), topAligned(owner, 0));
 	}
@@ -337,7 +386,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleLeft(T owner)
+	public static <T extends ISized & IChild> IPosition middleLeft(T owner)
 	{
 		return of(leftAligned(owner, 0), middleAligned(owner, 0));
 	}
@@ -349,7 +398,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleCenter(T owner)
+	public static <T extends ISized & IChild> IPosition middleCenter(T owner)
 	{
 		return of(centered(owner, 0), middleAligned(owner, 0));
 	}
@@ -361,7 +410,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleRight(T owner)
+	public static <T extends ISized & IChild> IPosition middleRight(T owner)
 	{
 		return of(rightAligned(owner, 0), middleAligned(owner, 0));
 	}
@@ -373,7 +422,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomLeft(T owner)
+	public static <T extends ISized & IChild> IPosition bottomLeft(T owner)
 	{
 		return of(leftAligned(owner, 0), bottomAligned(owner, 0));
 	}
@@ -385,7 +434,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomCenter(T owner)
+	public static <T extends ISized & IChild> IPosition bottomCenter(T owner)
 	{
 		return of(centered(owner, 0), bottomAligned(owner, 0));
 	}
@@ -397,7 +446,7 @@ public class Position
 	 * @param owner the element to be positioned
 	 * @return the position
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomRight(T owner)
+	public static <T extends ISized & IChild> IPosition bottomRight(T owner)
 	{
 		return of(rightAligned(owner, 0), bottomAligned(owner, 0));
 	}

@@ -30,7 +30,7 @@ import com.google.common.base.Converter;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
@@ -49,7 +49,7 @@ import java.util.function.Predicate;
  */
 public class UISlider<T> extends UIComponent implements IContentHolder, IValueChangeEventRegister<UISlider<T>, T>
 {
-	private static int SLIDER_WIDTH = 8;
+	private static final int SLIDER_WIDTH = 8;
 
 	/** Text to display over the slider. */
 	protected final GuiText text;

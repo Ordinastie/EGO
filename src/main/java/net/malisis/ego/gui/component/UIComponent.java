@@ -31,7 +31,6 @@ import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.control.IControlComponent;
 import net.malisis.ego.gui.component.decoration.UITooltip;
-import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.IKeyListener;
@@ -80,7 +79,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie
  */
-public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>, IMouseEventRegister<UIComponent>
+public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouseEventRegister<UIComponent>
 {
 	/** Reference to the {@link EGOGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
 	protected EGOGui gui;
@@ -153,7 +152,6 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 	 *
 	 * @param position the new position
 	 */
-	@Override
 	public void setPosition(@Nonnull IPosition position)
 	{
 		//if(fireEvent(this, this.position, position);
@@ -324,7 +322,6 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild
 	 *
 	 * @param parent the parent
 	 */
-	@Override
 	public void setParent(UIComponent parent)
 	{
 		this.parent = parent;

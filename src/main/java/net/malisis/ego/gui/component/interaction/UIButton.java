@@ -29,8 +29,11 @@ import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
-import net.malisis.ego.gui.component.content.IContentHolder;
-import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentSetter;
+import net.malisis.ego.gui.element.IOffset;
+import net.malisis.ego.gui.element.Padding;
+import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
@@ -50,15 +53,16 @@ import org.lwjgl.input.Keyboard;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIButton extends UIComponent implements IContentHolder, IContentSetter
+public class UIButton extends UIComponent implements IContentHolder, IContentSetter, IOffset, IPadded
 {
-	protected IPosition offsetPosition = Position.of(() -> isPressed() ? 1 : 0, () -> isPressed() ? 1 : 0);
-	protected IPosition contentPosition = null;
+	protected final IPosition offsetPosition = Position.of(() -> isPressed() ? 1 : 0, () -> isPressed() ? 1 : 0);
 
 	/** Content used for this {@link UIButton}. */
 	protected IContent content;
 	/** Whether this {@link UIButton} is currently being pressed. */
 	protected boolean isPressed = false;
+
+	protected Padding padding = Padding.NO_PADDING;
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -102,6 +106,16 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 	//#region Getters/Setters
 
+	public void setPadding(Padding padding)
+	{
+		this.padding = padding;
+	}
+
+	public Padding padding()
+	{
+		return padding;
+	}
+
 	/**
 	 * Sets the content for this {@link UIButton}.
 	 *
@@ -111,9 +125,6 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	public void setContent(IContent content)
 	{
 		this.content = content;
-		content.setParent(this);
-		content.setPosition(Position.middleCenter(content)
-									.plus(offsetPosition));
 		setForeground(content);
 	}
 
@@ -137,6 +148,14 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 		return content;
 	}
 
+	@Override
+	public IPosition offset()
+	{
+		if (isPressed())
+			System.out.println(offsetPosition);
+		return offsetPosition;
+	}
+
 	/**
 	 * Checks if this {@link UIButton} is currently being pressed.
 	 *
@@ -144,7 +163,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	 */
 	public boolean isPressed()
 	{
-		return isPressed;
+		return isPressed && isHovered();
 	}
 
 	/**
@@ -226,12 +245,17 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 	public static class UIButtonBuilder extends UIContentHolderBuilder<UIButtonBuilder, UIButton>
 	{
-		private int defaultOffset = 6;
+		private static final Padding TEXT_PADDING = Padding.of(5);
+		private static final Padding ICON_PADDING = Padding.of(2);
 		protected Runnable onClick;
+		protected Padding padding = Padding.of(5);
 
 		protected UIButtonBuilder()
 		{
-			sizeOfContent(defaultOffset);
+			padding(TEXT_PADDING);
+			tb().middleAligned();
+			tb().centered();
+			sizeOfContent();
 			fob().color(0xFFFFFF)
 				 .shadow()
 				 .when(UIButton::isHovered)
@@ -239,6 +263,25 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 				 .when(UIButton::isDisabled)
 				 .color(0xCCCCCC)
 				 .base();
+		}
+
+		public UIButtonBuilder padding(Padding padding)
+		{
+			this.padding = padding;
+			return this;
+		}
+
+		public UIButtonBuilder padding(int padding)
+		{
+			this.padding = Padding.of(padding);
+			return this;
+		}
+
+		public UIButtonBuilder icon(GuiIcon icon)
+		{
+			if (padding == TEXT_PADDING) //still default padding
+				padding(ICON_PADDING);
+			return super.icon(icon);
 		}
 
 		public UIButtonBuilder onClick(Runnable onClick)
@@ -256,6 +299,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 		public UIButton build()
 		{
 			UIButton button = build(new UIButton());
+			button.setPadding(padding);
 
 			if (onClick != null)
 				button.onClick(onClick);

@@ -36,7 +36,6 @@ import net.malisis.ego.font.StringWalker;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
-import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
@@ -45,6 +44,7 @@ import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
+import net.malisis.ego.gui.element.size.Size.ISized;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.minecraft.client.resources.I18n;
@@ -71,7 +71,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie
  */
-public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
+public class GuiText implements IGuiRenderer, IContent
 {
 	public static boolean CACHED = true;
 
@@ -114,7 +114,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	//private boolean buildLines = true;
 	//private boolean buildCache = true;
 
-	private UIComponent parent;
+	private ISized parent;
 
 	private GuiText(Builder builder)
 	{
@@ -135,19 +135,17 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		//	update(true);
 	}
 
-	@Override
-	public void setParent(UIComponent parent)
+	public void setParent(ISized parent)
 	{
 		this.parent = parent;
 	}
 
 	@Override
-	public UIComponent getParent()
+	public ISized getParent()
 	{
 		return parent;
 	}
 
-	@Override
 	public void setPosition(IPosition position)
 	{
 		this.position = position;
@@ -243,6 +241,11 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	{
 		update();
 		return cache.length();
+	}
+
+	public boolean isEmpty()
+	{
+		return length() <= 0;
 	}
 
 	/**
@@ -558,7 +561,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		String str = lines.size() > 0 ? lines.get(0)
 											 .text()
 											 .replace("\n", "") : "";
-		str += position + "@" + size;
+		str += " " + position + "@" + size;
 		if (getWrapSize() != 0)
 			str += " (wrap: " + getWrapSize() + ")";
 		return str;
@@ -593,7 +596,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		protected Function<GuiText, IntSupplier> y = gt -> Positions.topAligned(gt, 0);
 		private IntSupplier zIndex = () -> 0;
 		private IntSupplier alpha = () -> 255;
-		private UIComponent parent;
+		private ISized parent;
 		private boolean translated = true;
 		private boolean literal = false;
 		private IntSupplier wrapSize;
@@ -659,11 +662,14 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			return this;
 		}
 
-		public Builder parent(UIComponent parent)
+		public Builder parent(ISized parent)
 		{
 			this.parent = parent;
-			alpha(parent::getAlpha);
-			zIndex(parent::zIndex);
+			if (parent instanceof UIComponent)
+			{
+				alpha(((UIComponent) parent)::getAlpha);
+				zIndex(((UIComponent) parent)::zIndex);
+			}
 			return this;
 		}
 

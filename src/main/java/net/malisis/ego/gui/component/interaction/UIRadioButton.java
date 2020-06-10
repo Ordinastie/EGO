@@ -28,9 +28,8 @@ import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
-import net.malisis.ego.gui.component.content.IContentHolder;
-import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
-import net.malisis.ego.gui.element.position.Position;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentSetter;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
 import net.malisis.ego.gui.render.GuiIcon;
@@ -47,7 +46,7 @@ import java.util.List;
  */
 public class UIRadioButton extends UIComponent implements IContentHolder, IContentSetter, IValueChangeEventRegister<UIRadioButton, Boolean>
 {
-	//TODO:needs to cleared at some point
+	//TODO:needs to be cleared at some point
 	private final static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
 	protected final FontOptions fontOptions = FontOptions.builder()
@@ -102,12 +101,11 @@ public class UIRadioButton extends UIComponent implements IContentHolder, IConte
 	 *
 	 * @param content the content
 	 */
-	@Override
 	public void setContent(IContent content)
 	{
 		this.content = content;
-		content.setParent(this);
-		content.setPosition(Position.of(12, 1));
+		//		content.setParent(this);
+		//		content.setPosition(Position.of(12, 1));
 	}
 
 	public void setText(String text)

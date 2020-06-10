@@ -27,25 +27,24 @@ package net.malisis.ego.gui.element;
 import net.malisis.ego.gui.component.UIComponent;
 
 /**
- * ICipable indicates an object (usually {@link UIComponent}) that they need to provide a ClipArea.<br>
+ * IClipable indicates an object (usually {@link UIComponent}) that they need to provide a ClipArea.<br>
  * That area will be used to clip content with glScissor.
  *
  * @author Ordinastie
- *
  */
 public interface IClipable
 {
-	public static final ClipArea NOCLIP = new ClipArea(0, 0, 0, 0);
-	public static final ClipArea FULLCLIP = new ClipArea(-1, -1, -1, -1);
+	ClipArea NOCLIP = new ClipArea(0, 0, 0, 0);
+	ClipArea FULLCLIP = new ClipArea(-1, -1, -1, -1);
 
 	/**
 	 * Gets {@link ClipArea} to be used for glScissor
 	 *
 	 * @return the clip area.
 	 */
-	public ClipArea getClipArea();
+	ClipArea getClipArea();
 
-	public static ClipArea of(Object clipable)
+	static ClipArea of(Object clipable)
 	{
 		if (!(clipable instanceof IClipable))
 			return NOCLIP;
@@ -56,19 +55,19 @@ public interface IClipable
 		return area.width() > 0 && area.height() > 0 ? area : FULLCLIP;
 	}
 
-	public static ClipArea intersected(Object clipable)
+	static ClipArea intersected(Object clipable)
 	{
 		ClipArea area = of(clipable);
-		while (clipable instanceof IChild<?>)
+		while (clipable instanceof IChild)
 		{
-			clipable = ((IChild<?>) clipable).getParent();
+			clipable = ((IChild) clipable).getParent();
 			area = area.intersect(of(clipable));
 		}
 
 		return area;
 	}
 
-	public class ClipArea
+	class ClipArea
 	{
 		public int x;
 		public int y;
@@ -143,10 +142,14 @@ public interface IClipable
 
 		public static ClipArea from(UIComponent clipable, Padding padding)
 		{
-			return from(clipable.screenPosition().x() + padding.left(),
-						clipable.screenPosition().y() + padding.top(),
-						clipable.screenPosition().x() + padding.left() + clipable.innerSize().width(),
-						clipable.screenPosition().y() + padding.top() + clipable.innerSize().height());
+			return from(clipable.screenPosition()
+								.x() + padding.left(), clipable.screenPosition()
+															   .y() + padding.top(), clipable.screenPosition()
+																							 .x() + padding.left() + clipable.innerSize()
+																															 .width(),
+						clipable.screenPosition()
+								.y() + padding.top() + clipable.innerSize()
+															   .height());
 		}
 
 	}

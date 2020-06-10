@@ -26,12 +26,11 @@ package net.malisis.ego.gui.element.position;
 
 import static com.google.common.base.Preconditions.*;
 
-import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
-import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.position.Position.IPositioned;
+import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISized;
 
 import java.util.function.IntSupplier;
@@ -52,10 +51,9 @@ public class Positions
 	 * @param spacing the spacing
 	 * @return the int supplier
 	 */
-	public static IntSupplier leftAligned(IChild<?> owner, int spacing)
+	public static IntSupplier leftAligned(IChild owner, int spacing)
 	{
-		return () -> Padding.of(owner.getParent())
-							.left() + spacing;
+		return () -> Margin.left(owner) + spacing;
 	}
 
 	/**
@@ -63,20 +61,12 @@ public class Positions
 	 * Respects the parent padding.
 	 *
 	 * @param <T> the generic type
-	 * @param <U> the generic type
 	 * @param spacing the spacing
 	 * @return the int supplier
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier rightAligned(T owner, int spacing)
+	public static <T extends ISized & IChild> IntSupplier rightAligned(T owner, int spacing)
 	{
-
-		return () -> {
-			U parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return parent.width() - owner.width() - Padding.of(parent)
-														   .right() - spacing;
-		};
+		return () -> Size.widthOf(owner.getParent()) - owner.width() - Margin.right(owner) - spacing;
 	}
 
 	/**
@@ -84,20 +74,13 @@ public class Positions
 	 * Respects the parent padding.
 	 *
 	 * @param <T> the generic type
-	 * @param <U> the generic type
 	 * @param offset the offset
 	 * @return the int supplier
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier centered(T owner, int offset)
+	public static <T extends ISized & IChild> IntSupplier centered(T owner, int offset)
 	{
-		return () -> {
-			U parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (parent.width() - Padding.of(parent)
-											.horizontal() - owner.width()) / 2 + offset + Padding.of(parent)
-																								 .left();
-		};
+		return () -> (Size.widthOf(owner.getParent()) - Padding.horizontalOf(owner.getParent()) - owner.width()) / 2 + offset
+				+ Padding.leftOf(owner.getParent());
 	}
 
 	/**
@@ -107,10 +90,9 @@ public class Positions
 	 * @param spacing the spacing
 	 * @return the int supplier
 	 */
-	public static IntSupplier topAligned(IChild<?> owner, int spacing)
+	public static IntSupplier topAligned(IChild owner, int spacing)
 	{
-		return () -> Padding.of(owner.getParent())
-							.top() + spacing;
+		return () -> Margin.top(owner) + spacing;
 	}
 
 	/**
@@ -118,21 +100,12 @@ public class Positions
 	 * Respects the parent padding.
 	 *
 	 * @param <T> the generic type
-	 * @param <U> the generic type
 	 * @param spacing the spacing
 	 * @return the int supplier
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier bottomAligned(T owner, int spacing)
+	public static <T extends ISized & IChild> IntSupplier bottomAligned(T owner, int spacing)
 	{
-
-		return () -> {
-			U parent = owner.getParent();
-			if (owner.getParent() == null)
-				return 0;
-			return parent.height() - owner.height() - Padding.of(parent)
-															 .bottom() - spacing;
-		};
-
+		return () -> Size.heightOf(owner.getParent()) - owner.height() - Margin.bottom(owner) - spacing;
 	}
 
 	/**
@@ -140,20 +113,13 @@ public class Positions
 	 * Respects the parent padding.
 	 *
 	 * @param <T> the generic type
-	 * @param <U> the generic type
 	 * @param offset the offset
 	 * @return the int supplier
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier middleAligned(T owner, int offset)
+	public static <T extends ISized & IChild> IntSupplier middleAligned(T owner, int offset)
 	{
-		return () -> {
-			U parent = owner.getParent();
-			if (owner.getParent() == null)
-				return 0;
-			return (int) (Math.ceil(((float) parent.height() - Padding.of(parent)
-																	  .vertical() - owner.height()) / 2) + offset + Padding.of(parent)
-																														   .top());
-		};
+		return () -> (int) (Math.ceil(((float) Size.heightOf(owner.getParent()) - Padding.verticalOf(owner.getParent()) - owner.height())
+											  / 2) + offset + Padding.topOf(owner.getParent()));
 	}
 
 	//relative position to other
@@ -305,19 +271,13 @@ public class Positions
 	 * Respects the parent padding.
 	 *
 	 * @param <T> the generic type
-	 * @param <U> the generic type
 	 * @param offset the offset
 	 * @return the int supplier
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier leftOfCenter(T owner, int offset)
+	public static <T extends ISized & IChild> IntSupplier leftOfCenter(T owner, int offset)
 	{
-		return () -> {
-			U parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (parent.width() - Padding.of(parent)
-											.horizontal()) / 2 - owner.width() + offset;
-		};
+		return () -> (Size.widthOf(owner.getParent()) - Padding.horizontalOf(owner.getParent()) - Margin.rightOf(owner)) / 2 - owner.width()
+				+ offset;
 	}
 
 	/**
@@ -325,43 +285,11 @@ public class Positions
 	 * Respects the parent padding.
 	 *
 	 * @param <T> the generic type
-	 * @param <U> the generic type
 	 * @param offset the offset
 	 * @return the int supplier
 	 */
-	public static <T extends ISized & IChild<U>, U extends ISized> IntSupplier rightOfCenter(T owner, int offset)
+	public static <T extends ISized & IChild> IntSupplier rightOfCenter(T owner, int offset)
 	{
-		return () -> {
-			U parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (parent.width() - Padding.of(parent)
-											.horizontal()) / 2 + offset;
-		};
-	}
-
-	/**
-	 * Of.
-	 *
-	 * @param component the component
-	 * @return the i position
-	 */
-	public static IPosition of(UIComponent component)
-	{
-		return of(component, 0, 0);
-	}
-
-	/**
-	 * Of.
-	 *
-	 * @param component the component
-	 * @param xOffset the x offset
-	 * @param yOffset the y offset
-	 * @return the i position
-	 */
-	public static IPosition of(UIComponent component, int xOffset, int yOffset)
-	{
-		return component.screenPosition()
-						.offset(xOffset, yOffset);
+		return () -> (Size.widthOf(owner.getParent()) - Padding.horizontalOf(owner.getParent()) - Margin.leftOf(owner)) / 2 + offset;
 	}
 }

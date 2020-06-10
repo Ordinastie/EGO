@@ -33,8 +33,7 @@ import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.container.UITabGroup;
 import net.malisis.ego.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.ego.gui.component.content.IContent;
-import net.malisis.ego.gui.component.content.IContentHolder;
-import net.malisis.ego.gui.element.position.Position;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.event.MouseEvent.MouseLeftClick;
@@ -49,8 +48,13 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class UITab extends UIComponent implements IContentHolder
 {
-	protected final ISize AUTO_SIZE = Size.of(() -> isHorizontal() ? contentSize().width() : parent.size().width(),
-											  () -> isHorizontal() ? parent.size().height() : contentSize().height());
+	protected final ISize AUTO_SIZE = Size.of(() -> isHorizontal() ?
+													contentSize().width() :
+													parent.size()
+														  .width(), () -> isHorizontal() ?
+																		  parent.size()
+																				.height() :
+																		  contentSize().height());
 
 	/** The default {@link FontOptions} to use for this {@link UITab}. */
 	protected FontOptions fontOptions = FontOptions.builder()
@@ -77,7 +81,11 @@ public class UITab extends UIComponent implements IContentHolder
 	{
 		setAutoSize();
 
-		setBackground(GuiShape.builder(this).icon(this::getIcon).color(this::getColor).border(3).build());
+		setBackground(GuiShape.builder(this)
+							  .icon(this::getIcon)
+							  .color(this::getColor)
+							  .border(3)
+							  .build());
 	}
 
 	/**
@@ -112,9 +120,10 @@ public class UITab extends UIComponent implements IContentHolder
 	public void setContent(IContent content)
 	{
 		this.content = content;
-		content.setParent(this);
-		content.setPosition(Position.middleCenter(content));
-		contentSize = content.size().plus(Size.of(6, 6));
+		//		content.setParent(this);
+		//		content.setPosition(Position.middleCenter(content));
+		contentSize = content.size()
+							 .plus(Size.of(6, 6));
 		setForeground(content);
 	}
 
@@ -129,7 +138,7 @@ public class UITab extends UIComponent implements IContentHolder
 	 *
 	 * @return the content component
 	 */
-	@Override
+
 	public IContent content()
 	{
 		return content;

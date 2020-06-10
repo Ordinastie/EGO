@@ -28,9 +28,8 @@ import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
-import net.malisis.ego.gui.component.content.IContentHolder;
-import net.malisis.ego.gui.component.content.IContentHolder.IContentSetter;
-import net.malisis.ego.gui.element.position.Position;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentSetter;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
@@ -105,8 +104,8 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 	public void setContent(IContent content)
 	{
 		this.content = content;
-		content.setParent(this);
-		content.setPosition(Position.of(15, 2));
+		//		content.setParent(this);
+		//		content.setPosition(Position.of(15, 2));
 	}
 
 	public void setText(String text)

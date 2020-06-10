@@ -40,9 +40,10 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected UIComponent parent;
 	protected final Set<IControlComponent> controlComponents = Sets.newHashSet();
 	//pos & size
+	protected int px, py;
 	protected Function<COMPONENT, IntSupplier> x = o -> Positions.leftAligned(o, 0);
 	protected Function<COMPONENT, IntSupplier> y = o -> Positions.topAligned(o, 0);
-	protected Function<COMPONENT, IPosition> position = o -> Position.of(x.apply(o), y.apply(o));
+	protected Function<COMPONENT, IPosition> position = this::buildPosition;
 	protected Function<COMPONENT, IntSupplier> width = o -> Sizes.parentWidth(o, 1F, 0);
 	protected Function<COMPONENT, IntSupplier> height = o -> Sizes.parentHeight(o, 1F, 0);
 	protected Function<COMPONENT, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
@@ -273,6 +274,11 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	{
 		this.data = data;
 		return self();
+	}
+
+	protected IPosition buildPosition(COMPONENT component)
+	{
+		return Position.of(px, py, x.apply(component), y.apply(component), true);
 	}
 
 	protected COMPONENT build(COMPONENT component)

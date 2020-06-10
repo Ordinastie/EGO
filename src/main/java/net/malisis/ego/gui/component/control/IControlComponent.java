@@ -33,14 +33,14 @@ import net.malisis.ego.gui.render.IGuiRenderer;
  *
  * @author Ordinastie
  */
-public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
+public interface IControlComponent extends IGuiRenderer, IChild
 {
 	/**
 	 * Sets the {@link UIComponent} controlled by this {@link IControlComponent}.
 	 *
 	 * @param component the parent
 	 */
-	public void setParent(UIComponent component);
+	void setParent(UIComponent component);
 
 	/**
 	 * Gets the {@link UIComponent} controlled by this {@link IControlComponent}.
@@ -48,7 +48,7 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	 * @return the parent
 	 */
 	@Override
-	public UIComponent getParent();
+	UIComponent getParent();
 
 	/**
 	 * Gets the component at the specified coordinates. See {@link UIComponent#getComponentAt(int, int)}.
@@ -57,7 +57,7 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	 * @param y the y
 	 * @return the component at
 	 */
-	public UIComponent getComponentAt(int x, int y);
+	UIComponent getComponentAt(int x, int y);
 
 	/**
 	 * Gets the {@link UIComponent} matching the specified name.
@@ -65,7 +65,7 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	 * @param name the name
 	 * @return the component
 	 */
-	public UIComponent getComponent(String name);
+	UIComponent getComponent(String name);
 
 	/**
 	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>
@@ -75,7 +75,7 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	 * @param keyCode the key code
 	 * @return true, if successful
 	 */
-	public boolean keyTyped(char keyChar, int keyCode);
+	boolean keyTyped(char keyChar, int keyCode);
 
 	/**
 	 * Called when the scrollwheel is used when this {@link IControlComponent} or its parent is focused or hovered.<br>
@@ -83,5 +83,5 @@ public interface IControlComponent extends IGuiRenderer, IChild<UIComponent>
 	 *
 	 * @param delta the delta
 	 */
-	public void scrollWheel(int delta);
+	void scrollWheel(int delta);
 }

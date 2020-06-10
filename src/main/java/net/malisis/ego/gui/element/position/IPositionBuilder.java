@@ -26,7 +26,6 @@ package net.malisis.ego.gui.element.position;
 
 import static com.google.common.base.Preconditions.*;
 
-import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.position.Position.IPosition;
@@ -46,7 +45,7 @@ import java.util.function.IntSupplier;
  * @see GuiShape.Builder
  * @see UIComponentBuilder
  */
-public interface IPositionBuilder<BUILDER, OWNER extends IPositioned & ISized & IChild<UIComponent>>
+public interface IPositionBuilder<BUILDER, OWNER extends IPositioned & ISized & IChild>
 {
 	BUILDER position(Function<OWNER, IPosition> func);
 

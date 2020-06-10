@@ -26,10 +26,10 @@ package net.malisis.ego.gui.element.size;
 
 import static com.google.common.base.Preconditions.*;
 
-import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.element.IChild;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position.IPositioned;
 import net.malisis.ego.gui.element.size.Size.ISized;
@@ -44,112 +44,68 @@ public class Sizes
 	public static IntSupplier innerWidth(ISized owner)
 	{
 		checkNotNull(owner);
-		return () -> {
-			return owner.size()
-						.width() - Padding.of(owner)
-										  .horizontal() - UIScrollBar.scrollbarWidth(owner);
-		};
+		return () -> owner.size()
+						  .width() - Padding.of(owner)
+											.horizontal() - UIScrollBar.scrollbarWidth(owner);
 	}
 
 	public static IntSupplier innerHeight(ISized owner)
 	{
 		checkNotNull(owner);
-		return () -> {
-			return owner.size()
-						.height() - Padding.of(owner)
-										   .vertical() - UIScrollBar.scrollbarHeight(owner);
-		};
+		return () -> owner.size()
+						  .height() - Padding.of(owner)
+											 .vertical() - UIScrollBar.scrollbarHeight(owner);
 	}
 
-	public static <T extends IChild<UIComponent>> IntSupplier parentWidth(T owner, float width, int offset)
+	public static <T extends IChild> IntSupplier parentWidth(T owner, float width, int offset)
 	{
 		checkNotNull(owner);
-		return () -> {
-			UIComponent parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (int) (parent.innerSize()
-								.width() * width) + offset;
-		};
+		return () -> (int) ((Size.innerWidthOf(owner.getParent()) - Margin.horizontalOf(owner)) * width + offset);
 	}
 
-	public static <T extends IChild<UIComponent>> IntSupplier parentHeight(T owner, float height, int offset)
+	public static <T extends IChild> IntSupplier parentHeight(T owner, float height, int offset)
 	{
 		checkNotNull(owner);
-		return () -> {
-			UIComponent parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (int) (parent.innerSize()
-								.height() * height) + offset;
-		};
+		return () -> (int) ((Size.innerHeightOf(owner.getParent()) - Margin.verticalOf(owner)) * height + offset);
 	}
 
-	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillWidth(T owner, int spacing)
+	public static <T extends IPositioned & IChild> IntSupplier fillWidth(T owner, int spacing)
 	{
 		checkNotNull(owner);
-		return () -> {
-			UIComponent parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			//remove left padding as it's counted both in parent.innerSize and owner.position
-			return parent.innerSize()
-						 .width() - owner.position()
-										 .x() - spacing + Padding.of(parent)
-																 .left();
-		};
+		//remove left padding as it's counted both in parent.innerSize and owner.position
+		return () -> Size.innerWidthOf(owner.getParent()) - owner.x() - spacing + Padding.leftOf(owner.getParent());
 	}
 
-	public static <T extends IPositioned & IChild<UIComponent>> IntSupplier fillHeight(T owner, int spacing)
+	public static <T extends IPositioned & IChild> IntSupplier fillHeight(T owner, int spacing)
 	{
 		checkNotNull(owner);
-		return () -> {
-			UIComponent parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			//remove top padding as it's counted both in parent.innerSize and owner.position
-			return parent.innerSize()
-						 .height() - owner.position()
-										  .y() - spacing + Padding.of(parent)
-																  .top();
-		};
+		//remove top padding as it's counted both in parent.innerSize and owner.position
+		return () -> Size.innerHeightOf(owner.getParent()) - owner.y() - spacing + Padding.topOf(owner.getParent());
 	}
 
 	public static IntSupplier widthRelativeTo(ISized other, float width, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return (int) (other.size()
-							   .width() * width) + offset;
-		};
+		return () -> (int) (other.width() * width + offset);
 	}
 
 	public static IntSupplier heightRelativeTo(ISized other, float height, int offset)
 	{
 		checkNotNull(other);
-		return () -> {
-			return (int) (other.size()
-							   .height() * height) + offset;
-		};
+		return () -> (int) (other.height() * height + offset);
 	}
 
 	public static IntSupplier widthOfContent(IContentHolder owner, int offset)
 	{
 		checkNotNull(owner);
-		return () -> {
-			return owner.contentSize()
-						.width() + Padding.of(owner)
-										  .horizontal() + offset;
-		};
+		return () -> owner.contentSize()
+						  .width() + Padding.horizontalOf(owner) + offset;
 	}
 
 	public static IntSupplier heightOfContent(IContentHolder owner, int offset)
 	{
 		checkNotNull(owner);
-		return () -> {
-			return owner.contentSize()
-						.height() + Padding.of(owner)
-										   .vertical() + offset;
-		};
+		return () -> owner.contentSize()
+						  .height() + Padding.verticalOf(owner) + offset;
 	}
 }

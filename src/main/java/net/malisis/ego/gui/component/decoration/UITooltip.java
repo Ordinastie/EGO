@@ -31,7 +31,7 @@ import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;

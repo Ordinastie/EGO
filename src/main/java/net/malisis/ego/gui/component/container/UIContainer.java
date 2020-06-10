@@ -49,6 +49,7 @@ import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.background.BoxBackground;
 import net.malisis.ego.gui.render.background.PanelBackground;
 import net.malisis.ego.gui.render.background.WindowBackground;
+import net.malisis.ego.gui.render.background.WindowBackground.WindowBackgroundBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
@@ -113,7 +115,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	@Override
 	public Padding padding()
 	{
-		return padding;
+		if (padding == null && backgroundRenderer instanceof Padding)
+			return (Padding) backgroundRenderer;
+		return Padding.of(padding);
 	}
 
 	@Override
@@ -191,7 +195,8 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 								 .map(c -> c.getComponentAt(x, y))
 								 .filter(Objects::nonNull)
 								 //.filter(UIComponent::isEnabled)
-								 .max(Comparator.comparingInt(UIComponent::zIndex))
+								 .sorted(Comparator.comparingInt(UIComponent::zIndex))
+								 .reduce((a, b) -> b)
 								 .orElse(superComp);
 	}
 
@@ -302,10 +307,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public static UIContainerBuilder window()
 	{
-		return builder().name("Window")
-						.background(WindowBackground::new)
-						.position(Position::middleCenter)
-						.padding(5);
+		return builder().window();
 	}
 
 	/**
@@ -315,9 +317,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public static UIContainerBuilder panel()
 	{
-		return builder().name("Panel")
-						.background(PanelBackground::new)
-						.padding(3);
+		return builder().panel();
 	}
 
 	/**
@@ -352,19 +352,9 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		}
 
 		@Override
-		public void setParent(UIComponent parent)
-		{
-		}
-
-		@Override
 		public UIContainer getParent()
 		{
 			return UIContainer.this;
-		}
-
-		@Override
-		public void setPosition(IPosition position)
-		{
 		}
 
 		@Nonnull
@@ -422,12 +412,13 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	public abstract static class UIContainerBuilderG<BUILDER extends UIContainerBuilderG<?, ?>, CONTAINER extends UIContainer>
 			extends UIComponentBuilder<BUILDER, CONTAINER>
 	{
-		protected Padding padding = Padding.NO_PADDING;
+		protected Padding padding = null;
 		protected boolean clipContent = true;
 		protected Function<CONTAINER, ILayout> layout = c -> null;
 		protected BiFunction<CONTAINER, UIScrollBar.Type, UIScrollBar> vertical = null;
 		protected BiFunction<CONTAINER, UIScrollBar.Type, UIScrollBar> horizontal = null;
-		protected List<UIComponent> childs = Lists.newArrayList();
+		protected List<UIComponent> children = Lists.newArrayList();
+		protected Function<CONTAINER, String> title = null;
 
 		protected UIContainerBuilderG()
 		{
@@ -440,6 +431,41 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		public BUILDER self()
 		{
 			return (BUILDER) this;
+		}
+
+		public BUILDER window()
+		{
+			name("Window").background(WindowBackground::defaultWindow)
+						  .middleCenter()
+						  .padding(5);
+			return self();
+		}
+
+		public BUILDER window(String title)
+		{
+			return window(() -> title);
+		}
+
+		public BUILDER window(Supplier<String> title)
+		{
+			return window(c -> title.get());
+		}
+
+		public BUILDER window(Function<CONTAINER, String> func)
+		{
+			name("Window").middleCenter();
+
+			WindowBackgroundBuilder<CONTAINER> bg = WindowBackground.<CONTAINER>builder().title(func);
+			background(bg::build);
+
+			return self();
+		}
+
+		public BUILDER panel()
+		{
+			name("Panel").background(PanelBackground::new)
+						 .padding(3);
+			return self();
 		}
 
 		public BUILDER padding(Padding padding)
@@ -480,7 +506,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		public BUILDER add(UIComponent component)
 		{
-			childs.add(checkNotNull(component));
+			children.add(checkNotNull(component));
 			return self();
 		}
 
@@ -496,7 +522,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			if (horizontal != null)
 				horizontal.apply(container, Type.HORIZONTAL);
 
-			for (UIComponent c : childs)
+			for (UIComponent c : children)
 				container.add(c);
 
 			return container;

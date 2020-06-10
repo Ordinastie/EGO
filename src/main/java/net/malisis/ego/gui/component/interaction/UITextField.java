@@ -33,7 +33,7 @@ import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.UIComponentBuilder;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.Padding;
@@ -670,7 +670,8 @@ public class UITextField extends UIComponent
 			return true; //we don't want to close the GUI
 		}
 
-		if (GuiScreen.isCtrlKeyDown())
+		if (GuiScreen.isCtrlKeyDown() && !Keyboard.isKeyDown(
+				Keyboard.KEY_RMENU)) //for some reason, Alt gr press triggers left control key too
 			return handleCtrlKeyDown(keyCode);
 
 		switch (keyCode)
@@ -1115,12 +1116,20 @@ public class UITextField extends UIComponent
 		{
 			width(100);
 			height(12);
+			fob().color(0xFFFFFF)
+				 .shadow();//default for UITextfields
 		}
 
 		@Override
 		public FontOptionsBuilder fob()
 		{
 			return fontOptionsBuilder;
+		}
+
+		@Override
+		public void setFontOptionsBuilder(FontOptionsBuilder builder)
+		{
+			fontOptionsBuilder = checkNotNull(builder);
 		}
 
 		@Override
@@ -1220,7 +1229,9 @@ public class UITextField extends UIComponent
 			tf.setEnterCallback(enterCallback);
 			tf.setValidator(validator);
 
-			tf.setFontOptions(fob().build(tf));
+			fob().withPredicateParameter(tf);
+
+			tf.setFontOptions(buildFontOptions());
 
 			return tf;
 		}

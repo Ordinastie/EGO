@@ -26,9 +26,8 @@ package net.malisis.ego.gui.element;
 
 /**
  * @author Ordinastie
- *
  */
-public interface IChild<T>
+public interface IChild
 {
-	public T getParent();
+	Object getParent();
 }

@@ -188,6 +188,8 @@ public class UIImage extends UIComponent
 
 		protected UIImageBuilder()
 		{
+			width(i -> i::iconWidth);
+			height(i -> i::iconHeight);
 		}
 
 		public UIImageBuilder icon(GuiIcon icon)

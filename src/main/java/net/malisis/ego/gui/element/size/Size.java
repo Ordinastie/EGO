@@ -26,8 +26,7 @@ package net.malisis.ego.gui.element.size;
 
 import net.malisis.ego.EGO;
 import net.malisis.ego.gui.EGOGui;
-import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.position.Position.IPositioned;
 
@@ -49,7 +48,12 @@ public class Size
 		@Nonnull
 		default ISize size()
 		{
-			return Size.ZERO;
+			return Size.DEFAULT;
+		}
+
+		default ISize innerSize()
+		{
+			return size();
 		}
 
 		default int width()
@@ -152,8 +156,38 @@ public class Size
 		@Override
 		public String toString()
 		{
-			return width() + "x" + height();
+			return width + "x" + height;
 		}
+	}
+
+	public static ISize of(Object obj)
+	{
+		return obj instanceof ISized ? ((ISized) obj).size() : ZERO;
+	}
+
+	public static ISize innerOf(Object obj)
+	{
+		return obj instanceof ISized ? ((ISized) obj).innerSize() : ZERO;
+	}
+
+	public static int widthOf(Object obj)
+	{
+		return of(obj).width();
+	}
+
+	public static int heightOf(Object obj)
+	{
+		return of(obj).height();
+	}
+
+	public static int innerWidthOf(Object obj)
+	{
+		return innerOf(obj).width();
+	}
+
+	public static int innerHeightOf(Object obj)
+	{
+		return innerOf(obj).height();
 	}
 
 	//Size shortcuts
@@ -177,12 +211,12 @@ public class Size
 		return new DynamicSize(0, 0, widthSupplier, heightSupplier);
 	}
 
-	public static <T extends ISized & IChild<UIComponent>> ISize relativeTo(T other)
+	public static <T extends ISized & IChild> ISize relativeTo(T other)
 	{
 		return new DynamicSize(0, 0, Sizes.widthRelativeTo(other, 1.0F, 0), Sizes.heightRelativeTo(other, 1.0F, 0));
 	}
 
-	public static <T extends ISized & IChild<UIComponent>> ISize inherited(T owner)
+	public static <T extends ISized & IChild> ISize inherited(T owner)
 	{
 		return new DynamicSize(0, 0, Sizes.parentWidth(owner, 1.0F, 0), Sizes.parentHeight(owner, 1.0F, 0));
 	}
@@ -197,12 +231,12 @@ public class Size
 		return new DynamicSize(0, 0, Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
 	}
 
-	public static <T extends IPositioned & IChild<UIComponent>> ISize fill(T owner)
+	public static <T extends IPositioned & IChild> ISize fill(T owner)
 	{
 		return fill(owner, 0, 0);
 	}
 
-	public static <T extends IPositioned & IChild<UIComponent>> ISize fill(T owner, int rightOffset, int bottomOffset)
+	public static <T extends IPositioned & IChild> ISize fill(T owner, int rightOffset, int bottomOffset)
 	{
 		return new DynamicSize(0, 0, Sizes.fillWidth(owner, rightOffset), Sizes.fillHeight(owner, bottomOffset));
 	}

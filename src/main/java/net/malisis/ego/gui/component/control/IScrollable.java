@@ -25,7 +25,7 @@
 package net.malisis.ego.gui.component.control;
 
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.component.content.IContentHolder;
+import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.element.IOffset;
 import net.minecraft.client.gui.GuiScreen;
@@ -34,18 +34,15 @@ import net.minecraft.client.gui.GuiScreen;
  * This interface allows scrollbars to be added to the {@link UIComponent} implementer.
  *
  * @author Ordinastie
- *
  */
 public interface IScrollable extends IContentHolder, IOffset
 {
-	public default void onScrollbarAdded(UIScrollBar scrollbar)
+	default void onScrollbarAdded(UIScrollBar scrollbar)
 	{
-
 	}
 
-	public default float getScrollStep()
+	default float getScrollStep()
 	{
 		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F);
 	}
-
 }
