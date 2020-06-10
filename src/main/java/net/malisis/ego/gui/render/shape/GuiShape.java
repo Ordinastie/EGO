@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.Maps;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.content.IContent;
+import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
@@ -52,11 +53,11 @@ import javax.annotation.Nonnull;
 /**
  * @author Ordinastie
  */
-public class GuiShape implements IContent
+public class GuiShape implements IContent, IChild
 {
 	public static final int CORNER_SIZE = 5;
 
-	private final UIComponent parent;
+	private final Object parent;
 	private final IPosition position;
 	private final ScreenPosition screenPosition;
 	private final IntSupplier zIndex;
@@ -66,7 +67,7 @@ public class GuiShape implements IContent
 	private final Supplier<GuiIcon> icon;
 	private final int border;
 
-	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
+	private GuiShape(Object parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
 		this.position = position.apply(this);
@@ -88,7 +89,11 @@ public class GuiShape implements IContent
 
 	public int getZIndex()
 	{
-		return zIndex != null ? zIndex.getAsInt() : 0;
+		if(zIndex != null)
+			return zIndex.getAsInt();
+		if(parent instanceof UIComponent)
+			return  ((UIComponent) parent).zIndex();
+		return 0;
 	}
 
 	@Nonnull
@@ -99,7 +104,7 @@ public class GuiShape implements IContent
 	}
 
 	@Override
-	public UIComponent getParent()
+	public Object getParent()
 	{
 		return parent;
 	}
@@ -235,7 +240,7 @@ public class GuiShape implements IContent
 
 	public static class Builder implements IPositionBuilder<Builder, GuiShape>, ISizeBuilder<Builder, GuiShape>
 	{
-		private UIComponent component;
+		private Object parent;
 		private boolean fixed = true;
 		private Function<GuiShape, IntSupplier> x = o -> () -> 0;
 		private Function<GuiShape, IntSupplier> y = o -> () -> 0;
@@ -256,14 +261,20 @@ public class GuiShape implements IContent
 		private int borderAlpha;
 		private int borderSize;
 
-		private Builder forComponent(UIComponent component)
+		public Builder forComponent(UIComponent component)
 		{
-			this.component = component;
+			this.parent = component;
 			width(o -> Sizes.widthRelativeTo(component, 1.0F, 0));
 			height(o -> Sizes.heightRelativeTo(component, 1.0F, 0));
 			color = (fp, vp) -> component.getColor();
 			alpha = (fp, vp) -> component.getAlpha();
 			zIndex = component::zIndex;
+			return this;
+		}
+
+		public Builder parent(Object parent)
+		{
+			this.parent = parent;
 			return this;
 		}
 
@@ -521,7 +532,7 @@ public class GuiShape implements IContent
 
 		public GuiShape build()
 		{
-			return new GuiShape(component, position, zIndex, size, color, alpha, icon, borderSize, fixed);
+			return new GuiShape(parent, position, zIndex, size, color, alpha, icon, borderSize, fixed);
 		}
 	}
 }
