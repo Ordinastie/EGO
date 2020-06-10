@@ -28,22 +28,18 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.Maps;
 import net.malisis.ego.gui.component.UIComponent;
-import net.malisis.ego.gui.element.IChild;
+import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
-import net.malisis.ego.gui.element.position.Position.IPositioned;
 import net.malisis.ego.gui.element.position.Position.ScreenPosition;
-import net.malisis.ego.gui.element.position.Positions;
 import net.malisis.ego.gui.element.size.ISizeBuilder;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
-import net.malisis.ego.gui.element.size.Size.ISized;
 import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
-import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.EnumMap;
 import java.util.function.Function;
@@ -56,7 +52,7 @@ import javax.annotation.Nonnull;
 /**
  * @author Ordinastie
  */
-public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UIComponent>
+public class GuiShape implements IContent
 {
 	public static final int CORNER_SIZE = 5;
 
@@ -241,18 +237,20 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 	{
 		private UIComponent component;
 		private boolean fixed = true;
-		private Function<GuiShape, IPosition> position = s -> Position.ZERO;
-		private Function<GuiShape, IntSupplier> x = o -> Positions.leftAligned(o, 0);
-		private Function<GuiShape, IntSupplier> y = o -> Positions.topAligned(o, 0);
-		private Function<GuiShape, ISize> size = Size::relativeTo;
-		private Function<GuiShape, IntSupplier> width = o -> Sizes.widthRelativeTo(o, 1.0F, 0);
-		private Function<GuiShape, IntSupplier> height = o -> Sizes.heightRelativeTo(o, 1.0F, 0);
+		private Function<GuiShape, IntSupplier> x = o -> () -> 0;
+		private Function<GuiShape, IntSupplier> y = o -> () -> 0;
+		private Function<GuiShape, IPosition> position = o -> Position.of(x.apply(o), y.apply(o));
+		private Function<GuiShape, IntSupplier> width = o -> () -> o.getIcon()
+																	.width();
+		private Function<GuiShape, IntSupplier> height = o -> () -> o.getIcon()
+																	 .height();
+		private Function<GuiShape, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
 
 		private IntSupplier zIndex;
 		private ToIntBiFunction<FacePosition, VertexPosition> color = (fp, vp) -> 0xFFFFFF;
 		private ToIntBiFunction<FacePosition, VertexPosition> alpha = (fp, vp) -> 255;
-		private EnumMap<VertexPosition, Integer> colors = Maps.newEnumMap(VertexPosition.class);
-		private EnumMap<VertexPosition, Integer> alphas = Maps.newEnumMap(VertexPosition.class);
+		private final EnumMap<VertexPosition, Integer> colors = Maps.newEnumMap(VertexPosition.class);
+		private final EnumMap<VertexPosition, Integer> alphas = Maps.newEnumMap(VertexPosition.class);
 		private Supplier<GuiIcon> icon = () -> GuiIcon.NONE;
 		private int borderColor;
 		private int borderAlpha;
@@ -261,7 +259,8 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		private Builder forComponent(UIComponent component)
 		{
 			this.component = component;
-			size = s -> Size.relativeTo(component);
+			width(o -> Sizes.widthRelativeTo(component, 1.0F, 0));
+			height(o -> Sizes.heightRelativeTo(component, 1.0F, 0));
 			color = (fp, vp) -> component.getColor();
 			alpha = (fp, vp) -> component.getAlpha();
 			zIndex = component::zIndex;
@@ -279,7 +278,6 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		public Builder x(Function<GuiShape, IntSupplier> x)
 		{
 			this.x = checkNotNull(x);
-			position = null;
 			return this;
 		}
 
@@ -287,7 +285,6 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		public Builder y(Function<GuiShape, IntSupplier> y)
 		{
 			this.y = checkNotNull(y);
-			position = null;
 			return this;
 		}
 
@@ -300,14 +297,21 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		public Builder width(Function<GuiShape, IntSupplier> width)
 		{
 			this.width = checkNotNull(width);
-			size = null;
 			return this;
 		}
 
 		public Builder height(Function<GuiShape, IntSupplier> height)
 		{
 			this.height = checkNotNull(height);
-			size = null;
+			return this;
+		}
+
+		public Builder iconSize()
+		{
+			width(o -> () -> o.getIcon()
+							  .width());
+			height(o -> () -> o.getIcon()
+							   .height());
 			return this;
 		}
 
@@ -315,8 +319,8 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		 * Whether the {@link GuiShape} position will be relative to the component {@link IOffset}. If set to true (default), the
 		 * GuiShape position will match the component regardless of the scrolling offset.
 		 *
-		 * @param fixed
-		 * @return
+		 * @param fixed true to ignore offset, false otherwise
+		 * @return this builder
 		 */
 		public Builder fixed(boolean fixed)
 		{
@@ -517,11 +521,6 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 
 		public GuiShape build()
 		{
-			if (position == null)
-				position = o -> Position.of(x.apply(o), y.apply(o));
-			if (size == null)
-				size = o -> Size.of(width.apply(o), height.apply(o));
-
 			return new GuiShape(component, position, zIndex, size, color, alpha, icon, borderSize, fixed);
 		}
 	}
