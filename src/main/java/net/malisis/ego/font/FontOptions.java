@@ -108,7 +108,7 @@ public class FontOptions
 	protected Predicate<Object> predicate;
 	protected Object predicateParam;
 
-	protected FontOptions(FontOptionsBuilder builder, Object predicateParam)
+	protected FontOptions(FontOptionsBuilder builder)
 	{
 		font = builder.font;
 		fontScale = builder.fontScale;
@@ -125,15 +125,15 @@ public class FontOptions
 		obfuscatedCharList = builder.obfuscatedCharList;
 
 		predicate = builder.predicate;
-		this.predicateParam = predicateParam;
+		this.predicateParam = builder.predicateParameter;
 
 		builder.predicates.values()
-						  .forEach(fob -> predicates.add(new FontOptions(this, fob, predicateParam)));
+						  .forEach(fob -> predicates.add(new FontOptions(this, fob)));
 	}
 
-	public FontOptions(FontOptions fontOptions, FontOptionsBuilder fob, Object predicateParam)
+	public FontOptions(FontOptions fontOptions, FontOptionsBuilder fob)
 	{
-		this(fob, predicateParam);
+		this(fob);
 		this.base = fontOptions;
 	}
 
@@ -147,9 +147,16 @@ public class FontOptions
 
 	private boolean test()
 	{
-		if (predicate == null)
-			return false; //should never happen
-		return predicate.test(predicateParam);
+		if (predicate == null) //should never happen
+			return false;
+		return predicate.test(parameter());
+	}
+
+	private Object parameter()
+	{
+		if (base == null) //should never happen
+			return predicateParam;
+		return ObjectUtils.firstNonNull(predicateParam, base.predicateParam);
 	}
 
 	public EGOFont getFont()
@@ -678,30 +685,18 @@ public class FontOptions
 			return predicates.computeIfAbsent((Predicate<Object>) predicate, p -> new FontOptionsBuilder(this, p));
 		}
 
-		public FontOptionsBuilder when(Predicate<Object> predicate, FontOptions predicatedOptions)
-		{
-			//suppliers.add(Pair.of(predicate, predicatedOptions));
-			return this;
-		}
-
 		public FontOptionsBuilder withPredicateParameter(Object parameter)
 		{
 			predicateParameter = parameter;
 			return this;
 		}
 
-		public FontOptions build(Object predicateParameter)
-		{
-			if (this.predicate != null)
-				return baseBuilder.build(predicateParameter);
-
-			return new FontOptions(this, predicateParameter);
-		}
-
 		public FontOptions build()
 		{
-			return build(predicateParameter);
-		}
+			if (this.predicate != null)
+				return baseBuilder.build();
 
+			return new FontOptions(this);
+		}
 	}
 }
