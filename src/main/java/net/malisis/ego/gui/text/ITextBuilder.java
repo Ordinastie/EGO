@@ -4,15 +4,33 @@ import static com.google.common.base.Preconditions.*;
 
 import net.malisis.ego.cacheddata.ICachedData;
 import net.malisis.ego.font.FontOptions;
+import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
 import net.malisis.ego.gui.element.size.Size.ISized;
 
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
- * Interface that provides the implementing builder  proxy methods to the underlying {@link GuiText} and {@link FontOptions} objects.
+ * Interface that provides the implementing builder proxy methods to the underlying {@link GuiText.Builder} and {@link FontOptionsBuilder} objects.<br>
+ * <br>
+ * Expected implementation:
+ * <pre>{@code
+ * protected GuiText.Builder guiTextBuilder = GuiText.builder();
+ * protected FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
  *
- * @param <BUILDER>
+ * public Builder tb()
+ * {
+ * 		return guiTextBuilder;
+ * }
+ *
+ * public FontOptionsBuilder fob()
+ * {
+ * 		return fontOptionsBuilder;
+ * }
+ * }
+ * </pre>
+ *
+ * @param <BUILDER> type of Builder implementing this interface.
  */
 public interface ITextBuilder<BUILDER, PARENT extends ISized> extends IFontOptionsBuilder<BUILDER, PARENT>
 {
