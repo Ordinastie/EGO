@@ -58,6 +58,16 @@ public class Margin
 		return bottom;
 	}
 
+	public int horizontal()
+	{
+		return left() + right();
+	}
+
+	public int vertical()
+	{
+		return top() + bottom();
+	}
+
 	@Override
 	public String toString()
 	{
@@ -131,4 +141,59 @@ public class Margin
 	{
 		return component instanceof UIComponent ? ((UIComponent) component).margin() : NO_MARGIN;
 	}
+
+	public static int leftOf(Object component)
+	{
+		return of(component).left();
+	}
+
+	public static int rightOf(Object component)
+	{
+		return of(component).right();
+	}
+
+	public static int topOf(Object component)
+	{
+		return of(component).top();
+	}
+
+	public static int bottomOf(Object component)
+	{
+		return of(component).bottom();
+	}
+
+	public static int horizontalOf(Object component)
+	{
+		return of(component).horizontal();
+	}
+
+	public static int verticalOf(Object component)
+	{
+		return of(component).vertical();
+	}
+
+	public static int top(IChild component)
+	{
+		return Math.max(of(component).top(), Padding.of(component.getParent())
+													.top());
+	}
+
+	public static int bottom(IChild component)
+	{
+		return Math.max(of(component).bottom(), Padding.of(component.getParent())
+													   .bottom());
+	}
+
+	public static int left(IChild component)
+	{
+		return Math.max(of(component).left(), Padding.of(component.getParent())
+													 .left());
+	}
+
+	public static int right(IChild component)
+	{
+		return Math.max(of(component).right(), Padding.of(component.getParent())
+													  .right());
+	}
+
 }
