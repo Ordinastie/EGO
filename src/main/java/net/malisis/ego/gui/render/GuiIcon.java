@@ -458,7 +458,8 @@ public class GuiIcon
 	@Override
 	public String toString()
 	{
-		String str = u() + "," + v() + " -> " + U() + "," + V();
+		String str = String.format("%.02f", u()) + "," + String.format("%.02f", v()) + " -> " + String.format("%.02f", U()) + ","
+				+ String.format("%.02f", V());
 		if (texture != null)
 			str += " [" + texture.pixelFromU(u()) + "," + texture.pixelFromV(v()) + " -> " + texture.pixelFromU(U()) + ","
 					+ texture.pixelFromV(V()) + "]";
