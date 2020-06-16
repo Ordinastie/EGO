@@ -717,6 +717,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 			return;
 		removeFromScreen(o.get());
 		modalComponents.remove(o.get());
+		focusedComponent = null;
 	}
 
 	/**
