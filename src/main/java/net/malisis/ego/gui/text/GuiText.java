@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.malisis.ego.cacheddata.CachedData;
+import net.malisis.ego.cacheddata.CachedFontOptions;
 import net.malisis.ego.cacheddata.FixedData;
 import net.malisis.ego.cacheddata.ICachedData;
 import net.malisis.ego.cacheddata.IntCachedData;
@@ -102,8 +103,7 @@ public class GuiText implements IGuiRenderer, IContent
 	private IntCachedData wrapSize;
 	private final IntCachedData fitSize;
 
-	private final CachedData<FontOptions> cachedOptions = new CachedData<>(this::getFontOptions, (fo1, fo2) -> fo1.isBold() != fo2.isBold()
-			|| fo1.getFontScale() != fo2.getFontScale() || fo1.getFont() != fo2.getFont());
+	private final CachedFontOptions cachedOptions = new CachedFontOptions(this::getFontOptions);
 
 	private IPosition position;
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
@@ -591,9 +591,10 @@ public class GuiText implements IGuiRenderer, IContent
 		private Supplier<String> base = () -> "";
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
-		private Function<GuiText, IPosition> position = Position::topLeft;
-		protected Function<GuiText, IntSupplier> x = gt -> Positions.leftAligned(gt, 0);
-		protected Function<GuiText, IntSupplier> y = gt -> Positions.topAligned(gt, 0);
+		private Function<GuiText, IntSupplier> x = gt -> Positions.leftAligned(gt, 0);
+		private Function<GuiText, IntSupplier> y = gt -> Positions.topAligned(gt, 0);
+		private Function<GuiText, IPosition> position = gt -> Position.of(x.apply(gt), y.apply(gt));
+
 		private IntSupplier zIndex = () -> 0;
 		private IntSupplier alpha = () -> 255;
 		private ISized parent;
@@ -628,7 +629,6 @@ public class GuiText implements IGuiRenderer, IContent
 		public Builder x(Function<GuiText, IntSupplier> x)
 		{
 			this.x = checkNotNull(x);
-			position = null;
 			return this;
 		}
 
@@ -636,7 +636,6 @@ public class GuiText implements IGuiRenderer, IContent
 		public Builder y(Function<GuiText, IntSupplier> y)
 		{
 			this.y = checkNotNull(y);
-			position = null;
 			return this;
 		}
 
@@ -760,9 +759,6 @@ public class GuiText implements IGuiRenderer, IContent
 
 		public GuiText build()
 		{
-			if (position == null)
-				position = gt -> Position.of(x.apply(gt), y.apply(gt));
-
 			return new GuiText(this);
 		}
 
