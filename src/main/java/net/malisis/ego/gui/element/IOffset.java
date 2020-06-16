@@ -25,15 +25,30 @@
 package net.malisis.ego.gui.element;
 
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 
 /**
  * Interface to indicate a {@link UIComponent} that it should render its content with an offset.
  *
  * @author Ordinastie
- *
  */
 public interface IOffset
 {
-	public IPosition offset();
+	IPosition offset();
+
+	static IPosition of(Object object)
+	{
+		return object instanceof IOffset ? ((IOffset) object).offset() : Position.ZERO;
+	}
+
+	static int x(Object object)
+	{
+		return of(object).x();
+	}
+
+	static int y(Object object)
+	{
+		return of(object).y();
+	}
 }

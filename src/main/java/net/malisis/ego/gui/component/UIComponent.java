@@ -92,7 +92,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	/** Position of this {@link UIComponent} on screen. */
 	private final IPosition screenPosition = new ScreenPosition(this, this instanceof IControlComponent);
 	/** Position of the mouse inside this {@link UIComponent}. */
-	private final IPosition mousePosition = EGOGui.MOUSE_POSITION.minus(screenPosition);
+	private final IPosition mousePosition = Position.of(this::mouseX, this::mouseY);
 	/** Size of this {@link UIComponent}. */
 	protected ISize size = Size.inherited(this);
 	/** Size available for content. */
@@ -187,9 +187,17 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 */
 	public IPosition mousePosition()
 	{
-		if (this instanceof IOffset)
-			return mousePosition.minus(((IOffset) this).offset());
 		return mousePosition;
+	}
+
+	private int mouseX()
+	{
+		return EGOGui.MOUSE_POSITION.x() - screenPosition.x() - IOffset.x(this);
+	}
+
+	private int mouseY()
+	{
+		return EGOGui.MOUSE_POSITION.y() - screenPosition.y() - IOffset.x(this);
 	}
 
 	/**
