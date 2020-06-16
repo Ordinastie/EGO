@@ -355,8 +355,11 @@ public class GuiText implements IGuiRenderer, IContent
 		fitSize.update();
 		cachedOptions.update();
 
-		boolean buildCache = base.hasChanged() || hasParametersChanged();
-		boolean buildLines = buildCache || wrapSize.hasChanged() || fitSize.hasChanged() || cachedOptions.hasChanged();
+		//check params first as they need to be updated
+		boolean buildCache = hasParametersChanged() || base.hasChanged();
+		//check fontOptions first, as last values need to be updated
+		boolean buildLines = cachedOptions.hasChanged() || buildCache || fitSize.hasChanged() || wrapSize.hasChanged();
+
 		if (buildCache || !CACHED)
 			generateCache();
 
@@ -567,8 +570,8 @@ public class GuiText implements IGuiRenderer, IContent
 											 .text()
 											 .replace("\n", "") : "";
 		str += " " + position + "@" + size;
-		if (getWrapSize() != 0)
-			str += " (wrap: " + getWrapSize() + ")";
+		if (wrapSize.get() != 0)
+			str += " (wrap: " + wrapSize.get() + ")";
 		return str;
 		//return lines().stream().map(LineInfo::getText).collect(Collectors.joining());
 	}
