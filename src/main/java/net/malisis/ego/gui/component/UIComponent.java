@@ -62,6 +62,7 @@ import net.malisis.ego.gui.event.StateChangeEvent.FocusEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.UnfocusEvent;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
+import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
@@ -873,7 +874,8 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	@Override
 	public String toString()
 	{
-		return (name == null ? getClass().getSimpleName() : name) + " " + getPropertyString();
+		return (name == null ? getClass().getSimpleName() : TextFormatting.ITALIC + name + TextFormatting.RESET) + " "
+				+ getPropertyString();
 	}
 
 	public static BaseComponentBuilder base()
