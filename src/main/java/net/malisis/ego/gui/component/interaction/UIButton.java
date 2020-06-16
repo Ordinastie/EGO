@@ -24,6 +24,8 @@
 
 package net.malisis.ego.gui.component.interaction;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.MouseButton;
@@ -47,6 +49,8 @@ import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
+
+import java.util.function.Consumer;
 
 /**
  * UIButton
@@ -151,8 +155,6 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	@Override
 	public IPosition offset()
 	{
-		if (isPressed())
-			System.out.println(offsetPosition);
 		return offsetPosition;
 	}
 
@@ -183,6 +185,14 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	{
 		onLeftClick(e -> {
 			onClick.run();
+			return true;
+		});
+	}
+
+	public void onClick(Consumer<UIButton> onClick)
+	{
+		onLeftClick(e -> {
+			onClick.accept(this);
 			return true;
 		});
 	}
@@ -247,7 +257,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 	{
 		private static final Padding TEXT_PADDING = Padding.of(5);
 		private static final Padding ICON_PADDING = Padding.of(2);
-		protected Runnable onClick;
+		protected Consumer<UIButton> onClick;
 		protected Padding padding = Padding.of(5);
 
 		protected UIButtonBuilder()
@@ -284,10 +294,15 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 			return super.icon(icon);
 		}
 
+		public UIButtonBuilder onClick(Consumer<UIButton> onClick)
+		{
+			this.onClick = checkNotNull(onClick);
+			return this;
+		}
+
 		public UIButtonBuilder onClick(Runnable onClick)
 		{
-			this.onClick = onClick;
-			return this;
+			return onClick(btn -> onClick.run());
 		}
 
 		public UIButtonBuilder link(String url)
