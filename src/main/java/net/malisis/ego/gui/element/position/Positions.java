@@ -53,7 +53,7 @@ public class Positions
 	 */
 	public static IntSupplier leftAligned(IChild owner, int spacing)
 	{
-		return () -> Margin.left(owner) + spacing;
+		return () -> Padding.leftOf(owner.getParent()) + spacing;
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier rightAligned(T owner, int spacing)
 	{
-		return () -> Size.widthOf(owner.getParent()) - owner.width() - Margin.right(owner) - spacing;
+		return () -> Size.widthOf(owner.getParent()) - owner.width() - Padding.rightOf(owner) - spacing;
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class Positions
 	 */
 	public static IntSupplier topAligned(IChild owner, int spacing)
 	{
-		return () -> Margin.top(owner) + spacing;
+		return () -> Padding.topOf(owner.getParent()) + spacing;
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier bottomAligned(T owner, int spacing)
 	{
-		return () -> Size.heightOf(owner.getParent()) - owner.height() - Margin.bottom(owner) - spacing;
+		return () -> Size.heightOf(owner.getParent()) - owner.height() - Padding.bottomOf(owner) - spacing;
 	}
 
 	/**
@@ -276,8 +276,8 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier leftOfCenter(T owner, int offset)
 	{
-		return () -> (Size.widthOf(owner.getParent()) - Padding.horizontalOf(owner.getParent()) - Margin.rightOf(owner)) / 2 - owner.width()
-				+ offset;
+		return () -> Size.innerWidthOf(owner.getParent()) / 2 + Padding.leftOf(owner.getParent()) - owner.width() - (int) Math.ceil(
+				Margin.rightOf(owner)) / 2 + offset;
 	}
 
 	/**
@@ -290,6 +290,7 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier rightOfCenter(T owner, int offset)
 	{
-		return () -> (Size.widthOf(owner.getParent()) - Padding.horizontalOf(owner.getParent()) - Margin.leftOf(owner)) / 2 + offset;
+		return () -> (Size.innerHeightOf(owner.getParent()) + Padding.leftOf(owner.getParent()) + owner.height() + (int) Math.floor(
+				Margin.leftOf(owner))) / 2 + offset;
 	}
 }
