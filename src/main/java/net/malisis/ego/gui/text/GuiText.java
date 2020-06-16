@@ -56,6 +56,7 @@ import org.apache.logging.log4j.util.Strings;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -316,11 +317,15 @@ public class GuiText implements IGuiRenderer, IContent
 	 */
 	private String resolveParameter(String key)
 	{
-		ICachedData<?> o = parameters.get(key);
-		if (o == null) //not actual parameter : translate it
-			return translated ? I18n.format(key) : key;
-		return Objects.toString(o.get())
-					  .replace("$", "\\$");
+		String str = Optional.of(parameters.get(key))
+							 .map(d -> Objects.toString(d.get()))
+							 .orElse(key);
+		return translate(str).replace("$", "\\$");
+	}
+
+	private String translate(String key)
+	{
+		return translated ? I18n.format(key) : key;
 	}
 
 	/**
@@ -408,7 +413,7 @@ public class GuiText implements IGuiRenderer, IContent
 		}
 		matcher.appendTail(sb);
 		str = sb.toString();
-		return translated ? I18n.format(str) : str;
+		return translate(str);
 	}
 
 	/**
