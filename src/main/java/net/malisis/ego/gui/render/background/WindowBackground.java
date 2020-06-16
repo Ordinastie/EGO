@@ -78,7 +78,7 @@ public class WindowBackground implements IGuiRenderer, Padding
 	{
 		private final Builder textBuilder = GuiText.builder();
 		private FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
-		private Function<COMPONENT, String> title = null;
+		private Function<COMPONENT, String> title = c -> "";
 
 		private WindowBackgroundBuilder()
 		{
