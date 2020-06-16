@@ -35,7 +35,7 @@ import net.malisis.ego.gui.render.GuiTexture;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.apache.commons.lang3.ObjectUtils;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.function.Supplier;
 
@@ -173,7 +173,8 @@ public class UIImage extends UIComponent
 	@Override
 	public String getPropertyString()
 	{
-		return ObjectUtils.firstNonNull(itemStack, icon.get()) + " " + super.getPropertyString();
+		return "" + TextFormatting.DARK_RED + (itemStack != null ? itemStack.get() : icon.get()) + TextFormatting.RESET + " "
+				+ super.getPropertyString();
 	}
 
 	public static UIImageBuilder builder()
