@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
  *
  * @param <BUILDER>
  */
-public abstract class UITextComponentBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent>
+public abstract class  UITextComponentBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent>
 		extends UIComponentBuilder<BUILDER, COMPONENT> implements ITextBuilder<BUILDER, COMPONENT>
 {
 	protected GuiText.Builder guiTextBuilder = GuiText.builder();

@@ -39,6 +39,7 @@ import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.text.ITextBuilder;
 import net.malisis.ego.gui.text.UITextComponentBuilder;
 
 import java.util.function.Function;
@@ -69,14 +70,9 @@ public interface IContent extends IPositioned, ISized, IGuiRenderer, IChild
 	}
 
 	abstract class UIContentHolderBuilder<BUILDER extends UIComponentBuilder<?, ?>, COMPONENT extends UIComponent & IContentSetter>
-			extends UITextComponentBuilder<BUILDER, COMPONENT>
+			extends UITextComponentBuilder<BUILDER, COMPONENT> implements IContentHolderBuilder<BUILDER, COMPONENT>
 	{
 		protected Function<COMPONENT, IContent> content = this::buildText;
-
-		public UIContentHolderBuilder()
-		{
-
-		}
 
 		public BUILDER content(Function<COMPONENT, IContent> content)
 		{
@@ -84,14 +80,43 @@ public interface IContent extends IPositioned, ISized, IGuiRenderer, IChild
 			return self();
 		}
 
-		public BUILDER content(IContent content)
+		@Override
+		protected COMPONENT build(COMPONENT component)
+		{
+			component.setContent(content.apply(component));
+			return super.build(component);
+		}
+	}
+
+	/**
+	 * Provides implementing builders helper methods to build content.
+	 * Expected implementation:
+	 * <pre>{@code
+	 * protected Function<COMPONENT, IContent> content = this::buildText;
+	 * public BUILDER content(Function<COMPONENT, IContent> content)
+	 * {
+	 * 		this.content = checkNotNull(content);
+	 * 		return self();
+	 * }
+	 * }</pre>
+	 *
+	 * @param <BUILDER> type of builder to return
+	 * @param <COMPONENT> type of component that will hold the content
+	 */
+	interface IContentHolderBuilder<BUILDER, COMPONENT extends ISized> extends ITextBuilder<BUILDER, COMPONENT>
+	{
+
+		BUILDER content(Function<COMPONENT, IContent> content);
+
+		default BUILDER content(IContent content)
 		{
 			return content(c -> content);
 		}
 
-		public BUILDER icon(GuiIcon icon)
+		default BUILDER icon(GuiIcon icon)
 		{
-			return content(c -> GuiShape.builder(c)
+			return content(c -> GuiShape.builder()
+										.parent(c)
 										.middleCenter()
 										.icon(icon)
 										.iconSize()
@@ -99,21 +124,9 @@ public interface IContent extends IPositioned, ISized, IGuiRenderer, IChild
 										.build());
 		}
 
-		public BUILDER texture(GuiTexture texture)
+		default BUILDER texture(GuiTexture texture)
 		{
 			return icon(GuiIcon.full(texture));
-		}
-
-		@Override
-		protected COMPONENT build(COMPONENT component)
-		{
-			//set content first so size is correct when added to container
-			if (content != null)
-				component.setContent(content.apply(component));
-
-			super.build(component);
-
-			return component;
 		}
 	}
 }
