@@ -144,6 +144,7 @@ public class Position
 	{
 		protected final IntSupplier xFunction;
 		protected final IntSupplier yFunction;
+		protected boolean locked = false; //prevents infinite recursivity
 
 		DynamicPosition(int x, int y, IntSupplier xFunction, IntSupplier yFunction)
 		{
@@ -155,16 +156,24 @@ public class Position
 		@Override
 		public int x()
 		{
-			if (xFunction != null)
+			if (xFunction != null && !locked)
+			{
+				locked = true;
 				x = xFunction.getAsInt();
+				locked = false;
+			}
 			return x;
 		}
 
 		@Override
 		public int y()
 		{
-			if (yFunction != null)
+			if (yFunction != null && !locked)
+			{
+				locked = true;
 				y = yFunction.getAsInt();
+				locked = false;
+			}
 			return y;
 		}
 
@@ -187,37 +196,24 @@ public class Position
 		@Override
 		public int x()
 		{
-			if (xFunction != null && (!Position.CACHED || EGOGui.needsUpdate(counterX)))
-			{
-				counterX = EGOGui.counter;
-				x = xFunction.getAsInt();
-			}
-			return x;
+			locked = Position.CACHED && !EGOGui.needsUpdate(counterX);
+			counterX = EGOGui.counter;
+			return super.x();
 		}
 
 		@Override
 		public int y()
 		{
-			if (yFunction != null && (!Position.CACHED || EGOGui.needsUpdate(counterY)))
-			{
-				counterY = EGOGui.counter;
-				y = yFunction.getAsInt();
-			}
-
-			return y;
-		}
-
-		@Override
-		public String toString()
-		{
-			return x() + "," + y();
+			locked = Position.CACHED && !EGOGui.needsUpdate(counterY);
+			counterY = EGOGui.counter;
+			return super.y();
 		}
 	}
 
 	public static class ScreenPosition implements IPosition
 	{
 		private final IPositioned owner;
-		/* Determines whether the position with be relative to the offset ot the owner (if owner is IOffset). */
+		/* Determines whether the position with be relative to the offset of the owner (if owner is IOffset). */
 		private final boolean fixed;
 
 		private int x;
