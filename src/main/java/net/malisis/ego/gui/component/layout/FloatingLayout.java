@@ -14,11 +14,17 @@ public class FloatingLayout implements ILayout
 	private int lineHeight;
 
 	private final int spacing;
+	private final int wrapCount;
+	private final boolean autoWrap;
 
-	public FloatingLayout(UIContainer parent, int space)
+	private int count;
+
+	public FloatingLayout(FloatingLayoutBuilder builder, UIContainer parent)
 	{
 		this.parent = parent;
-		this.spacing = space;
+		spacing = builder.spacing;
+		autoWrap = builder.autoWrap;
+		wrapCount = builder.wrapCount;
 		reset();
 	}
 
@@ -27,7 +33,9 @@ public class FloatingLayout implements ILayout
 		currentX = 0;
 		currentY = Padding.of(parent)
 						  .top();
+		lineHeight = 0;
 		last = null;
+		count = 0;
 
 	}
 
@@ -50,11 +58,12 @@ public class FloatingLayout implements ILayout
 		currentY += Margin.bottomOf(last) + lineHeight + spacing;
 		lineHeight = 0;
 		last = null;
+		count = 0;
 	}
 
 	private int spaceBefore(UIComponent component)
 	{
-		return last == null ? Margin.left(component) : Margin.horizontal(last, component) + spacing;
+		return last == null ? Padding.leftOf(component.getParent()) : Margin.horizontal(last, component) + spacing;
 	}
 
 	private void place(UIComponent component, int space)
@@ -63,19 +72,26 @@ public class FloatingLayout implements ILayout
 		currentX += space + component.width();
 	}
 
+	private boolean shouldWrap(UIComponent component, int before)
+	{
+		if (wrapCount > 0 && count >= wrapCount)
+			return true;
+		return autoWrap && currentX + before + component.width() > parent.innerSize()
+																		 .width() + Margin.right(component);
+	}
+
 	@Override
 	public void add(UIComponent component)
 	{
 		int before = spaceBefore(component);
-
-		if (currentX + before + component.width() > parent.innerSize()
-														  .width() + Margin.right(component))
+		if (shouldWrap(component, before))
 			nextLine();
 
 		place(component, before);
 		lineHeight = Math.max(lineHeight, component.size()
 												   .height());
 		last = component;
+		count++;
 	}
 
 	@Override
@@ -90,5 +106,50 @@ public class FloatingLayout implements ILayout
 	public void clear()
 	{
 		reset();
+	}
+
+	public static FloatingLayoutBuilder builder()
+	{
+		return new FloatingLayoutBuilder();
+	}
+
+	public static FloatingLayout create(UIContainer container)
+	{
+		return new FloatingLayoutBuilder().build(container);
+	}
+
+	public static class FloatingLayoutBuilder
+	{
+		private int spacing = 0;
+		private boolean autoWrap = false;
+		private int wrapCount = 0;
+
+		public FloatingLayoutBuilder spacing(int spacing)
+		{
+			this.spacing = spacing;
+			return this;
+		}
+
+		public FloatingLayoutBuilder autoWrap()
+		{
+			return autoWrap(true);
+		}
+
+		public FloatingLayoutBuilder autoWrap(boolean wrap)
+		{
+			this.autoWrap = wrap;
+			return this;
+		}
+
+		public FloatingLayoutBuilder wrapCount(int count)
+		{
+			this.wrapCount = count;
+			return this;
+		}
+
+		public FloatingLayout build(UIContainer container)
+		{
+			return new FloatingLayout(this, container);
+		}
 	}
 }
