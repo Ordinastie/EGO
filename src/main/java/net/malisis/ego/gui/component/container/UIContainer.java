@@ -375,22 +375,19 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		{
 			return components.stream()
 							 .filter(UIComponent::isVisible)
-							 .mapToInt(c -> c.position()
-											 .x() + c.size()
-													 .width())
+							 .mapToInt(c -> c.x() + c.width())
 							 .max()
-							 .orElse(0) - padding().left();
+							 .orElse(16) - padding().left();
+
 		}
 
 		private int updateHeight()
 		{
 			return components.stream()
 							 .filter(UIComponent::isVisible)
-							 .mapToInt(c -> c.position()
-											 .y() + c.size()
-													 .height())
+							 .mapToInt(c -> c.y() + c.height())
 							 .max()
-							 .orElse(0) - padding().top();
+							 .orElse(16) - padding().top();
 		}
 
 		@Override
@@ -422,6 +419,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		protected UIContainerBuilderG()
 		{
+			margin(0); //container don't use default margin
 			widthOfContent();
 			heightOfContent();
 		}
