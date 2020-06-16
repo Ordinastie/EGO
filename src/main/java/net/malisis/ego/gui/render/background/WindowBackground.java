@@ -47,7 +47,7 @@ public class WindowBackground implements IGuiRenderer, Padding
 	@Override
 	public int top()
 	{
-		return 5 + (text.isEmpty() ? 0 : text.height());
+		return 5 + (text == null || text.isEmpty() ? 0 : text.height());
 	}
 
 	@Override
@@ -79,6 +79,7 @@ public class WindowBackground implements IGuiRenderer, Padding
 		private final Builder textBuilder = GuiText.builder();
 		private FontOptionsBuilder fontOptionsBuilder = FontOptions.builder();
 		private Function<COMPONENT, String> title = c -> "";
+		private boolean hasTitle = false;
 
 		private WindowBackgroundBuilder()
 		{
@@ -121,6 +122,7 @@ public class WindowBackground implements IGuiRenderer, Padding
 
 		public WindowBackgroundBuilder<COMPONENT> title(Function<COMPONENT, String> title)
 		{
+			hasTitle = true;
 			this.title = checkNotNull(title);
 			return this;
 		}
@@ -133,11 +135,15 @@ public class WindowBackground implements IGuiRenderer, Padding
 
 		public WindowBackground build(COMPONENT component)
 		{
-			tb().parent(component);
-			tb().text(() -> title.apply(component));
-			fob().withPredicateParameter(component);
-			tb().fontOptions(fob().build());
-			GuiText text = tb().build();
+			GuiText text = null;
+			if (hasTitle)
+			{
+				tb().parent(component);
+				tb().text(() -> title.apply(component));
+				fob().withPredicateParameter(component);
+				tb().fontOptions(fob().build());
+				text = tb().build();
+			}
 			return new WindowBackground(component, text);
 		}
 
