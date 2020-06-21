@@ -3,6 +3,7 @@ package net.malisis.ego.gui.text;
 import net.malisis.ego.font.EGOFont;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.font.FontOptions.FontOptionsBuilder;
+import net.malisis.ego.font.FontOptions.Shadow;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.function.BooleanSupplier;
@@ -112,10 +113,15 @@ public interface IFontOptionsBuilder<BUILDER, PARAMETER>
 
 	default BUILDER shadow()
 	{
-		return shadow(true);
+		return shadow(Shadow.DARK);
 	}
 
-	default BUILDER shadow(boolean shadow)
+	default BUILDER lightShadow()
+	{
+		return shadow(Shadow.LIGHT);
+	}
+
+	default BUILDER shadow(Shadow shadow)
 	{
 		fob().shadow(shadow);
 		return self();

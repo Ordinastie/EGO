@@ -76,13 +76,20 @@ public class FontOptions
 		}
 	}
 
+	public enum Shadow
+	{
+		NONE,
+		DARK,
+		LIGHT
+	}
+
 	protected final EGOFont font;
 	/** Scale for the font **/
 	protected final Float fontScale;
 	/** Color of the text **/
 	protected final Integer color;
 	/** Draw with shadow **/
-	protected final Boolean shadow;
+	protected final Shadow shadow;
 	/** Use bold font **/
 	protected final Boolean bold;
 	/** Use italic font **/
@@ -100,7 +107,7 @@ public class FontOptions
 	/** Right aligned. */
 	protected final Boolean rightAligned;
 	/* Obfuscated char list */
-	protected String obfuscatedCharList = null;
+	protected String obfuscatedCharList;
 
 	protected List<FontOptions> predicates = Lists.newLinkedList();
 
@@ -231,13 +238,23 @@ public class FontOptions
 	}
 
 	/**
-	 * Checks whether draw shadow is enabled for this {@link FontOptions}.
+	 * Checks whether a shadow is enabled for this {@link FontOptions}.
 	 *
 	 * @return true, if successful
 	 */
 	public boolean hasShadow()
 	{
-		return ObjectUtils.firstNonNull(get().shadow, shadow, false);
+		return getShadow() != Shadow.NONE;
+	}
+
+	/**
+	 * Checks whether draw shadow is enabled for this {@link FontOptions}.
+	 *
+	 * @return true, if successful
+	 */
+	public Shadow getShadow()
+	{
+		return ObjectUtils.firstNonNull(get().shadow, shadow, Shadow.NONE);
 	}
 
 	/**
@@ -288,6 +305,10 @@ public class FontOptions
 	public int getShadowColor()
 	{
 		int color = getColor(); //make sure we use the right color
+
+		if (color == 0x990000)
+			return 0xBF9999;
+
 		if (color == 0) //black
 			return 0x222222;
 		if (color == 0xFFAA00) //gold
@@ -297,9 +318,23 @@ public class FontOptions
 		int g = (color >> 8) & 255;
 		int b = color & 255;
 
+		return getShadow() == Shadow.LIGHT ? lightShadow(r, g, b) : darkShadow(r, g, b);
+	}
+
+	private int darkShadow(int r, int g, int b)
+	{
 		r /= 4;
 		g /= 4;
 		b /= 4;
+
+		return (r & 255) << 16 | (g & 255) << 8 | b & 255;
+	}
+
+	private int lightShadow(int r, int g, int b)
+	{
+		r = 255 - (255 - r) / 4;
+		g = 255 - (255 - g) / 4;
+		b = 255 - (255 - b) / 4;
 
 		return (r & 255) << 16 | (g & 255) << 8 | b & 255;
 	}
@@ -433,7 +468,7 @@ public class FontOptions
 		/** Color of the text **/
 		protected Integer color;
 		/** Draw with shadow **/
-		protected Boolean shadow;
+		protected Shadow shadow;
 		/** Use bold font **/
 		protected Boolean bold;
 		/** Use italic font **/
@@ -458,7 +493,7 @@ public class FontOptions
 			font = MinecraftFont.INSTANCE;
 			fontScale = 1F;
 			color = 0x000000;
-			shadow = false;
+			shadow = Shadow.NONE;
 			bold = false;
 			italic = false;
 			underline = false;
@@ -582,10 +617,15 @@ public class FontOptions
 
 		public FontOptionsBuilder shadow()
 		{
-			return shadow(true);
+			return shadow(Shadow.DARK);
 		}
 
-		public FontOptionsBuilder shadow(boolean shadow)
+		public FontOptionsBuilder lightShadow()
+		{
+			return shadow(Shadow.LIGHT);
+		}
+
+		public FontOptionsBuilder shadow(Shadow shadow)
 		{
 			this.shadow = shadow;
 			return this;
@@ -659,7 +699,7 @@ public class FontOptions
 			font = options.getFont();
 			fontScale = options.getFontScale();
 			color = options.getColor();
-			shadow = options.hasShadow();
+			shadow = options.getShadow();
 			bold = options.isBold();
 			italic = options.isItalic();
 			underline = options.isUnderline();
