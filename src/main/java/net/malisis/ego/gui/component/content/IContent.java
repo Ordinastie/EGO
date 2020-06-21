@@ -27,6 +27,7 @@ package net.malisis.ego.gui.component.content;
 import static com.google.common.base.Preconditions.*;
 
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.UIComponent.BaseComponentBuilder;
 import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.position.Position;
@@ -49,6 +50,24 @@ import java.util.function.Function;
  */
 public interface IContent extends IPositioned, ISized, IGuiRenderer, IChild
 {
+	default UIComponent toComponent()
+	{
+		if (this instanceof UIComponent)
+			return (UIComponent) this;
+
+		return toComponentBuilder().build();
+	}
+
+	default BaseComponentBuilder toComponentBuilder()
+	{
+		return UIComponent.base()
+						  .name("ContentComponent")
+						  .width(this::width)
+						  .height(this::height)
+						  //.margin(EGOGui.defaultMargin())
+						  .foreground(this);
+	}
+
 	interface IContentHolder
 	{
 		IContent content();
