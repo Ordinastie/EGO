@@ -188,5 +188,25 @@ public interface Padding
 		{
 			return NO_PADDING;
 		}
+
+		default int paddingLeft()
+		{
+			return padding().left();
+		}
+
+		default int paddingRight()
+		{
+			return padding().right();
+		}
+
+		default int paddingTop()
+		{
+			return padding().top();
+		}
+
+		default int paddingBottom()
+		{
+			return padding().bottom();
+		}
 	}
 }
