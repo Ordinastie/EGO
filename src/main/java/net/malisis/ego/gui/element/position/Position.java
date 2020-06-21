@@ -76,6 +76,14 @@ public class Position
 			return position().y();
 		}
 
+		/**
+		 * Determines whether the position with be relative to the offset of the owner (if owner is {@link IOffset}).
+		 */
+		default boolean fixed()
+		{
+			return false;
+		}
+
 	}
 
 	public interface IPosition
@@ -153,13 +161,23 @@ public class Position
 			this.yFunction = yFunction;
 		}
 
+		protected int updateX()
+		{
+			return xFunction.getAsInt();
+		}
+
+		protected int updateY()
+		{
+			return yFunction.getAsInt();
+		}
+
 		@Override
 		public int x()
 		{
 			if (xFunction != null && !locked)
 			{
 				locked = true;
-				x = xFunction.getAsInt();
+				x = updateX();
 				locked = false;
 			}
 			return x;
@@ -171,7 +189,7 @@ public class Position
 			if (yFunction != null && !locked)
 			{
 				locked = true;
-				y = yFunction.getAsInt();
+				y = updateY();
 				locked = false;
 			}
 			return y;
@@ -210,38 +228,27 @@ public class Position
 		}
 	}
 
-	public static class ScreenPosition implements IPosition
+	public static class ScreenPosition extends CachedPosition
 	{
 		private final IPositioned owner;
-		/* Determines whether the position with be relative to the offset of the owner (if owner is IOffset). */
-		private final boolean fixed;
-
-		private int x;
-		private int y;
-		private int counter = -1;
 
 		public ScreenPosition(IPositioned owner)
 		{
-			this(owner, false);
-		}
-
-		public ScreenPosition(IPositioned owner, boolean fixed)
-		{
+			super(0, 0, () -> 0, () -> 0);
 			this.owner = owner;
-			this.fixed = fixed;
 		}
 
-		public int updateX()
+		@Override
+		protected int updateX()
 		{
-			int x = owner.position()
-						 .x();
+			int x = owner.x();
 			if (owner instanceof IChild)
 			{
 				Object parent = ((IChild) owner).getParent();
 				if (parent instanceof UIComponent)
 					x += ((UIComponent) parent).screenPosition()
 											   .x();
-				if (!fixed && parent instanceof IOffset)
+				if (!owner.fixed() && parent instanceof IOffset)
 					x += ((IOffset) parent).offset()
 										   .x();
 			}
@@ -249,43 +256,20 @@ public class Position
 			return x;
 		}
 
-		public int updateY()
+		@Override
+		protected int updateY()
 		{
-			int y = owner.position()
-						 .y();
+			int y = owner.y();
 			if (owner instanceof IChild)
 			{
 				Object parent = ((IChild) owner).getParent();
 				if (parent instanceof UIComponent)
 					y += ((UIComponent) parent).screenPosition()
 											   .y();
-				if (!fixed && parent instanceof IOffset)
+				if (!owner.fixed() && parent instanceof IOffset)
 					y += ((IOffset) parent).offset()
 										   .y();
 			}
-			return y;
-		}
-
-		private void update()
-		{
-			x = updateX();
-			y = updateY();
-			counter = EGOGui.counter;
-		}
-
-		@Override
-		public int x()
-		{
-			if (!Position.CACHED || EGOGui.needsUpdate(counter))
-				update();
-			return x;
-		}
-
-		@Override
-		public int y()
-		{
-			if (!Position.CACHED || EGOGui.needsUpdate(counter))
-				update();
 			return y;
 		}
 

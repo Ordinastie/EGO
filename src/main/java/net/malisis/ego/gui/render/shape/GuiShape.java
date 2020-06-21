@@ -66,18 +66,20 @@ public class GuiShape implements IContent, IChild
 	private final ToIntBiFunction<FacePosition, VertexPosition> alpha;
 	private final Supplier<GuiIcon> icon;
 	private final int border;
+	private final boolean fixed;
 
 	private GuiShape(Object parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
 		this.position = position.apply(this);
-		this.screenPosition = new ScreenPosition(this, fixed);
+		this.screenPosition = new ScreenPosition(this);
 		this.zIndex = zIndex;
 		this.size = size.apply(this);
 		this.color = color;
 		this.alpha = alpha;
 		this.icon = icon;
 		this.border = border;
+		this.fixed = fixed;
 	}
 
 	@Nonnull
@@ -85,6 +87,12 @@ public class GuiShape implements IContent, IChild
 	public IPosition position()
 	{
 		return position;
+	}
+
+	@Override
+	public boolean fixed()
+	{
+		return fixed;
 	}
 
 	public int getZIndex()

@@ -91,7 +91,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	/** Position of this {@link UIComponent}. */
 	protected IPosition position = Position.topLeft(this);
 	/** Position of this {@link UIComponent} on screen. */
-	private final IPosition screenPosition = new ScreenPosition(this, this instanceof IControlComponent);
+	private final IPosition screenPosition = new ScreenPosition(this);
 	/** Position of the mouse inside this {@link UIComponent}. */
 	private final IPosition mousePosition = Position.of(this::mouseX, this::mouseY);
 	/** Size of this {@link UIComponent}. */
@@ -169,6 +169,12 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	public IPosition position()
 	{
 		return position;
+	}
+
+	@Override
+	public boolean fixed()
+	{
+		return this instanceof IControlComponent;
 	}
 
 	/**

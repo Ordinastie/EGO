@@ -107,6 +107,7 @@ public class GuiText implements IGuiRenderer, IContent
 	private final CachedFontOptions cachedOptions = new CachedFontOptions(this::getFontOptions);
 
 	private IPosition position;
+	private final boolean fixed;
 	private final IPosition screenPosition = new Position.ScreenPosition(this);
 	private ISize size;
 	private final IntSupplier zIndex;
@@ -122,7 +123,7 @@ public class GuiText implements IGuiRenderer, IContent
 		base = new CachedData<>(builder.base);
 		parameters = Maps.newHashMap(builder.parameters);
 		position = builder.position.apply(this);
-
+		fixed = builder.fixed;
 		zIndex = builder.zIndex;
 		alpha = builder.alpha;
 		parent = builder.parent;
@@ -157,6 +158,12 @@ public class GuiText implements IGuiRenderer, IContent
 	public IPosition position()
 	{
 		return position;
+	}
+
+	@Override
+	public boolean fixed()
+	{
+		return fixed;
 	}
 
 	/**
@@ -317,7 +324,7 @@ public class GuiText implements IGuiRenderer, IContent
 	 */
 	private String resolveParameter(String key)
 	{
-		String str = Optional.of(parameters.get(key))
+		String str = Optional.ofNullable(parameters.get(key))
 							 .map(d -> Objects.toString(d.get()))
 							 .orElse(key);
 		return translate(str).replace("$", "\\$");
@@ -610,6 +617,7 @@ public class GuiText implements IGuiRenderer, IContent
 		private boolean literal = false;
 		private IntSupplier wrapSize;
 		private IntSupplier fitSize;
+		private boolean fixed;
 
 		protected Builder()
 		{
@@ -644,6 +652,12 @@ public class GuiText implements IGuiRenderer, IContent
 		public Builder y(Function<GuiText, IntSupplier> y)
 		{
 			this.y = checkNotNull(y);
+			return this;
+		}
+
+		public Builder fixed()
+		{
+			fixed = true;
 			return this;
 		}
 
