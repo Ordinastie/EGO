@@ -157,7 +157,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		screen = UIContainer.builder()
 							.name("Screen")
 							.size(this) //.size(this::width, this::height)
-							.noClipContent()
+							.clipContent(false)
 							.build();
 		Keyboard.enableRepeatEvents(true);
 
