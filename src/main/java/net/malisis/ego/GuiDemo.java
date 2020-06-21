@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.ComponentPosition;
 import net.malisis.ego.gui.EGOGui;
+import net.malisis.ego.gui.component.AlertComponent;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.container.UIListContainer;
@@ -30,6 +31,7 @@ import net.malisis.ego.gui.component.interaction.UITextField;
 import net.malisis.ego.gui.component.layout.GridLayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
@@ -64,46 +66,127 @@ public class GuiDemo extends EGOGui
 	private int selectSize = 100;
 	private int currentSize = 100;
 
+	private UIContainer window;
+
 	public GuiDemo(/*MalisisInventoryContainer inventoryContainer*/)
 	{
 		//setInventoryContainer(inventoryContainer);
 		//guiscreenBackground = false;
 	}
 
+	UITextField tfTitle = null;
+
 	private UIComponent debug()
 	{
+		watch("Error");
+		setDefaultMargin(Margin.of(5));
+
+		tfTitle = UITextField.builder()
+							 .middleCenter()
+							 .width(100)
+							 .text("Default title")
+							 .build();
+
+		window = UIContainer.builder()
+							.window()
+							.title(tfTitle::getText)
+							.withControl(UIMoveHandle.builder()
+													 .height(15)
+													 .build())
+							.clipContent(false)
+							.size(250, 150)
+							.build();
+
 		UIContainer panel = UIContainer.panel()
-									   .middleCenter()
-									   .size(250, 150)
-									   .withControl(UIMoveHandle.builder()
-																.position(0, 0)
-																.fillWidth()
-																.height(15)
-																.build())
+									   .parent(window)
+									   .parentSize()
+									   .margin(0)
+									   .add(tfTitle)
 									   .build();
 
-		UILabel title = UILabel.builder()
-							   .parent(panel)
-							   .middleCenter()
-							   .text("Panel Title")
-							   .textColor(0xFFFFFF)
-							   .shadow()
-							   .scale(1.3F)
-							   .when(UILabel::isHovered)
-							   .textColor(0x8396FF)
-							   .build();
+		UIButton btnPork = UIButton.builder()
+								   .parent(panel)
+								   .rightOf(tfTitle)
+								   .middleAlignedTo(tfTitle)
+								   //.middleCenter()
+								   .icon(GuiIcon.from(Items.BOOK))
+								   .data(Items.BOOK)
+								   .margin(1)
+								   .onClick(this::alert)
+								   .build();
 
-		UIButton button = UIButton.builder()
+		UIButton btnWheat = UIButton.builder()
+									.parent(panel)
+									.rightAlignedTo(btnPork)
+									.above(btnPork)
+									.icon(GuiIcon.from(Items.WHEAT))
+									.data(Items.WHEAT)
+									.margin(1)
+									.onClick(this::alert)
+									.build();
+		UIButton btnRabbit = UIButton.builder()
+									 .parent(panel)
+									 .rightAlignedTo(btnPork)
+									 .below(btnPork)
+									 .icon(GuiIcon.from(Items.RABBIT_HIDE))
+									 .data(Items.RABBIT_HIDE)
+									 .margin(1)
+									 .onClick(this::alert)
+									 .build();
+
+		UIButton btnOk = UIButton.builder()
+								 .parent(panel)
+								 .below(tfTitle)
+								 .leftOfCenter()
+								 .width(50)
+								 .text("Ok")
+								 .build();
+
+		UIButton btnCnl = UIButton.builder()
 								  .parent(panel)
-								  .centered()
-								  .below(title)
-								  .text("Button")
-								  .textColor(TextFormatting.DARK_GREEN)
-								  .when(UIComponent::isHovered)
-								  .textColor(TextFormatting.GREEN)
+								  .below(tfTitle)
+								  .rightOf(btnOk)
+								  .width(50)
+								  .text("Cancel")
 								  .build();
 
-		return panel;
+		return window;
+	}
+
+	public void alert(UIButton btnClicked)
+	{
+		Item data = (Item) btnClicked.getData();
+		UIContainer message = UIContainer.builder()
+										 .build();
+		String name = data.getTranslationKey() + ".name";
+		UIImage img = UIImage.builder()
+							 .parent(message)
+							 .item(data)
+							 .build();
+		UILabel lbl = UILabel.builder()
+							 .parent(message)
+							 .rightOf(img)
+							 .middleAlignedTo(img)
+							 .text("You selected §o{" + name + "}§r.")
+							 .build();
+
+		AlertComponent alert = AlertComponent.confirm("Set title to §o{" + name + "}§r ? ", this::m1);
+
+		//											 .withButton(ButtonType.OK)
+		//											 .withButton(ButtonType.CANCEL)
+		//.build();
+
+		displayModal(alert);
+	}
+
+	private boolean m1()
+	{
+		displayModal(AlertComponent.error("I don't want to!"));
+		return false;
+	}
+
+	private void m2()
+	{
 	}
 
 	@Override
@@ -119,7 +202,7 @@ public class GuiDemo extends EGOGui
 		//allow contents to be drawn outside of the window's borders
 		UIContainer window = UIContainer.window()
 										.size(400, 240)
-										.noClipContent()
+										.clipContent(false)
 										.onLeftClick(e -> {
 											//EGO.message("Clicked");
 											return false;
