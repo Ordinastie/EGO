@@ -24,7 +24,6 @@
 
 package net.malisis.ego.gui.element.size;
 
-import net.malisis.ego.EGO;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.IChild;
@@ -56,11 +55,17 @@ public class Size
 			return size();
 		}
 
+		/**
+		 * @return size().width()
+		 */
 		default int width()
 		{
 			return size().width();
 		}
 
+		/**
+		 * @return size().height()
+		 */
 		default int height()
 		{
 			return size().height();
@@ -73,9 +78,9 @@ public class Size
 
 		int height();
 
-		default ISize offset(int x, int y)
+		default ISize offset(int w, int h)
 		{
-			return plus(Size.of(x, y));
+			return plus(Size.of(w, h));
 		}
 
 		default ISize plus(ISize other)
@@ -99,64 +104,113 @@ public class Size
 		}
 	}
 
-	public static class DynamicSize implements ISize
+	public static class FixedSize implements ISize
 	{
-		private int counterW = -1;
-		private int counterH = -1;
-		private int lock = 0;
-		private int width;
-		private int height;
-		private final IntSupplier widthFunction;
-		private final IntSupplier heightFunction;
+		protected int width;
+		protected int height;
 
-		DynamicSize(int width, int height, IntSupplier widthFunction, IntSupplier heightFunction)
+		public FixedSize(int width, int height)
 		{
 			this.width = width;
 			this.height = height;
-			this.widthFunction = widthFunction;
-			this.heightFunction = heightFunction;
 		}
 
 		@Override
 		public int width()
 		{
-			if (widthFunction != null && (!Size.CACHED || EGOGui.needsUpdate(counterW)))
-			{
-				if (lock++ >= 5)
-				{
-					EGO.log.error("Possible infinite recursion detected for width. (" + lock + ")");
-					return width;
-				}
-				counterW = EGOGui.counter;
-				width = widthFunction.getAsInt();
-			}
-
-			lock = 0;
 			return width;
 		}
 
 		@Override
 		public int height()
 		{
-			if (heightFunction != null && (!Size.CACHED || EGOGui.needsUpdate(counterH)))
-			{
-				if (lock++ >= 5)
-				{
-					EGO.log.error("Possible infinite recursion detected for height. (" + lock + ")");
-					return height;
-				}
-				counterH = EGOGui.counter;
-				height = heightFunction.getAsInt();
-			}
-
-			lock = 0;
 			return height;
 		}
 
 		@Override
 		public String toString()
 		{
-			return width + "x" + height;
+			return width + "," + height;
+		}
+	}
+
+	public static class DynamicSize extends FixedSize
+	{
+		protected final IntSupplier widthFunction;
+		protected final IntSupplier heightFunction;
+		protected boolean locked = false; //prevents infinite recursivity
+
+		DynamicSize(int width, int height, IntSupplier widthFunction, IntSupplier heightFunction)
+		{
+			super(width, height);
+			this.widthFunction = widthFunction;
+			this.heightFunction = heightFunction;
+		}
+
+		protected int updateWidth()
+		{
+			return widthFunction.getAsInt();
+		}
+
+		protected int updateHeight()
+		{
+			return heightFunction.getAsInt();
+		}
+
+		@Override
+		public int width()
+		{
+			if (widthFunction != null && !locked)
+			{
+				locked = true;
+				width = updateWidth();
+				locked = false;
+			}
+			return width;
+		}
+
+		@Override
+		public int height()
+		{
+			if (heightFunction != null && !locked)
+			{
+				locked = true;
+				height = updateHeight();
+				locked = false;
+			}
+			return height;
+		}
+
+		public ISize cached()
+		{
+			return new CachedSize(width, height, widthFunction, heightFunction);
+		}
+	}
+
+	public static class CachedSize extends DynamicSize
+	{
+		protected int counterWidth = -1;
+		protected int counterHeight = -1;
+
+		public CachedSize(int width, int height, IntSupplier widthFunction, IntSupplier heightFunction)
+		{
+			super(width, height, widthFunction, heightFunction);
+		}
+
+		@Override
+		public int width()
+		{
+			locked = Size.CACHED && !EGOGui.needsUpdate(counterWidth);
+			counterWidth = EGOGui.counter;
+			return super.width();
+		}
+
+		@Override
+		public int height()
+		{
+			locked = Size.CACHED && !EGOGui.needsUpdate(counterHeight);
+			counterHeight = EGOGui.counter;
+			return super.height();
 		}
 	}
 
@@ -193,32 +247,32 @@ public class Size
 	//Size shortcuts
 	public static ISize of(int width, int height)
 	{
-		return new DynamicSize(width, height, null, null);
+		return new FixedSize(width, height);
 	}
 
 	public static ISize of(int width, IntSupplier heightSupplier)
 	{
-		return new DynamicSize(width, 0, null, heightSupplier);
+		return new CachedSize(width, 0, null, heightSupplier);
 	}
 
 	public static ISize of(IntSupplier widthSupplier, int height)
 	{
-		return new DynamicSize(0, height, widthSupplier, null);
+		return new CachedSize(0, height, widthSupplier, null);
 	}
 
 	public static ISize of(IntSupplier widthSupplier, IntSupplier heightSupplier)
 	{
-		return new DynamicSize(0, 0, widthSupplier, heightSupplier);
+		return new CachedSize(0, 0, widthSupplier, heightSupplier);
 	}
 
 	public static <T extends ISized & IChild> ISize relativeTo(T other)
 	{
-		return new DynamicSize(0, 0, Sizes.widthRelativeTo(other, 1.0F, 0), Sizes.heightRelativeTo(other, 1.0F, 0));
+		return new CachedSize(0, 0, Sizes.widthRelativeTo(other, 1.0F, 0), Sizes.heightRelativeTo(other, 1.0F, 0));
 	}
 
 	public static <T extends ISized & IChild> ISize inherited(T owner)
 	{
-		return new DynamicSize(0, 0, Sizes.parentWidth(owner, 1.0F, 0), Sizes.parentHeight(owner, 1.0F, 0));
+		return new CachedSize(0, 0, Sizes.parentWidth(owner, 1.0F, 0), Sizes.parentHeight(owner, 1.0F, 0));
 	}
 
 	public static ISize sizeOfContent(IContentHolder owner)
@@ -228,7 +282,7 @@ public class Size
 
 	public static ISize sizeOfContent(IContentHolder owner, int widthOffset, int heightOffset)
 	{
-		return new DynamicSize(0, 0, Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
+		return new CachedSize(0, 0, Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
 	}
 
 	public static <T extends IPositioned & IChild> ISize fill(T owner)
@@ -238,7 +292,7 @@ public class Size
 
 	public static <T extends IPositioned & IChild> ISize fill(T owner, int rightOffset, int bottomOffset)
 	{
-		return new DynamicSize(0, 0, Sizes.fillWidth(owner, rightOffset), Sizes.fillHeight(owner, bottomOffset));
+		return new CachedSize(0, 0, Sizes.fillWidth(owner, rightOffset), Sizes.fillHeight(owner, bottomOffset));
 	}
 
 }
