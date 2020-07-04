@@ -24,10 +24,29 @@
 
 package net.malisis.ego.gui.element;
 
+import java.util.function.Function;
+
 /**
  * @author Ordinastie
  */
 public interface IChild
 {
 	Object getParent();
+
+	static Object parent(Object child)
+	{
+		return child instanceof IChild ? ((IChild) child).getParent() : null;
+	}
+
+	static <T> int parent(Object child, Function<T, Integer> func)
+	{
+		Object p = parent(child);
+		return p != null ? func.apply((T) p) : 0;
+	}
+
+	//	static <T> int parent(Object child, Class<T> clazz, Function<T, Integer> func)
+	//	{
+	//		Object p = parent(child);
+	//		return clazz.isInstance(p) ? func.apply(clazz.cast(p)) : 0;
+	//	}
 }
