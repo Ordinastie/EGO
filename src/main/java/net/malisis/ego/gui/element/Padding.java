@@ -24,60 +24,14 @@
 
 package net.malisis.ego.gui.element;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Ordinastie
  */
-public interface Padding
+public interface Padding extends ISpace
 {
 	Padding NO_PADDING = new FixedPadding(0, 0, 0, 0);
-
-	/**
-	 * Left padding.
-	 *
-	 * @return the left padding
-	 */
-	int left();
-
-	/**
-	 * Right padding.
-	 *
-	 * @return the right padding
-	 */
-	int right();
-
-	/**
-	 * Top padding.
-	 *
-	 * @return the top padding.
-	 */
-	int top();
-
-	/**
-	 * Bottom padding.
-	 *
-	 * @return the bottom padding.
-	 */
-	int bottom();
-
-	/**
-	 * Horizontal padding.
-	 *
-	 * @return the horizontal padding
-	 */
-	default int horizontal()
-	{
-		return left() + right();
-	}
-
-	/**
-	 * Vertical padding
-	 *
-	 * @return the vertical padding
-	 */
-	default int vertical()
-	{
-		return top() + bottom();
-	}
 
 	class FixedPadding implements Padding
 	{
@@ -91,21 +45,25 @@ public interface Padding
 			this.right = right;
 		}
 
+		@Override
 		public int left()
 		{
 			return left;
 		}
 
+		@Override
 		public int right()
 		{
 			return right;
 		}
 
+		@Override
 		public int top()
 		{
 			return top;
 		}
 
+		@Override
 		public int bottom()
 		{
 			return bottom;
@@ -114,7 +72,7 @@ public interface Padding
 		@Override
 		public String toString()
 		{
-			return "Pad{" + top() + "." + bottom() + "." + left() + "." + right() + "}";
+			return toString("P");
 		}
 	}
 
@@ -135,17 +93,17 @@ public interface Padding
 
 	/**
 	 * Gets the {@link Padding} of an object.<br>
-	 * If objects is not and instance of {@link IPadded}, return NO_PADDING.
+	 * If object is not and instance of {@link IPadded}, return NO_PADDING.
 	 *
-	 * @param component object to get the padding from
+	 * @param obj object to get the padding from
 	 * @return the padding
 	 */
-	static Padding of(Object component)
+	static Padding of(Object obj)
 	{
-		if (component instanceof Padding)
-			return (Padding) component;
-		else if (component instanceof IPadded)
-			return ((IPadded) component).padding();
+		if (obj instanceof Padding)
+			return (Padding) obj;
+		else if (obj instanceof IPadded)
+			return ((IPadded) obj).padding();
 		return Padding.NO_PADDING;
 	}
 
@@ -184,6 +142,7 @@ public interface Padding
 	 */
 	interface IPadded
 	{
+		@Nonnull
 		default Padding padding()
 		{
 			return NO_PADDING;
@@ -207,6 +166,16 @@ public interface Padding
 		default int paddingBottom()
 		{
 			return padding().bottom();
+		}
+
+		default int paddingHorizontal()
+		{
+			return padding().horizontal();
+		}
+
+		default int paddingVertical()
+		{
+			return padding().vertical();
 		}
 	}
 }

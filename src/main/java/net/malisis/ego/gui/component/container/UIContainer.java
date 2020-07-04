@@ -36,12 +36,12 @@ import net.malisis.ego.gui.component.UIComponentBuilder;
 import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.component.control.ICloseable;
 import net.malisis.ego.gui.component.control.IScrollable;
+import net.malisis.ego.gui.component.control.Title;
 import net.malisis.ego.gui.component.layout.ILayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.Padding;
-import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
@@ -72,10 +72,9 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie
  */
-public class UIContainer extends UIComponent implements IClipable, IScrollable, ICloseable, IPadded
+public class UIContainer extends UIComponent implements IClipable, IScrollable, ICloseable
 {
 	protected ContainerContent content = new ContainerContent();
-	protected Title title = new Title();
 
 	//IClipable
 	/** Determines whether this {@link UIContainer} should clip its contents to its drawn area. */
@@ -90,11 +89,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 */
 	public UIContainer()
 	{
-		//titleLabel = new UILabel();
-		setForeground(r -> {
-			title.text.render(r);
-			content.render(r);
-		});
+		setForeground(content);
 	}
 
 	@Override
@@ -104,83 +99,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	}
 
 	// #region getters/setters
-
-	public void setTitle(String text)
-	{
-		title.text.setText(text);
-	}
-
-	public void setTitle(GuiText text)
-	{
-		text.setPosition(title);
-		title.text = checkNotNull(text);
-	}
-
-	public String getTitle()
-	{
-		return title.text.getText();
-	}
-
-	private static class Title implements IPosition, Padding
-	{
-		private GuiText text = GuiText.of("", FontOptions.builder()
-														 .color(0x404040)
-														 .build());
-		private Padding padding = NO_PADDING;
-
-		@Override
-		public int x()
-		{
-			return padding.left();
-		}
-
-		@Override
-		public int y()
-		{
-			return padding.top();
-		}
-
-		@Override
-		public int left()
-		{
-			return padding.left();
-		}
-
-		@Override
-		public int right()
-		{
-			return padding.right();
-		}
-
-		@Override
-		public int top()
-		{
-			return padding.top() + (text.isEmpty() ? 0 : text.height());
-		}
-
-		@Override
-		public int bottom()
-		{
-			return padding.bottom();
-		}
-	}
-
-	/**
-	 * Set the padding for this {@link UIContainer}.
-	 *
-	 * @param padding the padding
-	 */
-	public void setPadding(Padding padding)
-	{
-		title.padding = padding;
-	}
-
-	@Override
-	public Padding padding()
-	{
-		return title;
-	}
-
 	@Override
 	public IPosition contentPosition()
 	{
@@ -211,6 +129,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	 * @param name the name
 	 * @return the component
 	 */
+	@Override
 	public UIComponent getComponent(String name)
 	{
 		if (StringUtils.isEmpty(name))
@@ -470,7 +389,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 	public abstract static class UIContainerBuilderG<BUILDER extends UIContainerBuilderG<?, ?>, CONTAINER extends UIContainer>
 			extends UIComponentBuilder<BUILDER, CONTAINER>
 	{
-		protected Padding padding = Padding.NO_PADDING;
 		protected boolean clipContent = true;
 		protected Function<CONTAINER, ILayout> layout = c -> null;
 		protected BiFunction<CONTAINER, UIScrollBar.Type, UIScrollBar> vertical = null;
@@ -481,7 +399,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 
 		protected UIContainerBuilderG()
 		{
-			margin(0); //container don't use default margin
+			margin(0); //containers don't use default margin
 			widthOfContent();
 			heightOfContent();
 			titleOptionsBuilder.color(0x404040);
@@ -521,18 +439,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 			return self();
 		}
 
-		public BUILDER padding(Padding padding)
-		{
-			this.padding = padding;
-			return self();
-		}
-
-		public BUILDER padding(int padding)
-		{
-			this.padding = Padding.of(padding);
-			return self();
-		}
-
 		public BUILDER clipContent(boolean clip)
 		{
 			clipContent = clip;
@@ -568,11 +474,6 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		{
 			super.build(container);
 
-			titleBuilder.parent(container);
-			titleBuilder.fontOptions(titleOptionsBuilder.build());
-			container.setTitle(titleBuilder.build());
-
-			container.setPadding(padding);
 			container.setClipContent(clipContent);
 			container.setLayout(layout.apply(container));
 			if (vertical != null)

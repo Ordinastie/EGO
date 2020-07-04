@@ -39,10 +39,10 @@ import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
-import net.malisis.ego.gui.event.MouseEvent.MouseDown;
-import net.malisis.ego.gui.event.MouseEvent.MouseLeftClick;
-import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
-import net.malisis.ego.gui.event.MouseEvent.MouseUp;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseDown;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseLeftClick;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseRightClick;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseUp;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
@@ -51,6 +51,8 @@ import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
 import java.util.function.Consumer;
+
+import javax.annotation.Nonnull;
 
 /**
  * UIButton
@@ -115,6 +117,8 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 		this.padding = padding;
 	}
 
+	@Nonnull
+	@Override
 	public Padding padding()
 	{
 		return padding;
@@ -287,6 +291,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 			return this;
 		}
 
+		@Override
 		public UIButtonBuilder icon(GuiIcon icon)
 		{
 			if (padding == TEXT_PADDING) //still default padding

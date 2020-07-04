@@ -37,7 +37,6 @@ import net.malisis.ego.gui.component.content.IContent.IContentHolder;
 import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IOffset;
 import net.malisis.ego.gui.element.Padding;
-import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
 import net.malisis.ego.gui.element.size.Size;
@@ -65,15 +64,11 @@ import java.util.function.Predicate;
  *
  * @author Ordinastie
  */
-public class UITextField extends UIComponent
-		implements IContentHolder, IClipable, IOffset, IPadded, IValueChangeEventRegister<UITextField, String>
+public class UITextField extends UIComponent implements IContentHolder, IClipable, IOffset, IValueChangeEventRegister<UITextField, String>
 {
 	protected final GuiText guiText;
 	/** Current text of this {@link UITextField}. */
 	protected StringBuilder text = new StringBuilder();
-
-	/** The padding of this {@link UITextField}. */
-	protected Padding padding = Padding.of(1);
 
 	private int xOffset = 0;
 	protected IPosition offset = Position.of(this::xOffset, 0);
@@ -136,6 +131,7 @@ public class UITextField extends UIComponent
 												 .build())
 						 .build();
 		setSize(Size.of(100, 12));
+		setPadding(Padding.of(1));
 
 		GuiShape background = GuiShape.builder(this)
 									  .icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD_BG, null, GuiIcon.TEXTFIELD_BG_DISABLED))
@@ -144,14 +140,6 @@ public class UITextField extends UIComponent
 		setBackground(background);
 		setForeground(guiText.and(this::drawCursor)
 							 .and(this::drawSelectionBox));
-	}
-
-	@Override
-	public void setParent(UIComponent parent)
-	{
-
-		super.setParent(parent);
-
 	}
 
 	// #region Getters/Setters
@@ -221,12 +209,6 @@ public class UITextField extends UIComponent
 		int end = Math.max(selectionCursor.index, cursor.index);
 
 		return text.substring(start, end);
-	}
-
-	@Override
-	public Padding padding()
-	{
-		return padding;
 	}
 
 	private int xOffset()
@@ -386,7 +368,7 @@ public class UITextField extends UIComponent
 
 	public void setEnterCallback(Consumer<UITextField> consumer)
 	{
-		this.enterCallback = consumer;
+		enterCallback = consumer;
 	}
 
 	public Consumer<UITextField> getEnterCallback()
@@ -1163,7 +1145,7 @@ public class UITextField extends UIComponent
 
 		public UITextFieldBuilder autoSelectOnFocus(boolean autoSelect)
 		{
-			this.autoSelectOnFocus = autoSelect;
+			autoSelectOnFocus = autoSelect;
 			return this;
 		}
 
@@ -1175,13 +1157,13 @@ public class UITextField extends UIComponent
 
 		public UITextFieldBuilder cursorColor(int color)
 		{
-			this.cursorColor = color;
+			cursorColor = color;
 			return this;
 		}
 
 		public UITextFieldBuilder filter(Function<String, String> func)
 		{
-			this.filterFunction = func;
+			filterFunction = func;
 			return this;
 		}
 

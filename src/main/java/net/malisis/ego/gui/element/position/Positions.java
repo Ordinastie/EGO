@@ -26,6 +26,7 @@ package net.malisis.ego.gui.element.position;
 
 import static com.google.common.base.Preconditions.*;
 
+import net.malisis.ego.gui.component.control.IControlComponent;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
@@ -53,7 +54,7 @@ public class Positions
 	 */
 	public static IntSupplier leftAligned(IChild owner, int spacing)
 	{
-		return () -> Padding.leftOf(owner.getParent()) + spacing;
+		return () -> IChild.parent(owner, Padding::leftOf) + IControlComponent.leftSpace(owner) + spacing;
 	}
 
 	/**
@@ -66,7 +67,8 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier rightAligned(T owner, int spacing)
 	{
-		return () -> Size.widthOf(owner.getParent()) - owner.width() - Padding.rightOf(owner) - spacing;
+		return () -> IChild.parent(owner, ISized::width) - owner.width() - IChild.parent(owner, Padding::rightOf)
+				- IControlComponent.rightSpace(owner) - spacing;
 	}
 
 	/**
@@ -79,8 +81,8 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier centered(T owner, int offset)
 	{
-		return () -> (Size.widthOf(owner.getParent()) - Padding.horizontalOf(owner.getParent()) - owner.width()) / 2 + offset
-				+ Padding.leftOf(owner.getParent());
+		return () -> (IChild.parent(owner, Size::innerWidthOf) - owner.width()) / 2 + offset + IChild.parent(owner, Padding::leftOf)
+				+ IControlComponent.leftSpace(owner);
 	}
 
 	/**
@@ -92,7 +94,7 @@ public class Positions
 	 */
 	public static IntSupplier topAligned(IChild owner, int spacing)
 	{
-		return () -> Padding.topOf(owner.getParent()) + spacing;
+		return () -> IChild.parent(owner, Padding::topOf) + IControlComponent.topSpace(owner) + spacing;
 	}
 
 	/**
@@ -105,7 +107,8 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier bottomAligned(T owner, int spacing)
 	{
-		return () -> Size.heightOf(owner.getParent()) - owner.height() - Padding.bottomOf(owner) - spacing;
+		return () -> IChild.parent(owner, ISized::height) - owner.height() - IChild.parent(owner, Padding::bottomOf)
+				- IControlComponent.bottomSpace(owner) - spacing;
 	}
 
 	/**
@@ -118,8 +121,8 @@ public class Positions
 	 */
 	public static <T extends ISized & IChild> IntSupplier middleAligned(T owner, int offset)
 	{
-		return () -> (int) (Math.ceil(((float) Size.heightOf(owner.getParent()) - Padding.verticalOf(owner.getParent()) - owner.height())
-											  / 2) + offset + Padding.topOf(owner.getParent()));
+		return () -> (int) Math.ceil(((float) IChild.parent(owner, Size::innerHeightOf) - owner.height()) / 2) + offset + IChild.parent(
+				owner, Padding::topOf) + IControlComponent.topSpace(owner);
 	}
 
 	//relative position to other
@@ -294,3 +297,5 @@ public class Positions
 				Margin.leftOf(owner))) / 2 + offset;
 	}
 }
+
+

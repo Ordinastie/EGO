@@ -25,6 +25,7 @@
 package net.malisis.ego.gui.element;
 
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.control.IControlComponent;
 
 /**
  * IClipable indicates an object (usually {@link UIComponent}) that they need to provide a ClipArea.<br>
@@ -58,7 +59,7 @@ public interface IClipable
 	static ClipArea intersected(Object clipable)
 	{
 		ClipArea area = of(clipable);
-		while (clipable instanceof IChild)
+		while (clipable instanceof IChild && !(clipable instanceof IControlComponent))
 		{
 			clipable = ((IChild) clipable).getParent();
 			area = area.intersect(of(clipable));
@@ -94,7 +95,7 @@ public interface IClipable
 
 		public boolean isInside(int x, int y)
 		{
-			return x >= this.x && x < this.X && y >= this.y && y < this.Y;
+			return x >= this.x && x < X && y >= this.y && y < Y;
 		}
 
 		public ClipArea intersect(ClipArea other)
@@ -106,7 +107,7 @@ public interface IClipable
 			if (other.noClip())
 				return this;
 
-			return from(Math.max(this.x, other.x), Math.max(this.y, other.y), Math.min(this.X, other.X), Math.min(this.Y, other.Y));
+			return from(Math.max(x, other.x), Math.max(y, other.y), Math.min(X, other.X), Math.min(Y, other.Y));
 		}
 
 		public boolean noClip()
@@ -129,27 +130,23 @@ public interface IClipable
 			return x + "," + y + " -> " + X + "," + Y + " (" + width() + "," + height() + ")";
 		}
 
-		public static ClipArea from(UIComponent clipable)
-		{
-			return from(clipable, Padding.of(clipable));
-		}
-
 		public static ClipArea from(int x, int y, int X, int Y)
 		{
 			ClipArea area = new ClipArea(x, y, X, Y);
 			return area.width() > 0 && area.height() > 0 ? area : FULLCLIP;
 		}
 
-		public static ClipArea from(UIComponent clipable, Padding padding)
+		public static ClipArea from(UIComponent clipable)
 		{
-			return from(clipable.screenPosition()
-								.x() + padding.left(), clipable.screenPosition()
-															   .y() + padding.top(), clipable.screenPosition()
-																							 .x() + padding.left() + clipable.innerSize()
-																															 .width(),
-						clipable.screenPosition()
-								.y() + padding.top() + clipable.innerSize()
-															   .height());
+			Padding padding = Padding.of(clipable);
+			int x = clipable.screenPosition()
+							.x() + padding.left() + clipable.controlSpace(ISpace::left);
+			int y = clipable.screenPosition()
+							.y() + padding.top() + clipable.controlSpace(ISpace::top);
+
+			return from(x, y, x + clipable.innerSize()
+										  .width(), y + clipable.innerSize()
+																.height());
 		}
 
 	}

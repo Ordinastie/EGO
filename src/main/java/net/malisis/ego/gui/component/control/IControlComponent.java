@@ -25,15 +25,19 @@
 package net.malisis.ego.gui.component.control;
 
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.component.content.IContent;
 import net.malisis.ego.gui.element.IChild;
-import net.malisis.ego.gui.render.IGuiRenderer;
+import net.malisis.ego.gui.element.IClipable;
+import net.malisis.ego.gui.element.ISpace;
+import net.malisis.ego.gui.element.position.Position.IPosition;
 
 /**
- * IControlledComponent are special components designed to affect other {@link UIComponent}.
+ * IControlComponent are special components held by a {@link UIComponent}.<br>
+ * They get priority for mouse and keyboard events, and they don't get clipped by {@link IClipable} components.
  *
  * @author Ordinastie
  */
-public interface IControlComponent extends IGuiRenderer, IChild
+public interface IControlComponent extends IContent, ISpace
 {
 	/**
 	 * Sets the {@link UIComponent} controlled by this {@link IControlComponent}.
@@ -50,38 +54,95 @@ public interface IControlComponent extends IGuiRenderer, IChild
 	@Override
 	UIComponent getParent();
 
-	/**
-	 * Gets the component at the specified coordinates. See {@link UIComponent#getComponentAt(int, int)}.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @return the component at
-	 */
-	UIComponent getComponentAt(int x, int y);
+	IPosition screenPosition();
 
-	/**
-	 * Gets the {@link UIComponent} matching the specified name.
-	 *
-	 * @param name the name
-	 * @return the component
-	 */
-	UIComponent getComponent(String name);
+	default boolean isInsideBounds(int x, int y)
+	{
+		if (!getParent().isVisible())
+			return false;
+		int sx = x() + getParent().screenPosition()
+								  .x();
+		int sy = y() + getParent().screenPosition()
+								  .y();
+		return x >= sx && x <= sx + size().width() && y >= sy && y <= sy + size().height();
+	}
 
-	/**
-	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>
-	 * See {@link UIComponent#keyTyped(char, int)}.
-	 *
-	 * @param keyChar the key char
-	 * @param keyCode the key code
-	 * @return true, if successful
-	 */
-	boolean keyTyped(char keyChar, int keyCode);
+	static int topSpace(Object owner)
+	{
+		if (owner instanceof IControlComponent)
+			return 0;
 
-	/**
-	 * Called when the scrollwheel is used when this {@link IControlComponent} or its parent is focused or hovered.<br>
-	 * See {@link UIComponent#scrollWheel(int)}
-	 *
-	 * @param delta the delta
-	 */
-	void scrollWheel(int delta);
+		return IChild.parent(owner, IControlComponent::topOf);
+	}
+
+	static int bottomSpace(Object owner)
+	{
+		if (owner instanceof IControlComponent)
+			return 0;
+
+		return IChild.parent(owner, IControlComponent::bottomOf);
+	}
+
+	static int leftSpace(Object owner)
+	{
+		if (owner instanceof IControlComponent)
+			return 0;
+
+		return IChild.parent(owner, IControlComponent::leftOf);
+	}
+
+	static int rightSpace(Object owner)
+	{
+		if (owner instanceof IControlComponent)
+			return 0;
+
+		return IChild.parent(owner, IControlComponent::rightOf);
+	}
+
+	static int horizontalSpace(Object owner)
+	{
+		if (owner instanceof IControlComponent)
+			return 0;
+
+		return IChild.parent(owner, IControlComponent::horizontalOf);
+	}
+
+	static int verticalSpace(Object owner)
+	{
+		if (owner instanceof IControlComponent)
+			return 0;
+
+		return IChild.parent(owner, IControlComponent::verticalOf);
+	}
+
+	static int topOf(Object owner)
+	{
+		return owner instanceof UIComponent ? ((UIComponent) owner).controlSpace(ISpace::top) : 0;
+	}
+
+	static int bottomOf(Object owner)
+	{
+		return owner instanceof UIComponent ? ((UIComponent) owner).controlSpace(ISpace::bottom) : 0;
+	}
+
+	static int leftOf(Object owner)
+	{
+		return owner instanceof UIComponent ? ((UIComponent) owner).controlSpace(ISpace::left) : 0;
+	}
+
+	static int rightOf(Object owner)
+	{
+		return owner instanceof UIComponent ? ((UIComponent) owner).controlSpace(ISpace::right) : 0;
+	}
+
+	static int verticalOf(Object owner)
+	{
+		return owner instanceof UIComponent ? ((UIComponent) owner).controlSpace(ISpace::vertical) : 0;
+	}
+
+	static int horizontalOf(Object owner)
+	{
+		return owner instanceof UIComponent ? ((UIComponent) owner).controlSpace(ISpace::horizontal) : 0;
+	}
+
 }

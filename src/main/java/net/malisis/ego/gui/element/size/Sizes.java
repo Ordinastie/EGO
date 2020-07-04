@@ -27,7 +27,7 @@ package net.malisis.ego.gui.element.size;
 import static com.google.common.base.Preconditions.*;
 
 import net.malisis.ego.gui.component.content.IContent.IContentHolder;
-import net.malisis.ego.gui.component.scrolling.UIScrollBar;
+import net.malisis.ego.gui.component.control.IControlComponent;
 import net.malisis.ego.gui.element.IChild;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
@@ -44,17 +44,13 @@ public class Sizes
 	public static IntSupplier innerWidth(ISized owner)
 	{
 		checkNotNull(owner);
-		return () -> owner.size()
-						  .width() - Padding.of(owner)
-											.horizontal() - UIScrollBar.scrollbarWidth(owner);
+		return () -> owner.width() - Padding.horizontalOf(owner) - IControlComponent.horizontalOf(owner);
 	}
 
 	public static IntSupplier innerHeight(ISized owner)
 	{
 		checkNotNull(owner);
-		return () -> owner.size()
-						  .height() - Padding.of(owner)
-											 .vertical() - UIScrollBar.scrollbarHeight(owner);
+		return () -> owner.height() - Padding.verticalOf(owner) - IControlComponent.verticalOf(owner);
 	}
 
 	public static <T extends IChild> IntSupplier parentWidth(T owner, float width, int offset)

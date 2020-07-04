@@ -38,7 +38,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Size.ISized;
 import net.malisis.ego.gui.event.KeyTypedEvent;
-import net.malisis.ego.gui.event.MouseEvent.ScrollWheel;
+import net.malisis.ego.gui.event.mouse.MouseEvent.ScrollWheel;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Keyboard;
@@ -68,7 +68,6 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 
 	/** The type of scrollbar. */
 	protected Type type;
-
 	protected float offset;
 
 	public boolean autoHide = true;
@@ -76,6 +75,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	public <T extends UIComponent & IScrollable> UIScrollBar(T parent, Type type)
 	{
 		this.type = type;
+		padding = Padding.of(1);
 		zIndex = 5;
 
 		parent.addControlComponent(this);
@@ -118,6 +118,18 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		return isHorizontal() ? scrollSize.height() : scrollSize.width();
 	}
 
+	@Override
+	public int right()
+	{
+		return isHorizontal() || !isVisible() ? 0 : width();
+	}
+
+	@Override
+	public int bottom()
+	{
+		return isHorizontal() && isVisible() ? height() : 0;
+	}
+
 	/**
 	 * Scroll length.
 	 *
@@ -146,6 +158,11 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	public boolean isHorizontal()
 	{
 		return type == Type.HORIZONTAL;
+	}
+
+	public boolean isVertical()
+	{
+		return type == Type.VERTICAL;
 	}
 
 	/**
@@ -395,23 +412,18 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		public int x()
 		{
 			if (isHorizontal())
-				return Padding.of(getParent())
-							  .left();
+				return Padding.leftOf(getParent()) + IControlComponent.topOf(getParent());
 			else
-				return getParent().size()
-								  .width() - size().width() - Padding.of(getParent())
-																	 .right();
+				return getParent().width() - width() - Padding.rightOf(getParent());
 		}
 
 		@Override
 		public int y()
 		{
 			if (isHorizontal())
-				return getParent().size()
-								  .height() - size().height();
+				return getParent().height() - height();
 			else
-				return Padding.of(getParent())
-							  .right();
+				return Padding.topOf(getParent()) + IControlComponent.topOf(getParent());
 		}
 
 		@Override
@@ -427,20 +439,18 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		public int width()
 		{
 			if (!isHorizontal())
-				return scrollThickness() + 2;
+				return scrollThickness() + paddingHorizontal();
 
-			return getParent().innerSize()
-							  .width();
+			return Size.widthOf(getParent());
 		}
 
 		@Override
 		public int height()
 		{
 			if (isHorizontal())
-				return scrollThickness() + 2;
+				return scrollThickness() + paddingVertical();
 
-			return getParent().innerSize()
-							  .height();
+			return Size.innerHeightOf(getParent());
 		}
 
 		@Override
@@ -455,15 +465,20 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		@Override
 		public int x()
 		{
-			int l = getLength() - scrollLength() - 1;
-			return isHorizontal() ? (int) (UIScrollBar.this.offset() * l) + 1 : 1;
+			if (isVertical())
+				return paddingLeft();
+
+			int l = getLength() - scrollLength() - paddingHorizontal();
+			return (int) (UIScrollBar.this.offset() * l) + paddingLeft();
 		}
 
 		@Override
 		public int y()
 		{
-			int l = getLength() - scrollLength() - 2;
-			return isHorizontal() ? 1 : (int) (UIScrollBar.this.offset() * l) + 1;
+			if (isHorizontal())
+				return paddingTop();
+			int l = getLength() - scrollLength() - paddingVertical();
+			return (int) (UIScrollBar.this.offset() * l) + paddingTop();
 		}
 
 		@Override

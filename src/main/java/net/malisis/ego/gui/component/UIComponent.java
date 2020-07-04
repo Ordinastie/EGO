@@ -35,6 +35,7 @@ import net.malisis.ego.gui.element.IClipable;
 import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.IKeyListener;
 import net.malisis.ego.gui.element.IOffset;
+import net.malisis.ego.gui.element.ISpace;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
@@ -47,19 +48,20 @@ import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.EventHandler;
 import net.malisis.ego.gui.event.GuiEvent;
 import net.malisis.ego.gui.event.KeyTypedEvent;
-import net.malisis.ego.gui.event.MouseEvent.IMouseEventRegister;
-import net.malisis.ego.gui.event.MouseEvent.MouseDoubleClick;
-import net.malisis.ego.gui.event.MouseEvent.MouseDown;
-import net.malisis.ego.gui.event.MouseEvent.MouseDrag;
-import net.malisis.ego.gui.event.MouseEvent.MouseLeftClick;
-import net.malisis.ego.gui.event.MouseEvent.MouseMove;
-import net.malisis.ego.gui.event.MouseEvent.MouseOut;
-import net.malisis.ego.gui.event.MouseEvent.MouseOver;
-import net.malisis.ego.gui.event.MouseEvent.MouseRightClick;
-import net.malisis.ego.gui.event.MouseEvent.MouseUp;
-import net.malisis.ego.gui.event.MouseEvent.ScrollWheel;
 import net.malisis.ego.gui.event.StateChangeEvent.FocusEvent;
 import net.malisis.ego.gui.event.StateChangeEvent.UnfocusEvent;
+import net.malisis.ego.gui.event.mouse.IMouseEventRegister;
+import net.malisis.ego.gui.event.mouse.IMouseListener;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseDoubleClick;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseDown;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseDrag;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseLeftClick;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseMove;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseOut;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseOver;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseRightClick;
+import net.malisis.ego.gui.event.mouse.MouseEvent.MouseUp;
+import net.malisis.ego.gui.event.mouse.MouseEvent.ScrollWheel;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.minecraft.util.text.TextFormatting;
@@ -70,6 +72,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 import javax.annotation.Nonnull;
 
@@ -80,7 +83,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie
  */
-public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouseEventRegister<UIComponent>
+public class UIComponent implements IContent, IMouseListener, IKeyListener, IMouseEventRegister<UIComponent>, IPadded
 {
 	/** Reference to the {@link EGOGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
 	protected EGOGui gui;
@@ -98,7 +101,9 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	protected ISize size = Size.inherited(this);
 	/** Size available for content. */
 	protected ISize innerSize = Size.of(Sizes.innerWidth(this), Sizes.innerHeight(this));
-	/** Margin of this component */
+	/** Padding of this component. */
+	protected Padding padding = Padding.NO_PADDING;
+	/** Margin of this component. */
 	protected Margin margin = EGOGui.defaultMargin();
 	/** Z index of the component. */
 	protected int zIndex = 0;
@@ -230,10 +235,25 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 		return size;
 	}
 
+	@Override
 	@Nonnull
 	public ISize innerSize()
 	{
 		return innerSize;
+	}
+
+	public void setPadding(Padding padding)
+	{
+		if (padding == null)
+			padding = Padding.NO_PADDING;
+		this.padding = padding;
+	}
+
+	@Nonnull
+	@Override
+	public Padding padding()
+	{
+		return padding;
 	}
 
 	public void setMargin(Margin margin)
@@ -247,6 +267,16 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	public Margin margin()
 	{
 		return margin;
+	}
+
+	public int controlSpace(ToIntFunction<ISpace> func)
+	{
+		if (controlComponents.size() == 0)
+			return 0;
+		return controlComponents.stream()
+								.mapToInt(func)
+								.max()
+								.orElse(0);
 	}
 
 	/**
@@ -550,7 +580,6 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 		eventHandler.register(clazz, handler);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void onKeyTyped(Predicate<KeyTypedEvent<UIComponent>> handler)
 	{
 		register(KeyTypedEvent.class, (Predicate) handler);
@@ -561,6 +590,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	/**
 	 * Called from the GUI when mouse is moved and over this component.
 	 */
+	@Override
 	public void mouseMove()
 	{
 		if (!isEnabled())
@@ -576,6 +606,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 *
 	 * @param button the button
 	 */
+	@Override
 	public void mouseDown(MouseButton button)
 	{
 		if (!isEnabled())
@@ -591,6 +622,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 *
 	 * @param button the button
 	 */
+	@Override
 	public void mouseUp(MouseButton button)
 	{
 		if (!isEnabled())
@@ -606,6 +638,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 *
 	 * @param button button being clicked
 	 */
+	@Override
 	public void click(MouseButton button)
 	{
 		if (!isEnabled())
@@ -622,6 +655,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 *
 	 * @param button the button
 	 */
+	@Override
 	public void doubleClick(MouseButton button)
 	{
 		if (!isEnabled())
@@ -640,6 +674,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 *
 	 * @param button the button
 	 */
+	@Override
 	public void mouseDrag(MouseButton button)
 	{
 		if (!isEnabled())
@@ -650,6 +685,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 			parent.mouseDrag(button);
 	}
 
+	@Override
 	public boolean dragPreventsClick()
 	{
 		return false;
@@ -660,20 +696,11 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	 *
 	 * @param delta the delta
 	 */
+	@Override
 	public void scrollWheel(int delta)
 	{
 		if (!isEnabled())
 			return;
-
-		//IControlComponents should just register their event
-		//		for (IControlComponent c : controlComponents)
-		//		{
-		//			if (c.onScrollWheel(delta))
-		//				return;
-		//		}
-		//
-		//		if(this instanceof IControlComponent)
-		//			return;
 
 		if (fireEvent(new ScrollWheel<>(this, delta)))
 			return;
@@ -687,16 +714,6 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	{
 		if (!isEnabled())
 			return false;
-
-		//IControlComponents should just register their event
-		//		for (IControlComponent c : controlComponents)
-		//		{
-		//			if (c.keyTyped(keyChar, keyCode))
-		//				return;
-		//		}
-		//
-		//		if(this instanceof IControlComponent)
-		//			return;
 
 		if (fireEvent(new KeyTypedEvent<>(this, keyChar, keyCode)))
 			return true;
@@ -719,7 +736,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 			return false;
 		int sx = screenPosition().x();
 		int sy = screenPosition().y();
-		return x >= sx && x <= sx + size().width() && y >= sy && y <= sy + size().height();
+		return x >= sx && x < sx + size().width() && y >= sy && y < sy + size().height();
 	}
 
 	/**
@@ -735,9 +752,8 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 		//control components take precedence over regular components
 		for (IControlComponent c : controlComponents)
 		{
-			UIComponent component = c.getComponentAt(x, y);
-			if (component != null)
-				return component;
+			if (c instanceof UIComponent && c.isInsideBounds(x, y))
+				return (UIComponent) c;
 		}
 
 		return isInsideBounds(x, y) ? this : null;
@@ -753,7 +769,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 
 		UIComponent found;
 		for (IControlComponent c : controlComponents)
-			if ((found = c.getComponent(name)) != null)
+			if (c instanceof UIComponent && (found = ((UIComponent) c).getComponent(name)) != null)
 				return found;
 
 		return null;
@@ -866,8 +882,7 @@ public class UIComponent implements IContent, IGuiRenderer, IKeyListener, IMouse
 	public String getPropertyString()
 	{
 		String str = position() + "@" + size() + " | Screen=" + screenPosition() + " | ";
-		if (this instanceof IPadded)
-			str += Padding.of(this) + ", ";
+		str += Padding.of(this) + ", ";
 		str += Margin.of(this);
 		return str;
 	}

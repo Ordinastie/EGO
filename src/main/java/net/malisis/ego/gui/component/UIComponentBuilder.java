@@ -12,6 +12,7 @@ import net.malisis.ego.gui.component.control.UIMoveHandle;
 import net.malisis.ego.gui.component.decoration.UITooltip;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Margin.InheritedMargin;
+import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.IPositionBuilder;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.position.Position.IPosition;
@@ -21,7 +22,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.GuiEvent;
-import net.malisis.ego.gui.event.MouseEvent.IMouseEventBuilder;
+import net.malisis.ego.gui.event.mouse.IMouseEventBuilder;
 import net.malisis.ego.gui.render.IGuiRenderer;
 
 import java.util.Map.Entry;
@@ -38,7 +39,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	private final Multimap<Class<?>, Predicate<?>> handlers = HashMultimap.create();
 	protected String name;
 	protected UIComponent parent;
-	protected final Set<IControlComponent> controlComponents = Sets.newHashSet();
+	protected final Set<Function<COMPONENT, IControlComponent>> controlComponents = Sets.newHashSet();
 	//pos & size
 	protected int px, py;
 	protected Function<COMPONENT, IntSupplier> x = o -> Positions.leftAligned(o, 0);
@@ -47,6 +48,8 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 	protected Function<COMPONENT, IntSupplier> width = o -> Sizes.parentWidth(o, 1F, 0);
 	protected Function<COMPONENT, IntSupplier> height = o -> Sizes.parentHeight(o, 1F, 0);
 	protected Function<COMPONENT, ISize> size = o -> Size.of(width.apply(o), height.apply(o));
+	protected int pleft, pright, ptop, pbottom;
+	protected Function<COMPONENT, Padding> padding = o -> Padding.of(ptop, pbottom, pleft, pright);
 	protected int mleft, mright, mtop, mbottom;
 	protected Function<COMPONENT, Margin> margin = o -> Margin.of(mtop, mbottom, mleft, mright);
 
@@ -122,21 +125,58 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		return self();
 	}
 
+	@Override
 	public BUILDER width(Function<COMPONENT, IntSupplier> width)
 	{
 		this.width = checkNotNull(width);
 		return self();
 	}
 
+	@Override
 	public BUILDER height(Function<COMPONENT, IntSupplier> height)
 	{
 		this.height = checkNotNull(height);
 		return self();
 	}
 
-	public BUILDER margin(int margin)
+	public BUILDER paddingTop(int padding)
 	{
-		mtop = mbottom = mleft = mright = margin;
+		ptop = padding;
+		return self();
+	}
+
+	public BUILDER paddingBottom(int padding)
+	{
+		pbottom = padding;
+		return self();
+	}
+
+	public BUILDER paddingLeft(int padding)
+	{
+		pleft = padding;
+		return self();
+	}
+
+	public BUILDER paddingRight(int padding)
+	{
+		pright = padding;
+		return self();
+	}
+
+	public BUILDER padding(Padding padding)
+	{
+		return padding(o -> padding);
+	}
+
+	public BUILDER padding(int padding)
+	{
+		ptop = pbottom = pleft = pright = padding;
+		return self();
+	}
+
+	public BUILDER padding(Function<COMPONENT, Padding> func)
+	{
+		padding = checkNotNull(func);
 		return self();
 	}
 
@@ -169,6 +209,12 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		return margin(o -> margin);
 	}
 
+	public BUILDER margin(int margin)
+	{
+		mtop = mbottom = mleft = mright = margin;
+		return self();
+	}
+
 	public BUILDER inheritMargin()
 	{
 		return margin(InheritedMargin::new);
@@ -176,7 +222,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 
 	public BUILDER margin(Function<COMPONENT, Margin> func)
 	{
-		this.margin = checkNotNull(func);
+		margin = checkNotNull(func);
 		return self();
 	}
 
@@ -218,13 +264,13 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 
 	public BUILDER enabled(BooleanSupplier supplier)
 	{
-		this.enabled = checkNotNull(supplier);
+		enabled = checkNotNull(supplier);
 		return self();
 	}
 
 	public BUILDER visible(BooleanSupplier supplier)
 	{
-		this.visible = checkNotNull(supplier);
+		visible = checkNotNull(supplier);
 		return self();
 
 	}
@@ -266,7 +312,12 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 
 	public BUILDER withControl(IControlComponent controlComponent)
 	{
-		controlComponents.add(checkNotNull(controlComponent));
+		return withControl(c -> controlComponent);
+	}
+
+	public BUILDER withControl(Function<COMPONENT, IControlComponent> control)
+	{
+		controlComponents.add(checkNotNull(control));
 		return self();
 	}
 
@@ -288,6 +339,7 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		component.setName(name);
 		component.setPosition(position.apply(component));
 		component.setSize(size.apply(component));
+		component.setPadding(padding.apply(component));
 		component.setMargin(margin.apply(component));
 		component.setEnabled(enabled);
 		component.setVisible(visible);
@@ -316,7 +368,9 @@ public abstract class UIComponentBuilder<BUILDER extends UIComponentBuilder<?, ?
 		else if (parent != null)
 			component.setParent(parent);
 
-		controlComponents.forEach(component::addControlComponent);
+		controlComponents.stream()
+						 .map(f -> f.apply(component))
+						 .forEach(component::addControlComponent);
 
 		return component;
 	}
