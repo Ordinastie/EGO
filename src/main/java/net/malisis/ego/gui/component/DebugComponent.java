@@ -32,6 +32,8 @@ import net.malisis.ego.cacheddata.PredicatedData;
 import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.content.IContent.IContentHolder;
+import net.malisis.ego.gui.element.IClipable;
+import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
@@ -80,6 +82,10 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 												 .zIndex(this::hierarchyZIndex)
 												 .border(2)
 												 .build();
+	private final GuiShape clipableShape = GuiShape.builder()
+												   .color(0xFF0000)
+												   .alpha(25)
+												   .build();
 
 	private final GuiText cachedText = GuiText.builder()
 											  .parent(this)
@@ -139,7 +145,10 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	{
 		debugMap.put("Mouse", () -> EGOGui.MOUSE_POSITION + (EGOGui.getHoveredComponent() != null ?
 															 " (" + EGOGui.getHoveredComponent()
-																		  .mousePosition() + ")" :
+																		  .mousePosition()
+																		  .x() + "," + EGOGui.getHoveredComponent()
+																							 .mousePosition()
+																							 .y() + ")" :
 															 ""));
 		debugMap.put("Focus", () -> String.valueOf(EGOGui.getFocusedComponent()));
 		debugMap.put("Hover", () -> String.valueOf(EGOGui.getHoveredComponent()));
@@ -313,6 +322,13 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		UIComponent component = EGOGui.getHoveredComponent();
 		if (component == null || !GuiScreen.isAltKeyDown())
 			return;
+
+		if (component instanceof IClipable)
+		{
+			ClipArea area = ((IClipable) component).getClipArea();
+			if (!area.noClip() && !area.fullClip())
+				clipableShape.render(renderer, Position.of(area.x, area.y), Size.of(area.width(), area.height()));
+		}
 
 		int offset = 80;
 		hierarchyColor = 0xFF0000;
