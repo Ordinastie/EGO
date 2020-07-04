@@ -8,6 +8,8 @@ import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 
+import javax.annotation.Nonnull;
+
 public class WindowBackground implements IGuiRenderer, IPadded
 {
 	private final GuiShape shape;
@@ -21,6 +23,7 @@ public class WindowBackground implements IGuiRenderer, IPadded
 						.build();
 	}
 
+	@Nonnull
 	@Override
 	public Padding padding()
 	{

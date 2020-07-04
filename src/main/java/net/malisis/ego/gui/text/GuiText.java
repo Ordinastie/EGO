@@ -47,7 +47,6 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Size.ISized;
 import net.malisis.ego.gui.render.GuiRenderer;
-import net.malisis.ego.gui.render.IGuiRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +72,7 @@ import javax.annotation.Nonnull;
  *
  * @author Ordinastie
  */
-public class GuiText implements IGuiRenderer, IContent
+public class GuiText implements IContent
 {
 	public static boolean CACHED = true;
 
@@ -313,7 +312,7 @@ public class GuiText implements IGuiRenderer, IContent
 	 */
 	public void setFontOptions(FontOptions fontOptions)
 	{
-		this.defaultOptions = checkNotNull(fontOptions);
+		defaultOptions = checkNotNull(fontOptions);
 	}
 
 	/**

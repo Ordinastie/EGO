@@ -58,6 +58,8 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
+
 /**
  * The Class UISelect.
  *
@@ -418,6 +420,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		}
 
 		//#region IScrollable
+		@Nonnull
 		@Override
 		public Padding padding()
 		{

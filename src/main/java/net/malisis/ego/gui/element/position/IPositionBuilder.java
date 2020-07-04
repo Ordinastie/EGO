@@ -42,23 +42,23 @@ import java.util.function.IntSupplier;
  * <br>
  * Typical implementation :
  * <pre>{@code
- * private Function<GuiShape, IntSupplier> x = o -> () -> 0;
- * private Function<GuiShape, IntSupplier> y = o -> () -> 0;
- * private Function<GuiShape, IPosition> position = o -> Position.of(x.apply(o), y.apply(o));
+ * private Function<OWNER, IntSupplier> x = o -> () -> 0;
+ * private Function<OWNER, IntSupplier> y = o -> () -> 0;
+ * private Function<OWNER, IPosition> position = o -> Position.of(x.apply(o), y.apply(o));
  *
- * public BUILDER position(Function<COMPONENT, IPosition> func)
+ * public BUILDER position(Function<OWNER, IPosition> func)
  * {
  * 		position = checkNotNull(func);
  * 		return self();
  * }
  *
- * public BUILDER x(Function<COMPONENT, IntSupplier> x)
+ * public BUILDER x(Function<OWNER, IntSupplier> x)
  * {
  * 		this.x = checkNotNull(x);
  * 		return self();
  * }
  *
- * public BUILDER y(Function<COMPONENT, IntSupplier> y)
+ * public BUILDER y(Function<OWNER, IntSupplier> y)
  * {
  * 		this.y = checkNotNull(y);
  * 		return self();
