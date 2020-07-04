@@ -14,6 +14,7 @@ import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.component.container.UIContainer;
 import net.malisis.ego.gui.component.container.UIListContainer;
 import net.malisis.ego.gui.component.container.UITabGroup;
+import net.malisis.ego.gui.component.control.Title;
 import net.malisis.ego.gui.component.control.UIMoveHandle;
 import net.malisis.ego.gui.component.control.UIResizeHandle;
 import net.malisis.ego.gui.component.decoration.UIImage;
@@ -30,7 +31,9 @@ import net.malisis.ego.gui.component.interaction.UITab;
 import net.malisis.ego.gui.component.interaction.UITextField;
 import net.malisis.ego.gui.component.layout.GridLayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
+import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
+import net.malisis.ego.gui.component.scrolling.UIWindowScrollbar;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
@@ -78,10 +81,10 @@ public class GuiDemo extends EGOGui
 
 	private UIComponent debug()
 	{
-		watch("Error");
 		setDefaultMargin(Margin.of(5));
 
 		tfTitle = UITextField.builder()
+							 .parent(window)
 							 .middleCenter()
 							 .width(100)
 							 .text("Default title")
@@ -89,12 +92,15 @@ public class GuiDemo extends EGOGui
 
 		window = UIContainer.builder()
 							.window()
-							.title(tfTitle::getText)
 							.withControl(UIMoveHandle.builder()
 													 .height(15)
 													 .build())
-							.clipContent(false)
+							//.clipContent(false)
 							.size(250, 150)
+							.withControl(w -> new UIWindowScrollbar(w, Type.VERTICAL))
+							.withControl(new Title.Builder().text(tfTitle::getText)
+															.centered()
+															.build())
 							.build();
 
 		UIContainer panel = UIContainer.panel()
