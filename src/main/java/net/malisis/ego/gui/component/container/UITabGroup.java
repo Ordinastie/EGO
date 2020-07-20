@@ -33,6 +33,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.event.GuiEvent;
 import net.malisis.ego.gui.render.GuiIcon;
+import net.malisis.ego.gui.theme.Theme;
 
 import java.util.LinkedHashMap;
 
@@ -41,9 +42,10 @@ import java.util.LinkedHashMap;
  */
 public class UITabGroup extends UIContainer
 {
-	public static enum Type
+	public enum Type
 	{
-		WINDOW, PANEL
+		WINDOW,
+		PANEL
 	}
 
 	/** The list of {@link UITab} added to this {@link UITabGroup}. */
@@ -51,9 +53,9 @@ public class UITabGroup extends UIContainer
 	/** The currently active {@link UITab}. */
 	protected UITab activeTab;
 	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
-	protected ComponentPosition tabPosition = ComponentPosition.TOP;
+	protected ComponentPosition tabPosition;
 	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
-	protected Type type = Type.WINDOW;
+	protected Type type;
 	/** The {@link UIContainer} this {@link UITabGroup} is attached to. */
 	protected UIContainer attachedContainer;
 	/** Number of pixels this {@link UITabGroup} is offset to the border of the {@link #attachedContainer}. */
@@ -95,13 +97,13 @@ public class UITabGroup extends UIContainer
 			switch (tabPosition)
 			{
 				case TOP:
-					return GuiIcon.TAB_WINDOW_TOP;
+					return Theme.icon("tab_window_top");
 				case BOTTOM:
-					return GuiIcon.TAB_WINDOW_BOTTOM;
+					return Theme.icon("tab_window_bottom");
 				case LEFT:
-					return GuiIcon.TAB_WINDOW_LEFT;
+					return Theme.icon("tab_window_left");
 				case RIGHT:
-					return GuiIcon.TAB_WINDOW_RIGHT;
+					return Theme.icon("tab_window_right");
 			}
 		}
 		if (type == Type.PANEL)
@@ -109,13 +111,13 @@ public class UITabGroup extends UIContainer
 			switch (tabPosition)
 			{
 				case TOP:
-					return GuiIcon.TAB_PANEL_TOP;
+					return Theme.icon("tab_panel_top");
 				case BOTTOM:
-					return GuiIcon.TAB_PANEL_BOTTOM;
+					return Theme.icon("tab_panel_bottom");
 				case LEFT:
-					return GuiIcon.TAB_PANEL_LEFT;
+					return Theme.icon("tab_panel_left");
 				case RIGHT:
-					return GuiIcon.TAB_PANEL_RIGHT;
+					return Theme.icon("tab_panel_right");
 			}
 		}
 		return GuiIcon.FULL;
@@ -213,13 +215,17 @@ public class UITabGroup extends UIContainer
 		{
 			if (tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM)
 			{
-				width += tab.contentSize().width() + spacing;
-				height = Math.max(height, tab.contentSize().height());
+				width += tab.contentSize()
+							.width() + spacing;
+				height = Math.max(height, tab.contentSize()
+											 .height());
 			}
 			else
 			{
-				width = Math.max(width, tab.contentSize().width());
-				height += tab.contentSize().height() + spacing;
+				width = Math.max(width, tab.contentSize()
+										   .width());
+				height += tab.contentSize()
+							 .height() + spacing;
 			}
 		}
 		setSize(Size.of(width, height));

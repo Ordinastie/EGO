@@ -13,7 +13,7 @@ public class AchievementBackground implements IGuiRenderer
 	public AchievementBackground(UIComponent component)
 	{
 		shape = GuiShape.builder(component)
-						.icon(GuiIcon.ACHIEVEMENT_BG)
+						.icon("achievement_bg")
 						.border(3)
 						.build();
 	}

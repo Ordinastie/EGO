@@ -48,7 +48,7 @@ public class UICloseHandle extends UIComponent implements IControlComponent
 		setZIndex(parent.zIndex() + 10);
 		parent.addControlComponent(this);
 
-		setForeground(GuiShape.builder(this).icon(GuiIcon.CLOSE).build());
+//		setForeground(GuiShape.builder(this).icon(GuiIcon.CLOSE).build());
 	}
 
 	@Override

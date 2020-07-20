@@ -58,7 +58,7 @@ public class UIResizeHandle extends UIComponent implements IControlComponent
 		setSize(Size.of(5, 5));
 		parent.addControlComponent(this);
 
-		setForeground(GuiShape.builder(this).icon(GuiIcon.RESIZE).build());
+//		setForeground(GuiShape.builder(this).icon(GuiIcon.RESIZE).build());
 	}
 
 	public UIResizeHandle(UIComponent parent)

@@ -34,7 +34,6 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
-import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.minecraft.util.text.TextFormatting;
@@ -69,7 +68,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 		setBackground(GuiShape.builder(this)
 							  .position(1, 0)
 							  .size(12, 12)
-							  .icon(this, GuiIcon.CHECKBOX_BG, GuiIcon.CHECKBOX_BG_HOVER, GuiIcon.CHECKBOX_BG_DISABLED)
+							  .icon(this, "checkbox_bg", "checkbox_bg_hover", "checkbox_bg_disabled")
 							  .build());
 
 		//Foreground
@@ -77,7 +76,7 @@ public class UICheckBox extends UIComponent implements IContentHolder, IContentS
 								 .position(1, 1)
 								 .size(12, 10)
 								 .zIndex(10)
-								 .icon(this, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED)
+								 .icon(this, "checkbox", "checkbox_hover", "checkbox_disabled")
 								 .build();
 
 		setForeground(r -> {

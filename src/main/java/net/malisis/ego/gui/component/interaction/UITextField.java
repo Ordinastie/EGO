@@ -124,7 +124,8 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 						 .text(this::getText)
 						 .translated(false)
 						 .literal(true)
-						 .position(2, 1)
+						 .centered()
+						 .y(1)
 						 .fontOptions(FontOptions.builder()
 												 .color(0xFFFFFF)
 												 .shadow()
@@ -134,7 +135,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		setPadding(Padding.of(1));
 
 		GuiShape background = GuiShape.builder(this)
-									  .icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD_BG, null, GuiIcon.TEXTFIELD_BG_DISABLED))
+									  .icon(this, "textfield_bg", null, "textfield_bg_disabled")
 									  .border(1)
 									  .build();
 		setBackground(background);
@@ -437,7 +438,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 
 		text = new StringBuilder(newValue);
 		guiText.setText(newValue);
-		cursor.jumpBy(index);
+		cursor.jumpTo(index);
 
 		isValid = validator.test(this);
 
@@ -554,10 +555,8 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 			xOffset = -cursor.x;
 		else if (cursor.x >= innerSize().width() - xOffset)
 			xOffset = Math.min(innerSize().width() - cursor.x - 4, 0);
-		else if (guiText.size()
-						.width() <= innerSize().width() - xOffset - 5)
-			xOffset = Math.min(innerSize().width() - guiText.size()
-															.width() - 4, 0);
+		else if (guiText.width() <= innerSize().width() - xOffset - 5)
+			xOffset = Math.min(innerSize().width() - guiText.width() - 4, 0);
 	}
 
 	/**
@@ -850,7 +849,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		@Override
 		public int x()
 		{
-			return x + 2;
+			return guiText.x() + x;
 		}
 
 		/**
@@ -861,7 +860,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		@Override
 		public int y()
 		{
-			return y + 1;
+			return guiText.y() + y;
 		}
 
 		/**
@@ -927,14 +926,14 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		public void fromMouse()
 		{
 			StringWalker walker = guiText.walker();
-			if (!walker.walkToY(mousePosition().y()))
+			if (!walker.walkToY(mousePosition().y() - guiText.y()))
 			{
 				jumpToEnd();
 				lastX = x;
 				return;
 			}
 
-			int x = mousePosition().x();
+			int x = mousePosition().x() - guiText.x();
 			walker.walkToX(x);
 			walker = back(walker);
 			int i = walker.globalIndex();

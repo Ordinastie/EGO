@@ -39,6 +39,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.theme.Theme;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -64,7 +65,7 @@ public class UITooltip extends UIComponent implements IContentHolder, IPosition
 		setSize(Size.sizeOfContent(this, 8, 4));
 
 		setBackground(GuiShape.builder(this)
-							  .icon(GuiIcon.TOOLTIP)
+							  .icon("tooltip")
 							  .border(5)
 							  .build());
 	}

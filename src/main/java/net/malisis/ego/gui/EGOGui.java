@@ -24,6 +24,8 @@
 
 package net.malisis.ego.gui;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.malisis.ego.EGO;
@@ -39,6 +41,7 @@ import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.GuiTexture;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.theme.Theme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
@@ -95,6 +98,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;
 
+	protected Theme theme;
 	/** Renderer drawing the components. */
 	protected GuiRenderer renderer;
 	/** Width of the window. */
@@ -151,6 +155,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 	protected EGOGui()
 	{
 		mc = Minecraft.getMinecraft();
+		theme = EGO.VANILLA_THEME;
 		itemRender = mc.getRenderItem();
 		fontRenderer = mc.fontRenderer;
 		renderer = new GuiRenderer();
@@ -199,6 +204,35 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		}
 
 		return constructed;
+	}
+
+	public final void reconstruct()
+	{
+		modalComponents.clear();
+		clearScreen();
+		setResolution();
+		setHoveredComponent(null);
+		setFocusedComponent(null);
+		constructed = false;
+		doConstruct();
+	}
+
+	/**
+	 * Sets the {@link Theme} used by this GUI.
+	 *
+	 * @param theme the theme to use
+	 */
+	public void setTheme(Theme theme)
+	{
+		this.theme = checkNotNull(theme);
+	}
+
+	/**
+	 * @return the theme used by this {@link EGOGui}
+	 */
+	public Theme theme()
+	{
+		return theme;
 	}
 
 	/**
@@ -577,13 +611,7 @@ public abstract class EGOGui extends GuiScreen implements ISize
 			{
 				if (keyCode == Keyboard.KEY_R)
 				{
-					modalComponents.clear();
-					clearScreen();
-					setResolution();
-					setHoveredComponent(null);
-					setFocusedComponent(null);
-					constructed = false;
-					doConstruct();
+					reconstruct();
 				}
 			}
 		}
@@ -847,6 +875,19 @@ public abstract class EGOGui extends GuiScreen implements ISize
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * Gets the current theme in use.
+	 *
+	 * @return
+	 */
+	public static Theme currentTheme()
+	{
+		EGOGui current = current();
+		if (current == null)
+			return EGO.VANILLA_THEME;
+		return current.theme();
 	}
 
 	//	/**

@@ -41,6 +41,7 @@ import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
+import net.malisis.ego.gui.theme.Theme;
 
 import java.util.EnumMap;
 import java.util.function.Function;
@@ -72,7 +73,7 @@ public class GuiShape implements IContent, IChild
 	{
 		this.parent = parent;
 		this.position = position.apply(this);
-		this.screenPosition = new ScreenPosition(this);
+		screenPosition = new ScreenPosition(this);
 		this.zIndex = zIndex;
 		this.size = size.apply(this);
 		this.color = color;
@@ -97,10 +98,10 @@ public class GuiShape implements IContent, IChild
 
 	public int getZIndex()
 	{
-		if(zIndex != null)
+		if (zIndex != null)
 			return zIndex.getAsInt();
-		if(parent instanceof UIComponent)
-			return  ((UIComponent) parent).zIndex();
+		if (parent instanceof UIComponent)
+			return ((UIComponent) parent).zIndex();
 		return 0;
 	}
 
@@ -271,7 +272,7 @@ public class GuiShape implements IContent, IChild
 
 		public Builder forComponent(UIComponent component)
 		{
-			this.parent = component;
+			parent = component;
 			width(o -> Sizes.widthRelativeTo(component, 1.0F, 0));
 			height(o -> Sizes.heightRelativeTo(component, 1.0F, 0));
 			color = (fp, vp) -> component.getColor();
@@ -307,18 +308,21 @@ public class GuiShape implements IContent, IChild
 			return this;
 		}
 
+		@Override
 		public Builder size(Function<GuiShape, ISize> func)
 		{
 			size = checkNotNull(func);
 			return this;
 		}
 
+		@Override
 		public Builder width(Function<GuiShape, IntSupplier> width)
 		{
 			this.width = checkNotNull(width);
 			return this;
 		}
 
+		@Override
 		public Builder height(Function<GuiShape, IntSupplier> height)
 		{
 			this.height = checkNotNull(height);
@@ -521,6 +525,11 @@ public class GuiShape implements IContent, IChild
 			return (fp, vp) -> fp != FacePosition.CENTER ? borderAlpha : alpha.applyAsInt(fp, vp);
 		}
 
+		public Builder icon(String name)
+		{
+			return icon(Theme.icon(name));
+		}
+
 		public Builder icon(GuiIcon i)
 		{
 			icon = () -> i;
@@ -531,6 +540,11 @@ public class GuiShape implements IContent, IChild
 		{
 			icon = checkNotNull(supplier);
 			return this;
+		}
+
+		public Builder icon(UIComponent component, String icon, String hover, String disabled)
+		{
+			return icon(component, Theme.icon(icon), Theme.icon(hover), Theme.icon(disabled));
 		}
 
 		public Builder icon(UIComponent component, GuiIcon icon, GuiIcon hover, GuiIcon disabled)

@@ -46,6 +46,7 @@ import net.malisis.ego.gui.event.mouse.MouseEvent.MouseUp;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
+import net.malisis.ego.gui.theme.Theme;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
@@ -80,10 +81,10 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 							  .border(5)
 							  .icon(() -> {
 								  if (isDisabled())
-									  return GuiIcon.BUTTON_DISABLED;
+									  return Theme.icon("button_disabled");
 								  if (isHovered())
-									  return isPressed() ? GuiIcon.BUTTON_HOVER_PRESSED : GuiIcon.BUTTON_HOVER;
-								  return GuiIcon.BUTTON;
+									  return isPressed() ? Theme.icon("button_pressed") : Theme.icon("button_hovered");
+								  return Theme.icon("button");
 							  })
 							  .build());
 	}
@@ -112,6 +113,7 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 
 	//#region Getters/Setters
 
+	@Override
 	public void setPadding(Padding padding)
 	{
 		this.padding = padding;
@@ -279,12 +281,14 @@ public class UIButton extends UIComponent implements IContentHolder, IContentSet
 				 .base();
 		}
 
+		@Override
 		public UIButtonBuilder padding(Padding padding)
 		{
 			this.padding = padding;
 			return this;
 		}
 
+		@Override
 		public UIButtonBuilder padding(int padding)
 		{
 			this.padding = Padding.of(padding);

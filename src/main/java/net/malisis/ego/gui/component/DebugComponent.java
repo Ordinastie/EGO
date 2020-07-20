@@ -28,23 +28,20 @@ import static net.malisis.ego.gui.element.size.Sizes.heightOfContent;
 import static net.malisis.ego.gui.element.size.Sizes.parentWidth;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
-import net.malisis.ego.cacheddata.PredicatedData;
-import net.malisis.ego.font.FontOptions;
 import net.malisis.ego.gui.EGOGui;
-import net.malisis.ego.gui.component.content.IContent.IContentHolder;
+import net.malisis.ego.gui.component.container.UIContainer;
+import net.malisis.ego.gui.component.decoration.UILabel;
+import net.malisis.ego.gui.component.interaction.UISelect;
 import net.malisis.ego.gui.element.IClipable;
-import net.malisis.ego.gui.element.IClipable.ClipArea;
 import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
-import net.malisis.ego.gui.element.Padding.IPadded;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
-import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
-import net.malisis.ego.gui.text.GuiText.Builder;
+import net.malisis.ego.gui.theme.Theme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
@@ -53,28 +50,20 @@ import org.lwjgl.input.Keyboard;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 /**
  * @author Ordinastie
  */
-public class DebugComponent extends UIComponent implements IPadded, IContentHolder
+public class DebugComponent extends UIContainer
 {
 	//remember setting between reconstructs and different guis
 	private static boolean isDebug = false;
 	private static boolean isTop = true; //can't store the actual position because it's dependant on the instance
 	private static float scale = 1;
-	private static int alpha = 80;
+	private static int bgAlpha = 80;
 
 	private final HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
-	private GuiText text;
-	private final FontOptions fontOptions = FontOptions.builder()
-													   .color(0xFFFFFF)
-													   .scale(scale)
-													   .shadow()
-													   .build();
+
 	private final Padding padding = Padding.of(5, 5);
 	private final GuiShape borderShape = GuiShape.builder()
 												 .icon(GuiIcon.BORDER)
@@ -87,30 +76,39 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 												   .alpha(25)
 												   .build();
 
-	private final GuiText cachedText = GuiText.builder()
+	private final UISelect<Theme> themes = UISelect.builder(Theme.THEMES)
+												   .parent(this)
+												   .topCenter()
+												   .width(100)
+												   .withLabel(Theme::name)
+												   .select(EGOGui.currentTheme())
+												   .onChange(theme -> {
+													   EGOGui.current()
+															 .setTheme(theme);
+													   EGOGui.current()
+															 .reconstruct();
+												   })
+												   .alpha(255)
+												   .build();
+
+	private final UILabel leftText = UILabel.builder()
+											.parent(this)
+											.text(this::leftText)
+											.translated(false)
+											.textColor(0xFFFFFF)
+											.scale(scale)
+											.shadow()
+											.build();
+
+	private final UILabel cachedText = UILabel.builder()
 											  .parent(this)
-											  .text("FPS: {FPS} ({DRAWCOUNT})\n{POS}Position" + ChatFormatting.RESET
-															+ "\n{SIZE}Size\n{TEXT}Text")
-											  .bind("FPS", Minecraft::getDebugFPS)
-											  .bind("DRAWCOUNT", () -> EGOGui.current() != null ?
-																	   EGOGui.current()
-																			 .getRenderer().lastDrawCount :
-																	   0)
-											  .bind("POS", new PredicatedData<>(() -> Position.CACHED, ChatFormatting.DARK_GREEN,
-																				ChatFormatting.DARK_RED))
-											  .bind("SIZE", new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN,
-																				 ChatFormatting.DARK_RED))
-											  .bind("TEXT", new PredicatedData<>(() -> GuiText.CACHED, ChatFormatting.DARK_GREEN,
-																				 ChatFormatting.DARK_RED))
+											  .topRight()
+											  .text(this::cachedText)
 											  .translated(false)
-											  .fontOptions(FontOptions.builder()
-																	  .color(0xFFFFFF)
-																	  .scale(scale)
-																	  .shadow()
-																	  .rightAligned()
-																	  .build())
-											  .position(Position::topRight)
-											  .alpha(255) //do not respect the component alpha
+											  .textColor(0xFFFFFF)
+											  .scale(scale)
+											  .shadow()
+											  .textRightAligned()
 											  .build();
 
 	private int hierarchyColor;
@@ -120,7 +118,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	{
 		this.gui = gui;
 
-		setAlpha(alpha);
+		//setAlpha(bgAlpha);
 		setZIndex(100);
 		setMargin(Margin.NO_MARGIN);
 
@@ -130,15 +128,18 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 		setBackground(GuiShape.builder(this)
 							  .color(0)
-							  .alpha(this::getAlpha)
+							  .alpha(() -> bgAlpha)
 							  .build());
-		setForeground(((IGuiRenderer) this::drawHierarchy).and(r -> {
-			text.render(r);
-			cachedText.render(r);
-		}));
 
 		setDefaultDebug();
 		setEnabled(isDebug);
+	}
+
+	@Override
+	public void render(GuiRenderer renderer)
+	{
+		super.render(renderer);
+		drawHierarchy(renderer);
 	}
 
 	private void setDefaultDebug()
@@ -155,43 +156,33 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		debugMap.put("Dragged", () -> String.valueOf(EGOGui.getDraggedComponent()));
 		//		if (getGui().inventoryContainer() != null)
 		//			debugMap.put("Picked", () -> ItemUtils.toString(getGui().inventoryContainer().getPickedItemStack()));
-		updateGuiText();
 	}
 
-	private void updateGuiText()
+	private String leftText()
 	{
-		Builder tb = GuiText.builder()
-							.parent(this)
-							.translated(false)
-							.fontOptions(fontOptions)
-							.alpha(255);//do not respect the component alpha
+		StringBuilder sb = new StringBuilder();
 
-		String str = debugMap.entrySet()
-							 .stream()
-							 .peek(e -> tb.bind(e.getKey(), e.getValue()))
-							 .map(e -> e.getKey() + " : {" + e.getKey() + "}")
-							 .collect(Collectors.joining("\n"));
-		text = tb.text(str)
-				 .build();
+		debugMap.forEach((k, v) -> sb.append(k)
+									 .append("  : ")
+									 .append(v.get())
+									 .append("\n"));
+
+		return sb.toString();
 	}
 
-	@Override
-	public GuiText content()
+	private String cachedText()
 	{
-		return text;
-	}
+		int fps = Minecraft.getDebugFPS();
+		int dc = EGOGui.current() != null ?
+				 EGOGui.current()
+					   .getRenderer().lastDrawCount :
+				 0;
+		ChatFormatting pos = Position.CACHED ? ChatFormatting.DARK_GREEN : ChatFormatting.DARK_RED;
+		ChatFormatting size = Size.CACHED ? ChatFormatting.DARK_GREEN : ChatFormatting.DARK_RED;
+		ChatFormatting text = GuiText.CACHED ? ChatFormatting.DARK_GREEN : ChatFormatting.DARK_RED;
 
-	@Override
-	@Nonnull
-	public Padding padding()
-	{
-		return padding;
-	}
-
-	@Override
-	public boolean isEnabled()
-	{
-		return super.isEnabled();
+		return "FPS: " + fps + " (" + dc + ")\n" + pos + "Position" + ChatFormatting.RESET + "\n" + size + "Size" + ChatFormatting.RESET
+				+ "\n" + text + "Text";
 	}
 
 	@Override
@@ -214,13 +205,11 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 	public void addDebug(String name, Supplier<String> supplier)
 	{
 		debugMap.put(name, supplier);
-		updateGuiText();
 	}
 
 	public void removeDebug(String name)
 	{
 		debugMap.remove(name);
-		updateGuiText();
 	}
 
 	public void watch(String watched)
@@ -245,20 +234,22 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 			scale += 1 / 3F * delta;
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
-			text.setFontOptions(text.getFontOptions()
-									.toBuilder()
-									.scale(scale)
-									.build());
-			cachedText.setFontOptions(cachedText.getFontOptions()
+			leftText.setFontOptions(leftText.content()
+											.getFontOptions()
+											.toBuilder()
+											.scale(scale)
+											.build());
+			cachedText.setFontOptions(cachedText.content()
+												.getFontOptions()
 												.toBuilder()
 												.scale(scale)
 												.build());
 		}
 		else if (GuiScreen.isShiftKeyDown())
 		{
-			alpha += 25 * delta;
-			alpha = MathHelper.clamp(alpha, 0, 255);
-			setAlpha(alpha);
+			bgAlpha += 25 * delta;
+			bgAlpha = MathHelper.clamp(bgAlpha, 0, 255);
+			setAlpha(bgAlpha);
 		}
 	}
 

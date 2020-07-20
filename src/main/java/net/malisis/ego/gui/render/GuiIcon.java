@@ -26,10 +26,10 @@ package net.malisis.ego.gui.render;
 
 import static net.malisis.ego.gui.EGOGui.VANILLAGUI_TEXTURE;
 
-import net.malisis.ego.EGO;
 import net.malisis.ego.atlas.Atlas;
 import net.malisis.ego.gui.EGOGui;
 import net.malisis.ego.gui.component.UIComponent;
+import net.malisis.ego.gui.theme.Theme;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -47,211 +47,16 @@ import javax.annotation.Nullable;
  */
 public class GuiIcon
 {
-	public static GuiIcon FULL;
-	/** White canvas to be used for colored background */
+	public static final GuiIcon FULL = new GuiIcon(0, 0, 1, 1);
 	public static GuiIcon NONE;
-	/** Just a border with transparent inside */
 	public static GuiIcon BORDER;
-	//BOX
-	public static GuiIcon BOX;
-	//UISlot
-	public static GuiIcon SLOT;
-	//UIPanel
-	public static GuiIcon PANEL;
-	//UITooltip
-	public static GuiIcon TOOLTIP;
-	//UIWindow
-	public static GuiIcon WINDOW;
-	//UIProgressBar
-	public static GuiIcon ARROW_EMPTY;
-	public static GuiIcon ARROW_FILLED;
-	//UISeparator
-	//public static  GuiIcon SEPARATOR ;
-	//UIButton
-	public static GuiIcon BUTTON;
-	public static GuiIcon BUTTON_HOVER;
-	public static GuiIcon BUTTON_HOVER_PRESSED;
-	public static GuiIcon BUTTON_DISABLED;
-	//UICheckbox
-	public static GuiIcon CHECKBOX_BG;
-	public static GuiIcon CHECKBOX_BG_HOVER;
-	public static GuiIcon CHECKBOX_BG_DISABLED;
-	public static GuiIcon CHECKBOX;
-	public static GuiIcon CHECKBOX_HOVER;
-	public static GuiIcon CHECKBOX_DISABLED;
-	//UIRadioButton
-	public static GuiIcon RADIO_BG;
-	public static GuiIcon RADIO_BG_HOVER;
-	public static GuiIcon RADIO_BG_DISABLED;
-	public static GuiIcon RADIO;
-	public static GuiIcon RADIO_HOVER;
-	public static GuiIcon RADIO_DISABLED;
-	//UIScrollbar
-	public static GuiIcon SCROLLBAR_BG;
-	public static GuiIcon SCROLLBAR_DISABLED_BG;
-	public static GuiIcon SCROLLBAR_HORIZONTAL;
-	public static GuiIcon SCROLLBAR_HORIZONTAL_DISABLED;
-	public static GuiIcon SCROLLBAR_VERTICAL;
-	public static GuiIcon SCROLLBAR_VERTICAL_DISABLED;
-	//UISelect
-	public static GuiIcon SELECT_BG;
-	public static GuiIcon SELECT_BG_HOVER;
-	public static GuiIcon SELECT_BG_DISABLED;
-	public static GuiIcon SELECT_BOX;
-	public static GuiIcon SELECT_ARROW;
-	//UISlider
-	public static GuiIcon SLIDER;
-	public static GuiIcon SLIDER_BG;
-	//UITab window
-	public static GuiIcon TAB_WINDOW_TOP;
-	public static GuiIcon TAB_WINDOW_RIGHT;
-	public static GuiIcon TAB_WINDOW_LEFT;
-	public static GuiIcon TAB_WINDOW_BOTTOM;
-	//UITab panel
-	public static GuiIcon TAB_PANEL_TOP;
-	public static GuiIcon TAB_PANEL_RIGHT;
-	public static GuiIcon TAB_PANEL_LEFT;
-	public static GuiIcon TAB_PANEL_BOTTOM;
-	//UITextfield
-	public static GuiIcon TEXTFIELD_BG;
-	public static GuiIcon TEXTFIELD_BG_DISABLED;
-
-	//ControlComponents
-	public static GuiIcon CLOSE;
-	public static GuiIcon MOVE;
-	public static GuiIcon RESIZE;
-
-	//VANILLA
-	public static GuiIcon CROSSHAIR;
-	public static GuiIcon HEART_EMPTY;
-	public static GuiIcon HEART_FULL;
-	public static GuiIcon HEART_HALF;
-	public static GuiIcon ARMOR_EMPTY;
-	public static GuiIcon ARMOR_FULL;
-	public static GuiIcon ARMOR_HALF;
-	public static GuiIcon HUNGER_EMPTY;
-	public static GuiIcon HUNGER_FULL;
-	public static GuiIcon HUNGER_HALF;
-	//bars
-	public static GuiIcon BAR_PINK_EMPTY;
-	public static GuiIcon BAR_PINK;
-	public static GuiIcon BAR_CYAN_EMPTY;
-	public static GuiIcon BAR_CYAN;
-	public static GuiIcon BAR_RED_EMPTY;
-	public static GuiIcon BAR_RED;
-	public static GuiIcon BAR_GREEN_EMPTY;
-	public static GuiIcon BAR_GREEN;
-	public static GuiIcon BAR_YELLOW_EMPTY;
-	public static GuiIcon BAR_YELLOW;
-	public static GuiIcon BAR_PURPLE_EMPTY;
-	public static GuiIcon BAR_PURPLE;
-	public static GuiIcon BAR_GRAY_EMPTY;
-	public static GuiIcon BAR_GRAY;
-
-	public static GuiIcon ACHIEVEMENT_BG;
-	public static GuiIcon EXPERIENCE_ORB;
 
 	public static void registerIcons(Atlas atlas)
 	{
-		FULL = new GuiIcon(0, 0, 1, 1);
-		NONE = register(atlas, "blank");
-		BORDER = register(atlas, "border");
-		BOX = register(atlas, "box");
-		SLOT = register(atlas, "slot");
-		PANEL = register(atlas, "panel");
-		TOOLTIP = register(atlas, "tooltip");
-		WINDOW = register(atlas, "window");
+		//		CLOSE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 30, 15, 15);
+		//		MOVE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 15, 15, 15);
+		//		RESIZE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 0, 15, 15);
 
-		ARROW_EMPTY = register(atlas, "arrow_bg");
-		ARROW_FILLED = register(atlas, "arrow");
-		BUTTON = register(atlas, "button");
-		BUTTON_HOVER = register(atlas, "button_hovered");
-		BUTTON_HOVER_PRESSED = register(atlas, "button_pressed");
-		BUTTON_DISABLED = register(atlas, "button_disabled");
-		CHECKBOX_BG = register(atlas, "checkbox_bg");
-		CHECKBOX_BG_HOVER = register(atlas, "checkbox_bg_hovered");
-		CHECKBOX_BG_DISABLED = register(atlas, "checkbox_bg_disabled");
-		CHECKBOX = register(atlas, "checkbox");
-		CHECKBOX_HOVER = register(atlas, "checkbox_hovered");
-		CHECKBOX_DISABLED = register(atlas, "checkbox_disabled");
-		RADIO_BG = register(atlas, "radiobutton_bg");
-		RADIO_BG_HOVER = register(atlas, "radiobutton_bg_hovered");
-		RADIO_BG_DISABLED = register(atlas, "radiobutton_bg_disabled");
-		RADIO = register(atlas, "radiobutton");
-		RADIO_HOVER = register(atlas, "radiobutton_hovered");
-		RADIO_DISABLED = register(atlas, "radiobutton_disabled");
-		SCROLLBAR_BG = register(atlas, "scrollbar_bg");
-		SCROLLBAR_DISABLED_BG = register(atlas, "scrollbar_bg_disabled");
-		SCROLLBAR_HORIZONTAL = register(atlas, "scrollbar_horizontal");
-		SCROLLBAR_HORIZONTAL_DISABLED = register(atlas, "scrollbar_horizontal");
-		SCROLLBAR_VERTICAL = register(atlas, "scrollbar_vertical");
-		SCROLLBAR_VERTICAL_DISABLED = register(atlas, "scrollbar_vertical_disabled");
-		SELECT_BG = register(atlas, "select_bg");
-		SELECT_BG_HOVER = register(atlas, "select_bg_hovered");
-		SELECT_BG_DISABLED = register(atlas, "select_bg_disabled");
-		SELECT_BOX = register(atlas, "select_box");
-		SELECT_ARROW = register(atlas, "select_arrow");
-		SLIDER = register(atlas, "slider");
-		SLIDER_BG = register(atlas, "slider_bg");
-		TEXTFIELD_BG = register(atlas, "textfield_bg");
-		TEXTFIELD_BG_DISABLED = register(atlas, "textfield_disabled");
-
-		CLOSE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 30, 15, 15);
-		MOVE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 15, 15, 15);
-		RESIZE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 0, 15, 15);
-
-		//UITab window
-		TAB_WINDOW_TOP = register(atlas, "tab_window_top");
-		TAB_WINDOW_RIGHT = register(atlas, "tab_window_right");
-		TAB_WINDOW_LEFT = register(atlas, "tab_window_left");
-		TAB_WINDOW_BOTTOM = register(atlas, "tab_window_bottom");
-		//UITab panel
-		TAB_PANEL_TOP = register(atlas, "tab_panel_top");
-		TAB_PANEL_RIGHT = register(atlas, "tab_panel_right");
-		TAB_PANEL_LEFT = register(atlas, "tab_panel_left");
-		TAB_PANEL_BOTTOM = register(atlas, "tab_panel_bottom");
-
-		//VANILLA
-		CROSSHAIR = registerVanilla(atlas, "CROSSHAIR", "gui/icons.png", 0, 0, 16, 16);
-		HEART_EMPTY = registerVanilla(atlas, "HEART_EMPTY", "gui/icons.png", 16, 0, 9, 9);
-		HEART_FULL = registerVanilla(atlas, "HEART_FULL", "gui/icons.png", 52, 0, 9, 9);
-		HEART_HALF = registerVanilla(atlas, "HEART_HALF", "gui/icons.png", 61, 0, 9, 9);
-		ARMOR_EMPTY = registerVanilla(atlas, "ARMOR_EMPTY", "gui/icons.png", 16, 9, 9, 9);
-		ARMOR_FULL = registerVanilla(atlas, "ARMOR_FULL", "gui/icons.png", 25, 9, 9, 9);
-		ARMOR_HALF = registerVanilla(atlas, "ARMOR_HALF", "gui/icons.png", 34, 9, 9, 9);
-		HUNGER_EMPTY = registerVanilla(atlas, "HUNGER_EMPTY", "gui/icons.png", 16, 27, 9, 9);
-		HUNGER_FULL = registerVanilla(atlas, "HUNGER_FULL", "gui/icons.png", 52, 27, 9, 9);
-		HUNGER_HALF = registerVanilla(atlas, "HUNGER_HALF", "gui/icons.png", 61, 27, 9, 9);
-		//bars
-		BAR_PINK_EMPTY = registerVanilla(atlas, "BAR_PINK_EMPTY", "gui/bars.png", 0, 0, 182, 5);
-		BAR_PINK = registerVanilla(atlas, "BAR_PINK", "gui/bars.png", 0, 5, 182, 5);
-		BAR_CYAN_EMPTY = registerVanilla(atlas, "BAR_CYAN_EMPTY", "gui/bars.png", 0, 10, 182, 5);
-		BAR_CYAN = registerVanilla(atlas, "BAR_CYAN", "gui/bars.png", 0, 15, 182, 5);
-		BAR_RED_EMPTY = registerVanilla(atlas, "BAR_RED_EMPTY", "gui/bars.png", 0, 20, 182, 5);
-		BAR_RED = registerVanilla(atlas, "BAR_RED", "gui/bars.png", 0, 25, 182, 5);
-		BAR_GREEN_EMPTY = registerVanilla(atlas, "BAR_GREEN_EMPTY", "gui/bars.png", 0, 30, 182, 5);
-		BAR_GREEN = registerVanilla(atlas, "BAR_GREEN", "gui/bars.png", 0, 35, 182, 5);
-		BAR_YELLOW_EMPTY = registerVanilla(atlas, "BAR_YELLOW_EMPTY", "gui/bars.png", 0, 40, 182, 5);
-		BAR_YELLOW = registerVanilla(atlas, "BAR_YELLOW", "gui/bars.png", 0, 45, 182, 5);
-		BAR_PURPLE_EMPTY = registerVanilla(atlas, "BAR_PURPLE_EMPTY", "gui/bars.png", 0, 50, 182, 5);
-		BAR_PURPLE = registerVanilla(atlas, "BAR_PURPLE", "gui/bars.png", 0, 55, 182, 5);
-		BAR_GRAY_EMPTY = registerVanilla(atlas, "BAR_GRAY_EMPTY", "gui/bars.png", 0, 60, 182, 5);
-		BAR_GRAY = registerVanilla(atlas, "BAR_GRAY", "gui/bars.png", 0, 65, 182, 5);
-
-		ACHIEVEMENT_BG = registerVanilla(atlas, "ACHIEVEMENT_BG", "gui/container/inventory.png", 141, 166, 24, 24);
-
-		EXPERIENCE_ORB = registerVanilla(atlas, "EXPERIENCE_ORB", "entity/experience_orb.png", 4, 4, 8, 8);
-	}
-
-	private static GuiIcon register(Atlas atlas, String name)
-	{
-		return atlas.register(new ResourceLocation(EGO.modid, "textures/gui/widgets/" + name + ".png"));
-	}
-
-	private static GuiIcon registerVanilla(Atlas atlas, String name, String path, int x, int y, int w, int h)
-	{
-		return atlas.register(new ResourceLocation("ego:vanilla/" + name), new ResourceLocation("minecraft", "textures/" + path), x, y, w,
-							  h);
 	}
 
 	protected GuiTexture texture = VANILLAGUI_TEXTURE;
@@ -499,6 +304,11 @@ public class GuiIcon
 	public static GuiIcon from(Block block)
 	{
 		return from(block.getDefaultState());
+	}
+
+	public static Supplier<GuiIcon> forComponent(UIComponent component, String icon, String hover, String disabled)
+	{
+		return forComponent(component, Theme.icon(icon), Theme.icon(hover), Theme.icon(disabled));
 	}
 
 	public static Supplier<GuiIcon> forComponent(UIComponent component, GuiIcon icon, GuiIcon hover, GuiIcon disabled)

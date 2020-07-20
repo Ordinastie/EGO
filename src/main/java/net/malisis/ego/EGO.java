@@ -28,8 +28,9 @@ import net.malisis.ego.atlas.Atlas;
 import net.malisis.ego.atlas.GuiAtlas;
 import net.malisis.ego.command.EGOCommand;
 import net.malisis.ego.gui.EGOGui;
-import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
+import net.malisis.ego.gui.theme.Theme;
+import net.malisis.ego.gui.theme.VanillaTheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -74,6 +75,9 @@ public class EGO
 
 	public static final GuiTexture GUI = new GuiTexture(new ResourceLocation(EGO.modid, "textures/atlas.png"));
 	public static final GuiTexture BLOCKS = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
+	public static final Theme VANILLA_THEME = new VanillaTheme(EGO.modid, new Atlas("Vanilla"));
+	public static final Theme TEST_THEME = new Theme("Test theme", EGO.modid, VANILLA_THEME.atlas());
+	//public static Atlas defaultAtlas =
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
@@ -81,9 +85,10 @@ public class EGO
 		ClientCommandHandler.instance.registerCommand(EGOCommand.INSTANCE);
 		//register this to the EVENT_BUS for onGuiClose()
 		MinecraftForge.EVENT_BUS.register(this);
+		TEST_THEME.loadDefaultIcons();
+		TEST_THEME.setPrefix("gui/theme_test/");
 
-		Atlas atlas = Atlas.register(GUI, GuiIcon::registerIcons);
-		EGOCommand.registerCommand("atlas", () -> new GuiAtlas(atlas).display(true));
+		EGOCommand.registerCommand("atlas", () -> new GuiAtlas(VANILLA_THEME.atlas()).display(true));
 	}
 
 	@EventHandler

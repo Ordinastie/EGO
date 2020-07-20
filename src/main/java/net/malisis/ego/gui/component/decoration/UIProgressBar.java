@@ -30,6 +30,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.theme.Theme;
 
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -80,7 +81,7 @@ public class UIProgressBar extends UIComponent
 	//by default, use furnace arrows
 	public UIProgressBar(EGOGui gui)
 	{
-		this(Size.of(22, 16), GuiIcon.ARROW_EMPTY, GuiIcon.ARROW_FILLED);
+		this(Size.of(22, 16), Theme.icon("arrow_empty"), Theme.icon("arrow_filled"));
 	}
 
 	public UIProgressBar setReversed()

@@ -24,8 +24,11 @@
 
 package net.malisis.ego.atlas;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.malisis.ego.EGO;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiTexture;
@@ -43,6 +46,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -53,15 +57,22 @@ public class Atlas implements ITextureObject
 {
 	private static final List<Atlas> registeredAtlas = Lists.newArrayList();
 
+	private final String name;
 	private final GuiTexture texture;
-	private final Consumer<Atlas> iconRegisters;
+	private final Set<Consumer<Atlas>> iconRegisters = Sets.newHashSet();
 	private final Map<ResourceLocation, Holder> holders = Maps.newHashMap();
 	private int glTextureId = -1;
 
-	private Atlas(GuiTexture texture, Consumer<Atlas> iconRegisters)
+	public Atlas(String name)
 	{
-		this.texture = texture;
-		this.iconRegisters = iconRegisters;
+		this.name = checkNotNull(name);
+		texture = new GuiTexture(new ResourceLocation(EGO.modid, name));
+		registeredAtlas.add(this);
+	}
+
+	public String name()
+	{
+		return name;
 	}
 
 	public GuiTexture texture()
@@ -69,10 +80,15 @@ public class Atlas implements ITextureObject
 		return texture;
 	}
 
+	public void addIconRegister(Consumer<Atlas> iconRegister)
+	{
+		iconRegisters.add(checkNotNull(iconRegister));
+	}
+
 	public void init()
 	{
 		holders.clear();
-		iconRegisters.accept(this);
+		iconRegisters.forEach(c -> c.accept(this));
 		Minecraft.getMinecraft()
 				 .getTextureManager()
 				 .loadTexture(texture.getResourceLocation(), this);
@@ -112,7 +128,7 @@ public class Atlas implements ITextureObject
 		//allocates node positions and expand atlas if necessary
 		stitcher.stitch(holders);
 		EGO.log.info("Created: {}x{} atlas for GUIs", stitcher.width(), stitcher.height());
-		TextureUtil.allocateTexture(this.getGlTextureId(), stitcher.width(), stitcher.height());
+		TextureUtil.allocateTexture(getGlTextureId(), stitcher.width(), stitcher.height());
 		texture.setSize(stitcher.width(), stitcher.height());
 
 		//upload texture data to the texture
@@ -132,6 +148,7 @@ public class Atlas implements ITextureObject
 
 	}
 
+	@Override
 	public int getGlTextureId()
 	{
 		if (glTextureId != -1)
@@ -156,13 +173,6 @@ public class Atlas implements ITextureObject
 					  .stream()
 					  .map(Holder::icon)
 					  .collect(Collectors.toList());
-	}
-
-	public static Atlas register(GuiTexture texture, Consumer<Atlas> iconRegister)
-	{
-		Atlas atlas = new Atlas(texture, iconRegister);
-		registeredAtlas.add(atlas);
-		return atlas;
 	}
 
 	public static void loadAtlas()
@@ -192,15 +202,15 @@ public class Atlas implements ITextureObject
 		public void subOf(ResourceLocation sub, int x, int y, int w, int h)
 		{
 			this.sub = sub;
-			this.subX = x;
-			this.subY = y;
-			this.width = w;
-			this.height = h;
+			subX = x;
+			subY = y;
+			width = w;
+			height = h;
 		}
 
 		public GuiIcon icon()
 		{
-			return this.icon;
+			return icon;
 		}
 
 		public IResource getResource(IResourceManager manager) throws IOException
@@ -281,11 +291,13 @@ public class Atlas implements ITextureObject
 			icon.stitch(texture, x, y, width, height);
 		}
 
+		@Override
 		public String toString()
 		{
 			return icon.location() + " - " + width + "x" + height;
 		}
 
+		@Override
 		public int compareTo(Holder other)
 		{
 			if (height() > other.height())

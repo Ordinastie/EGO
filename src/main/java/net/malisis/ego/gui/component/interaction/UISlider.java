@@ -35,7 +35,6 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.event.ValueChange;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
-import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import net.malisis.ego.gui.text.UITextComponentBuilder;
@@ -76,12 +75,12 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 		GuiShape sliderShape = GuiShape.builder(this)
 									   .x(this::scrollPosition)
 									   .size(Size.of(SLIDER_WIDTH, () -> size().height()))
-									   .icon(GuiIcon.SLIDER)
+									   .icon("slider")
 									   .border(5)
 									   .build();
 
 		setBackground(GuiShape.builder(this)
-							  .icon(GuiIcon.SLIDER_BG)
+							  .icon("slider_bg")
 							  .build());
 		setForeground(sliderShape.and(text));
 	}
@@ -267,6 +266,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder, IValueCh
 			return this;
 		}
 
+		@Override
 		public UISliderBuilder<T> width(int width)
 		{
 			return size(width, 20);

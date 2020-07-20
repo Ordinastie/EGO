@@ -44,16 +44,16 @@ public final class UIWindowScrollbar extends UIScrollBar
 		if (isHorizontal())
 		{
 			scrollSize = Size.of(15, 10);
-			scrollIcon = GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_HORIZONTAL, null, GuiIcon.SCROLLBAR_HORIZONTAL_DISABLED);
+			scrollIcon = GuiIcon.forComponent(this, "scrollbar_horizontal", null, "scrollbar_horizontal_disabled");
 		}
 		else
 		{
 			scrollSize = Size.of(10, 15);
-			scrollIcon = GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_VERTICAL, null, GuiIcon.SCROLLBAR_VERTICAL_DISABLED);
+			scrollIcon = GuiIcon.forComponent(this, "scrollbar_vertical", null, "scrollbar_vertical_disabled");
 		}
 
 		setBackground(GuiShape.builder(this)
-							  .icon(this, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG)
+							  .icon(this, "scrollbar_bg", null, "scrollbar_bg_disabled")
 							  .border(3)
 							  .build());
 		setForeground(GuiShape.builder(this)

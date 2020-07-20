@@ -37,14 +37,15 @@ import net.malisis.ego.gui.component.layout.RowLayout;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar;
 import net.malisis.ego.gui.component.scrolling.UIScrollBar.Type;
 import net.malisis.ego.gui.component.scrolling.UISlimScrollbar;
+import net.malisis.ego.gui.element.Margin;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.position.Position;
 import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.element.size.Size.ISize;
 import net.malisis.ego.gui.element.size.Sizes;
 import net.malisis.ego.gui.event.ValueChange;
+import net.malisis.ego.gui.event.ValueChange.IValueChangeBuilder;
 import net.malisis.ego.gui.event.ValueChange.IValueChangeEventRegister;
-import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.shape.GuiShape;
 import net.malisis.ego.gui.text.GuiText;
 import org.lwjgl.input.Keyboard;
@@ -96,10 +97,11 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		if (optionsFactory != null)
 			optionsContainer.optionsFactory = optionsFactory;
 		setOptions(values);
+		setPadding(Padding.of(12, 2));
 
 		/* Shape used for the background of the select. */
 		GuiShape background = GuiShape.builder(this)
-									  .icon(this, GuiIcon.SELECT_BG, GuiIcon.SELECT_BG_HOVER, GuiIcon.SELECT_BG_DISABLED)
+									  .icon(this, "select_bg", "select_bg_hovered", "select_bg_disabled")
 									  .border(1)
 									  .build();
 		/* Shape used to draw the arrow. */
@@ -107,7 +109,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 									  .middleRight(2, 0)
 									  .size(7, 4)
 									  .color(() -> (isHovered() || expanded ? 0xBEC8FF : 0xFFFFFF))
-									  .icon(GuiIcon.SELECT_ARROW)
+									  .icon("select_arrow")
 									  .build();
 
 		setBackground(background);
@@ -357,7 +359,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 			setZIndex(300);
 			setBackground(GuiShape.builder(this)
 								  .color(UISelect.this::getColor)
-								  .icon(GuiIcon.SELECT_BOX)
+								  .icon("select_box")
 								  .border(1)
 								  .build());
 
@@ -383,7 +385,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		{
 			UIComponent comp = optionsFactory.apply(parentSelect(), element);
 			comp.onLeftClick(e -> {
-				select(element);
+				UISelect.this.select(element);
 				return true;
 			});
 			return comp;
@@ -500,7 +502,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 			attachData(element);
 			setSize(Size.of(this::width, () -> text.size()
 												   .height()));
-			setAlpha(301);
+			setMargin(Margin.of(0));
 
 			setBackground(background);
 			setForeground(r -> {
@@ -508,18 +510,19 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 			});
 		}
 
+		@Override
 		public int width()
 		{
 			//TODO: cache ?
 			//noinspection unchecked
-			int maxTextWidth = UISelect.this.optionsContainer.components()
-															 .stream()
-															 .mapToInt(c -> ((Option) c).text()
-																						.size()
-																						.width())
-															 .max()
-															 .orElse(text.size()
-																		 .width());
+			int maxTextWidth = optionsContainer.components()
+											   .stream()
+											   .mapToInt(c -> ((Option) c).text()
+																		  .size()
+																		  .width())
+											   .max()
+											   .orElse(text.size()
+														   .width());
 			return Math.max(maxTextWidth, UISelect.this.size()
 													   .width());
 		}
@@ -548,6 +551,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 	//TODO: allow "NONE" option ?
 	//TODO: maxDisplayedOptions
 	public static class UISelectBuilder<T> extends UIComponentBuilder<UISelectBuilder<T>, UISelect<T>>
+			implements IValueChangeBuilder<UISelectBuilder<T>, UISelect<T>, T>
 	{
 		protected List<T> values;
 		protected BiFunction<UISelect<T>, T, UIComponent> optionsFactory; // can't use Option::new because static context
@@ -565,7 +569,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 		public UISelectBuilder(List<T> value)
 		{
-			this.values = value;
+			values = value;
 			height(12);
 			widthOfElements();
 		}
@@ -573,17 +577,17 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		/**
 		 * Sets the width to match the longest available element width.
 		 *
-		 * @return
+		 * @return this builder
 		 */
 		public UISelectBuilder<T> widthOfElements()
 		{
-			return width(s -> s::optionsMaxWidth);
+			return width(s -> () -> s.optionsMaxWidth() + s.paddingHorizontal());
 		}
 
 		/**
 		 * Sets the size of the container holding the elements.
 		 *
-		 * @return
+		 * @return this builder
 		 */
 		public UISelectBuilder<T> optionsSize(Function<UISelect.OptionsContainer, ISize> size)
 		{
@@ -596,7 +600,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		 * Uses {@link UISelect<T>.Option::new} by default
 		 *
 		 * @param factory
-		 * @return
+		 * @return this builder
 		 */
 		public UISelectBuilder<T> withOptions(BiFunction<UISelect<T>, T, UIComponent> factory)
 		{
@@ -609,7 +613,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		 * Uses {@link Objects::toString} by default.
 		 *
 		 * @param func
-		 * @return
+		 * @return this builder
 		 */
 		public UISelectBuilder<T> withLabel(Function<T, String> func)
 		{
@@ -621,7 +625,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 		 * Sets the layout to use for the options container.
 		 *
 		 * @param layout
-		 * @return
+		 * @return this builder
 		 */
 		public UISelectBuilder<T> layout(Function<UISelect.OptionsContainer, ILayout> layout)
 		{
@@ -631,7 +635,7 @@ public class UISelect<T> extends UIComponent implements IValueChangeEventRegiste
 
 		public UISelectBuilder<T> disableElements(Predicate<T> predicate)
 		{
-			this.disablePredicate = checkNotNull(predicate);
+			disablePredicate = checkNotNull(predicate);
 			return self();
 		}
 

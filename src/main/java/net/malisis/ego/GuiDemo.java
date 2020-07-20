@@ -40,6 +40,7 @@ import net.malisis.ego.gui.element.size.Size;
 import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.theme.Theme;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -86,6 +87,7 @@ public class GuiDemo extends EGOGui
 		tfTitle = UITextField.builder()
 							 .parent(window)
 							 .middleCenter()
+
 							 .width(100)
 							 .text("Default title")
 							 .build();
@@ -724,7 +726,7 @@ public class GuiDemo extends EGOGui
 			setSize(Size.of(19, 19));
 
 			btnBg = GuiShape.builder(this)
-							.icon(this, GuiIcon.BUTTON, GuiIcon.BUTTON_HOVER, null)
+							.icon(this, Theme.icon("button_bg"), Theme.icon("button_hovered"), null)
 							.border(2)
 							.build();
 

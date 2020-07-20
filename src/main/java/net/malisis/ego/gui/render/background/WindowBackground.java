@@ -1,5 +1,6 @@
 package net.malisis.ego.gui.render.background;
 
+import net.malisis.ego.EGO;
 import net.malisis.ego.gui.component.UIComponent;
 import net.malisis.ego.gui.element.Padding;
 import net.malisis.ego.gui.element.Padding.IPadded;
@@ -7,6 +8,7 @@ import net.malisis.ego.gui.render.GuiIcon;
 import net.malisis.ego.gui.render.GuiRenderer;
 import net.malisis.ego.gui.render.IGuiRenderer;
 import net.malisis.ego.gui.render.shape.GuiShape;
+import net.malisis.ego.gui.theme.Theme;
 
 import javax.annotation.Nonnull;
 
@@ -18,7 +20,7 @@ public class WindowBackground implements IGuiRenderer, IPadded
 	public WindowBackground(UIComponent component)
 	{
 		shape = GuiShape.builder(component)
-						.icon(GuiIcon.WINDOW)
+						.icon("window")
 						.border(5)
 						.build();
 	}

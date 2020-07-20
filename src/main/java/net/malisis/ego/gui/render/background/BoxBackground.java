@@ -13,7 +13,7 @@ public class BoxBackground implements IGuiRenderer
 	public BoxBackground(UIComponent component)
 	{
 		shape = GuiShape.builder(component)
-						.icon(GuiIcon.BOX)
+						.icon("box")
 						.border(1)
 						.build();
 	}
